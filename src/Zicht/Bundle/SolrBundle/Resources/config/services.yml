@@ -1,0 +1,14 @@
+services:
+    zicht_solr.solr_manager:
+        class: Zicht\Bundle\SolrBundle\Manager\SolrManager
+        arguments:
+            - @doctrine
+            - @solarium.client
+        calls:
+            - [ setContainer, [ @service_container ] ]
+    zicht_solr.solr_index_subscriber:
+        class: Zicht\Bundle\SolrBundle\Manager\Doctrine\Subscriber
+        arguments:
+            - @service_container
+        tags:
+            - { name: doctrine.event_subscriber }
