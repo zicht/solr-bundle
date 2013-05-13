@@ -40,9 +40,11 @@ class ReindexCommand extends ContainerAwareCommand
 
         $output->writeln(sprintf('Reindexing %d records', count($records)));
         $indexer = $solr->createIndexer();
-        $i = 0;
+        $i = $j = 0;
+
         foreach ($records as $record) {
             $i ++;
+            $j ++;
             $builder = $solr->getBuilderForEntity($record);
             if ($builder) {
                 $indexer->addDocumentBuilder($builder);
@@ -54,9 +56,14 @@ class ReindexCommand extends ContainerAwareCommand
                     $output->writeln(sprintf(' - Skipped record %d of %d', $i, count($records)));
                 }
             }
+            if ($j > 1000) {
+                $output->writeln('Flushing ' . $j . ' records');
+                $indexer->flush();
+                $j = 0;
+            }
         }
-        $output->writeln('Flushing ' . $i . ' records');
+        $output->writeln('Flushing ' . $j . ' records');
         $indexer->flush();
-        $output->writeln("done");
+        $output->writeln("Processed $i items");
     }
 }
