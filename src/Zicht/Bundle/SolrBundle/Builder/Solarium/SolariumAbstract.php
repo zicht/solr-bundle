@@ -12,12 +12,13 @@ abstract class SolariumAbstract implements SolariumInterface
     const FIELD_TYPE_INT = '_i';
     const FIELD_UNIQUE   = '';
     const FIELD_AS_IS    = '';
+    const FIELD_DATETIME = '_dt';
 
     protected $files = array();
     protected $fields = array();
 
     /**
-     * @var Solarium_Client
+     * @var \Solarium_Client
      */
     protected $solr = null;
 
@@ -72,6 +73,15 @@ abstract class SolariumAbstract implements SolariumInterface
         $return = null;
 
         switch ($value['type']) {
+            case self::FIELD_DATETIME:
+                if (ctype_digit($value['value']) || is_int($value['value'])) {
+                    $return = date('Y-m-d\TH:i:s\Z', $value['value']);
+                } elseif ($value['value']  instanceof \DateTime) {
+                    $return = $value['value']->format('Y-m-d\TH:i:s\Z');
+                } else {
+                    $return = $value['value'];
+                }
+                break;
             case self::FIELD_TYPE_INT:
                 $return = (int)$value['value'];
                 break;
