@@ -4,12 +4,15 @@
  * @copyright Zicht Online <http://zicht.nl>
  */
 namespace Zicht\Bundle\SolrBundle\Pager;
+
 use Zicht\Bundle\FrameworkExtraBundle\Pager\Pageable;
 
-class SolrPageable implements Pageable {
+class SolrPageable implements Pageable
+{
     private $results = null;
 
-    function __construct(\Solarium\QueryType\Select\Result\Result $results) {
+    function __construct(\Solarium\QueryType\Select\Result\Result $results)
+    {
         $this->results = $results;
     }
 
@@ -19,7 +22,8 @@ class SolrPageable implements Pageable {
      *
      * @return int
      */
-    function getTotal() {
+    function getTotal()
+    {
         return $this->getResults()->getNumFound();
     }
 
@@ -30,7 +34,8 @@ class SolrPageable implements Pageable {
      * @param int $length
      * @return void
      */
-    function setRange($start, $length) {
+    function setRange($start, $length)
+    {
         $this->limit($length)->offset($start);
     }
 
@@ -41,7 +46,8 @@ class SolrPageable implements Pageable {
      * @param int $limit
      * @return self
      */
-    function limit($limit) {
+    function limit($limit)
+    {
         $this->_limit = null;
 
         if (!is_string($limit)) {
@@ -53,6 +59,7 @@ class SolrPageable implements Pageable {
                 $this->_limit = $limit;
             }
         }
+
         return $this;
     }
 
@@ -62,16 +69,19 @@ class SolrPageable implements Pageable {
      * @param int $offset
      * @return self
      */
-    function offset($offset) {
+    function offset($offset)
+    {
         if ($offset >= 0) {
             $this->_offset = $offset;
         } else {
             $this->_offset = null;
         }
+
         return $this;
     }
 
-    public function getResults() {
+    public function getResults()
+    {
         return $this->results;
     }
 }
