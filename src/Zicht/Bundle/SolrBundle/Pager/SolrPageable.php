@@ -6,14 +6,20 @@
 namespace Zicht\Bundle\SolrBundle\Pager;
 
 use Zicht\Bundle\FrameworkExtraBundle\Pager\Pageable;
+use \Solarium\QueryType\Select\Result\Result;
 
 class SolrPageable implements Pageable
 {
-    private $results = null;
+    private $total = null;
 
-    function __construct(\Solarium\QueryType\Select\Result\Result $results)
+    /**
+     * @param \Solarium\Core\Client\Client $client
+     * @param \Solarium\QueryType\Select\Query\Query $selectQuery
+     */
+    public function __construct($client, $selectQuery)
     {
-        $this->results = $results;
+        $this->client = $client;
+        $this->query = $selectQuery;
     }
 
 
@@ -22,9 +28,16 @@ class SolrPageable implements Pageable
      *
      * @return int
      */
-    function getTotal()
+    public function getTotal()
     {
-        return $this->getResults()->getNumFound();
+        if (!isset($this->total)) {
+            $countQuery = clone $this->query;
+            // makes sure only the total number of results is fetched.
+            $countQuery->setRows(0);
+            $this->total = $this->client->select($countQuery)->getNumFound();
+        }
+
+        return $this->total;
     }
 
     /**
@@ -34,54 +47,11 @@ class SolrPageable implements Pageable
      * @param int $length
      * @return void
      */
-    function setRange($start, $length)
+    public function setRange($start, $length)
     {
-        $this->limit($length)->offset($start);
-    }
-
-
-    /**
-     * Adds a limit, or removes it if the given limit is not greater than 0
-     *
-     * @param int $limit
-     * @return self
-     */
-    function limit($limit)
-    {
-        $this->_limit = null;
-
-        if (!is_string($limit)) {
-            if ($limit > 0) {
-                $this->_limit = $limit;
-            }
-        } else {
-            if (!empty($limit)) {
-                $this->_limit = $limit;
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Adds an offset, or removes it if the given limit is not greater than or equal to 0
-     *
-     * @param int $offset
-     * @return self
-     */
-    function offset($offset)
-    {
-        if ($offset >= 0) {
-            $this->_offset = $offset;
-        } else {
-            $this->_offset = null;
-        }
-
-        return $this;
-    }
-
-    public function getResults()
-    {
-        return $this->results;
+        $this->query
+            ->setStart($start)
+            ->setRows($length)
+        ;
     }
 }
