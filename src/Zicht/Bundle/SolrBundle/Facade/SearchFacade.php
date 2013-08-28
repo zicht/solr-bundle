@@ -235,7 +235,7 @@ abstract class SearchFacade
 
             if (count($stack) < $depth && !empty($term['__children'])) {
                 array_push($stack, $term);
-                $descendantIds = array_merge($ret, $this->decorateHierarchy($term['__children'], $facetName, $depth, $stack));
+                $descendantIds = $this->decorateHierarchy($term['__children'], $facetName, $depth, $stack);
                 array_pop($stack);
 
                 // if the term is active, and we deactivate it, all relevant children must be deactivated too
@@ -250,6 +250,8 @@ abstract class SearchFacade
                         $term['url'] = $this->getUrl($params);
                     }
                 }
+
+                $ret = array_merge($ret, $descendantIds);
             }
         }
 
