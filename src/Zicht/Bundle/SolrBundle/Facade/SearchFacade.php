@@ -224,7 +224,15 @@ abstract class SearchFacade
     }
 
     /**
+     * Decorates a nested tree result with facet meta data recursively.
      *
+     * Returns all ids that were decorated.
+     *
+     * @param array &$filters
+     * @param string $facetName
+     * @param int $depth
+     * @param array $stack
+     * @return array
      */
     public function decorateHierarchy(&$filters, $facetName, $depth = 3, $stack = array())
     {
