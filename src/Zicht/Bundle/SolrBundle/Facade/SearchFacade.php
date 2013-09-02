@@ -165,8 +165,8 @@ abstract class SearchFacade
         foreach ($this->getFacetFields() as $field) {
             $facetSet->createFacetField($field)->setField($field);
 
-            foreach ($this->searchParams->get($field) as $value) {
-                $query->createFilterQuery($field . '-' . $value)->setQuery($field . ':' . $value);
+            foreach ($this->searchParams->get($field) as $i => $value) {
+                $query->createFilterQuery($field . '-' . $i)->setQuery($field . ':"' . $value . '"');
             }
         }
 

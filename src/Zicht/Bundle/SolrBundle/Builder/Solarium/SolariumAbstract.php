@@ -47,7 +47,7 @@ abstract class SolariumAbstract implements SolariumInterface
      */
     public function addField($field_name, $field_value)
     {
-        if (!is_array($field_value)) {
+        if (!is_array($field_value) || !isset($field_value['type'])) {
             $this->fields[$field_name] = $field_value;
         } else {
             $this->fields[$field_name . $field_value['type']] = $this->processValue($field_value);
