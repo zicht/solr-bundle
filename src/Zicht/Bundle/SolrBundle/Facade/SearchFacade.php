@@ -282,6 +282,14 @@ abstract class SearchFacade
         return $this->response;
     }
 
+    /**
+     * @return \Zicht\Bundle\FrameworkExtraBundle\Pager\Pager
+     */
+    public function getPager()
+    {
+        return $this->pager;
+    }
+
     abstract protected function createQuery();
     abstract protected function getFacetFields();
 }
