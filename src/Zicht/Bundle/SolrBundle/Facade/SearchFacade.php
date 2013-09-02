@@ -42,7 +42,6 @@ abstract class SearchFacade
      */
     protected $pager;
 
-
     /**
      * @var int
      */
@@ -101,7 +100,7 @@ abstract class SearchFacade
      */
     public function getPostRedirect($postParams)
     {
-        $this->searchParams->mergeAll($postParams);
+        $this->searchParams->mergeAll(array_filter($postParams));
         return $this->getUrl($this->searchParams);
     }
 
