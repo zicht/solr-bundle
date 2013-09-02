@@ -33,7 +33,7 @@ class ZichtSolrExtension extends Extension
                 ->getDefinition('zicht_solr.solr_manager')
                 ->addMethodCall(
                 'addMapping',
-                array($mapping['class'], $mapping['type'], $mapping['builder'], $mapping['subtype'])
+                array($mapping['class'], $mapping['type'], $mapping['builder'])
             );
         }
     }

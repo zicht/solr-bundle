@@ -27,13 +27,12 @@ class SolrManager implements ContainerAwareInterface
 		$this->client = $client;
 	}
 
-	public function addMapping($entityName, $type, $builderClass, $subtype)
+	public function addMapping($entityName, $type, $builderClass)
     {
 		$this->mappings[$entityName] = array(
             'class' => $entityName,
             'builder' => $builderClass,
-            'type' => $type,
-            'subtype' => $subtype
+            'type' => $type
         );
 	}
 

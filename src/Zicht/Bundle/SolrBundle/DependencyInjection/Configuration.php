@@ -29,7 +29,6 @@ class Configuration implements ConfigurationInterface
                 ->prototype('array')
                     ->children()
                         ->scalarNode('type')->isRequired()->cannotBeEmpty()->end()
-                        ->scalarNode('subtype')->isRequired()->cannotBeEmpty()->end()
                         ->scalarNode('builder')->isRequired()->cannotBeEmpty()->end()
                         ->scalarNode('class')->isRequired()->cannotBeEmpty()->end()
                     ->end()

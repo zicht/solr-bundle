@@ -42,6 +42,12 @@ abstract class SearchFacade
      */
     protected $pager;
 
+
+    /**
+     * @var int
+     */
+    protected $facetMinimumCount = 1;
+
     /**
      * Construct the facade.
      *
@@ -155,7 +161,7 @@ abstract class SearchFacade
         // Setup facetting
         /** @var $facetSet \Solarium\QueryType\Select\Query\Component\FacetSet */
         $facetSet = $query->getFacetSet();
-        $facetSet->setMinCount(0);
+        $facetSet->setMinCount($this->facetMinimumCount);
         foreach ($this->getFacetFields() as $field) {
             $facetSet->createFacetField($field)->setField($field);
 
@@ -216,6 +222,7 @@ abstract class SearchFacade
     public function getFacetMetaData($facetName, $value)
     {
         return array(
+            'value'         => $value,
             'count'         => $this->getFacetCount($facetName, $value),
             'active'        => $this->searchParams->contains($facetName, $value),
             'url'           => $this->getUrl($this->searchParams->with($facetName, $value)),
