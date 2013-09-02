@@ -224,7 +224,7 @@ abstract class SearchFacade
             'value'         => $value,
             'count'         => $this->getFacetCount($facetName, $value),
             'active'        => $this->searchParams->contains($facetName, $value),
-            'url'           => $this->getUrl($this->searchParams->with($facetName, $value)),
+            'url'           => $this->getUrl($this->searchParams->without('page')->with($facetName, $value)),
             'url_filter'    => $this->getUrl($this->searchParams->without($facetName)->with($facetName, $value)),
         );
     }
