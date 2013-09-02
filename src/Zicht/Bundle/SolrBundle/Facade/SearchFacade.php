@@ -154,9 +154,6 @@ abstract class SearchFacade
         $currentPage = $this->searchParams->getOne('page', 0);
         $limit = $this->searchParams->getOne('limit', $this->defaultLimit);
 
-        $this->pager = new Pager(new SolrPageable($this->client, $query), $limit);
-        $this->pager->setCurrentPage($currentPage);
-
         // Setup facetting
         /** @var $facetSet \Solarium\QueryType\Select\Query\Component\FacetSet */
         $facetSet = $query->getFacetSet();
@@ -168,6 +165,9 @@ abstract class SearchFacade
                 $query->createFilterQuery($field . '-' . $i)->setQuery($field . ':"' . $value . '"');
             }
         }
+
+        $this->pager = new Pager(new SolrPageable($this->client, $query), $limit);
+        $this->pager->setCurrentPage($currentPage);
 
         $this->response = $this->client->select($query);
     }
