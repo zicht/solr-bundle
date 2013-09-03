@@ -4,7 +4,10 @@
  * @copyright Zicht Online <http://zicht.nl>
  */
 namespace Zicht\Bundle\SolrBundle\Command;
+
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepositoryAdapter;
+use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -31,11 +34,15 @@ class ReindexCommand extends ContainerAwareCommand
         $solr = $this->getContainer()->get('zicht_solr.solr_manager');
         $entity = $input->getArgument('entity');
         $repos = $this->getContainer()->get('doctrine')->getRepository($entity);
+
+        if (!$repos instanceof SearchDocumentRepository) {
+            $repos = new SearchDocumentRepositoryAdapter($repos);
+        }
+
         if ($id = $input->getArgument('id')) {
-            $id = array_map('intval', explode(',', $id));
-            $records = $repos->find($id);
+            $records = $repos->findIndexableDocumentsById(array_map('intval', explode(',', $id)));
         } else {
-            $records = $repos->findAll();
+            $records = $repos->findIndexableDocuments();
         }
 
         $output->writeln(sprintf('Reindexing %d records', count($records)));
