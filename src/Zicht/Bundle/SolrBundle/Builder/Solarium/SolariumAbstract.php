@@ -8,6 +8,8 @@ namespace Zicht\Bundle\SolrBundle\Builder\Solarium;
 
 abstract class SolariumAbstract implements SolariumInterface
 {
+    const DATE_FORMAT = 'Y-m-d\TH:i:s\Z';
+
     const FIELD_TYPE_TXT = '_txt';
     const FIELD_TYPE_INT = '_i';
     const FIELD_TYPE_DATETIME = '_dt';
@@ -77,9 +79,9 @@ abstract class SolariumAbstract implements SolariumInterface
         switch ($value['type']) {
             case self::FIELD_TYPE_DATETIME:
                 if (ctype_digit($value['value']) || is_int($value['value'])) {
-                    $return = date('Y-m-d\TH:i:s\Z', $value['value']);
+                    $return = date(self::DATE_FORMAT, $value['value']);
                 } elseif ($value['value']  instanceof \DateTime) {
-                    $return = $value['value']->format('Y-m-d\TH:i:s\Z');
+                    $return = $value['value']->format(self::DATE_FORMAT);
                 } else {
                     $return = $value['value'];
                 }
