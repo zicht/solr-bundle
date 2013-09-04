@@ -22,6 +22,7 @@ class ReindexCommand extends ContainerAwareCommand
     {
         $this
             ->setName('zicht:solr:reindex')
+            ->addOption('em', '', InputArgument::OPTIONAL, 'The entity manager to get the repository from', 'default')
             ->addArgument('entity', InputArgument::REQUIRED, 'The entity class to fetch records from')
             ->addArgument('id', InputArgument::OPTIONAL, 'The id(s) in the repository to reindex')
             ->setDescription('Reindexes entities in the SOLR index')
@@ -33,7 +34,7 @@ class ReindexCommand extends ContainerAwareCommand
         /** @var $solr \Zicht\Bundle\SolrBundle\Manager\SolrManager */
         $solr = $this->getContainer()->get('zicht_solr.solr_manager');
         $entity = $input->getArgument('entity');
-        $repos = $this->getContainer()->get('doctrine')->getRepository($entity);
+        $repos = $this->getContainer()->get('doctrine')->getManager($input->getOption('em'))->getRepository($entity);
 
         if (!$repos instanceof SearchDocumentRepository) {
             $repos = new SearchDocumentRepositoryAdapter($repos);
