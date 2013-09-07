@@ -21,9 +21,10 @@ class SolrManager implements ContainerAwareInterface
 	protected $container;
     protected $enabled = true;
 
-	function __construct(Registry $em, Client $client)
+	function __construct(Registry $doctrine, Client $client)
     {
-		$this->em = $em->getManager();
+        $this->doctrine = $doctrine;
+		$this->em = $doctrine->getManager();
 		$this->client = $client;
 	}
 
@@ -74,7 +75,6 @@ class SolrManager implements ContainerAwareInterface
     {
         return new Indexer($this->client);
     }
-
 
     public function setEnabled($enabled)
     {
