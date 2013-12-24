@@ -26,7 +26,7 @@ class Subscriber implements \Doctrine\Common\EventSubscriber
         $this->getManager()->buildSolrIndex($event->getEntity());
     }
 
-    public function postRemove($event)
+    public function preRemove($event)
     {
         $this->getManager()->removeSolrIndex($event->getEntity());
     }
@@ -44,7 +44,7 @@ class Subscriber implements \Doctrine\Common\EventSubscriber
         return array(
             \Doctrine\ORM\Events::postPersist,
             \Doctrine\ORM\Events::preUpdate,
-            \Doctrine\ORM\Events::postRemove
+            \Doctrine\ORM\Events::preRemove
         );
     }
 }
