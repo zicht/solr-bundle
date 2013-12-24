@@ -43,7 +43,7 @@ class SolrManager implements ContainerAwareInterface
         if (!$this->enabled) {
             return;
         }
-        if ($builder = $this->getBuilderForEntity(get_class($entity))) {
+        if ($builder = $this->getBuilderForEntity($entity)) {
             $id = $builder->generateObjectIdentity($entity);
 
             $update = $this->client->createUpdate();
