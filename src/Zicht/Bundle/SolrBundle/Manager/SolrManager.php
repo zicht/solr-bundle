@@ -49,6 +49,8 @@ class SolrManager implements ContainerAwareInterface
             $update = $this->client->createUpdate();
             $update->addDeleteQuery('id:' . $id);
             $update->addCommit();
+
+            $this->client->update($update);
         }
     }
 
