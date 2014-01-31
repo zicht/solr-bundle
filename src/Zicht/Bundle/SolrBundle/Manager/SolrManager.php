@@ -44,14 +44,11 @@ class SolrManager implements ContainerAwareInterface
             return;
         }
         if ($builder = $this->getBuilderForEntity($entity)) {
-
             $id = $builder->generateObjectIdentity($entity);
 
             $update = $this->client->createUpdate();
             $update->addDeleteQuery('id:' . $id);
             $update->addCommit();
-
-            $this->client->update($update);
         }
     }
 
