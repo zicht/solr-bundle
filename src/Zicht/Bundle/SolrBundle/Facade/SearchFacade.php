@@ -50,7 +50,7 @@ abstract class SearchFacade
     /**
      * @var int
      */
-    protected $facetResultLimit = 10000;
+    protected $facetResultLimit = -1;
 
     /**
      * Construct the facade.
