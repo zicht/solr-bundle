@@ -48,6 +48,11 @@ abstract class SearchFacade
     protected $facetMinimumCount = 1;
 
     /**
+     * @var int
+     */
+    protected $facetResultLimit = 10000;
+
+    /**
      * Construct the facade.
      *
      * @param \Solarium\Core\Client\Client $client
@@ -154,7 +159,10 @@ abstract class SearchFacade
         // Setup facetting
         /** @var $facetSet \Solarium\QueryType\Select\Query\Component\FacetSet */
         $facetSet = $query->getFacetSet();
-        $facetSet->setMinCount($this->facetMinimumCount);
+        $facetSet
+            ->setMinCount($this->facetMinimumCount)
+            ->setLimit($this->facetResultLimit)
+        ;
         foreach ($this->getFacetFields() as $field) {
             $facetSet->createFacetField($field)->setField($field);
 
