@@ -90,24 +90,20 @@ class SolrManager implements ContainerAwareInterface
     public function getBuilderForEntity($entity)
     {
         $builder = null;
-        if (is_string($entity)) {
-            $entityClass = $entity;
-        } else {
-            $entityClass = get_class($entity);
-        }
-
-        if (isset($this->mappings[$entityClass])) {
-            $mapping = $this->mappings[$entityClass];
-
-            if (substr($mapping['builder'], 0, 1) === '@') {
-                // service
-                if ($entityClass === $mapping['class']) {
-                    $service_name = ltrim($mapping['builder'], '@');
-                    $builder      = $this->container->get($service_name);
+        foreach ($this->mappings as $entityClass => $mapping) {
+            $dummy_class = new $entityClass();
+            if ($entity instanceof $dummy_class) {
+                if (substr($mapping['builder'], 0, 1) === '@') {
+                    // service
+                    if ($entityClass === $mapping['class']) {
+                        $service_name = ltrim($mapping['builder'], '@');
+                        $builder      = $this->container->get($service_name);
+                    }
+                } else {
+                    // classname
+                    $builder = new $mapping['builder']();
                 }
-            } else {
-                // classname
-                $builder = new $mapping['builder']();
+                break;
             }
         }
         if ($builder instanceof \Zicht\Bundle\SolrBundle\Manager\Doctrine\EntityBuilder) {
