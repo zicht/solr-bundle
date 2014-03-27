@@ -156,18 +156,21 @@ abstract class SearchFacade
          */
         $query = $this->createQuery();
 
-        // Setup facetting
-        /** @var $facetSet \Solarium\QueryType\Select\Query\Component\FacetSet */
-        $facetSet = $query->getFacetSet();
-        $facetSet
-            ->setMinCount($this->facetMinimumCount)
-            ->setLimit($this->facetResultLimit)
-        ;
-        foreach ($this->getFacetFields() as $field) {
-            $facetSet->createFacetField($field)->setField($field);
+        $facetFields = $this->getFacetFields();
+        if (count($facetFields)) {
+            // Setup facetting
+            /** @var $facetSet \Solarium\QueryType\Select\Query\Component\FacetSet */
+            $facetSet = $query->getFacetSet();
+            $facetSet
+                ->setMinCount($this->facetMinimumCount)
+                ->setLimit($this->facetResultLimit)
+            ;
+            foreach ($facetFields as $field) {
+                $facetSet->createFacetField($field)->setField($field);
 
-            foreach ($this->searchParams->get($field) as $i => $value) {
-                $query->createFilterQuery($field . '-' . $i)->setQuery($field . ':"' . $value . '"');
+                foreach ($this->searchParams->get($field) as $i => $value) {
+                    $query->createFilterQuery($field . '-' . $i)->setQuery($field . ':"' . $value . '"');
+                }
             }
         }
 
