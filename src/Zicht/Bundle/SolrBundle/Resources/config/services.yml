@@ -1,3 +1,5 @@
+parameters:
+    zicht_solr.doctrine.subscriber.class: Zicht\Bundle\SolrBundle\Manager\Doctrine\Subscriber
 services:
     zicht_solr.solr_manager:
         class: Zicht\Bundle\SolrBundle\Manager\SolrManager
@@ -7,7 +9,7 @@ services:
         calls:
             - [ setContainer, [ @service_container ] ]
     zicht_solr.solr_index_subscriber:
-        class: Zicht\Bundle\SolrBundle\Manager\Doctrine\Subscriber
+        class: %zicht_solr.doctrine.subscriber.class%
         arguments:
             - @service_container
         tags:
