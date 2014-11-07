@@ -157,22 +157,7 @@ abstract class SearchFacade
         $query = $this->createQuery();
 
         $facetFields = $this->getFacetFields();
-        if (count($facetFields)) {
-            // Setup facetting
-            /** @var $facetSet \Solarium\QueryType\Select\Query\Component\FacetSet */
-            $facetSet = $query->getFacetSet();
-            $facetSet
-                ->setMinCount($this->facetMinimumCount)
-                ->setLimit($this->facetResultLimit)
-            ;
-            foreach ($facetFields as $field) {
-                $facetSet->createFacetField($field)->setField($field);
-
-                foreach ($this->searchParams->get($field) as $i => $value) {
-                    $query->createFilterQuery($field . '-' . $i)->setQuery($field . ':"' . $value . '"');
-                }
-            }
-        }
+        $this->prepareFacetFieldQuery($facetFields, $query);
 
         $currentPage = $this->searchParams->getOne('page', 0);
         $limit = $this->searchParams->getOne('limit', $this->defaultLimit);
@@ -301,4 +286,27 @@ abstract class SearchFacade
 
     abstract protected function createQuery();
     abstract protected function getFacetFields();
+
+    /**
+     * @param $facetFields
+     * @param $query
+     */
+    protected function prepareFacetFieldQuery($facetFields, $query)
+    {
+        if (count($facetFields)) {
+            // Setup facetting
+            /** @var $facetSet \Solarium\QueryType\Select\Query\Component\FacetSet */
+            $facetSet = $query->getFacetSet();
+            $facetSet
+                ->setMinCount($this->facetMinimumCount)
+                ->setLimit($this->facetResultLimit);
+            foreach ($facetFields as $field) {
+                $facetSet->createFacetField($field)->setField($field);
+
+                foreach ($this->searchParams->get($field) as $i => $value) {
+                    $query->createFilterQuery($field . '-' . $i)->setQuery($field . ':"' . $value . '"');
+                }
+            }
+        }
+    }
 }
