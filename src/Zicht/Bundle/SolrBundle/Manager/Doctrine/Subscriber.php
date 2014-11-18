@@ -6,29 +6,55 @@
 
 namespace Zicht\Bundle\SolrBundle\Manager\Doctrine;
 
-use Doctrine\ORM\Event\LifecycleEventArgs;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use \Doctrine\Common\EventSubscriber;
+use \Doctrine\ORM\Event\LifecycleEventArgs;
+use \Doctrine\ORM\Events;
+use \Symfony\Component\DependencyInjection\ContainerInterface;
 
-class Subscriber implements \Doctrine\Common\EventSubscriber
+class Subscriber implements EventSubscriber
 {
+    protected $enabled = true;
+
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
     }
 
+    /**
+     * @param boolean $enabled
+     */
+    public function setEnabled($enabled)
+    {
+        $this->enabled = $enabled;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getEnabled()
+    {
+        return $this->enabled;
+    }
+
     public function postPersist(LifecycleEventArgs $event)
     {
-        $this->getManager()->buildSolrIndex($event->getEntity());
+        if ($this->getEnabled()) {
+            $this->getManager()->buildSolrIndex($event->getEntity());
+        }
     }
 
     public function preUpdate(LifecycleEventArgs $event)
     {
-        $this->getManager()->buildSolrIndex($event->getEntity());
+        if ($this->getEnabled()) {
+            $this->getManager()->buildSolrIndex($event->getEntity());
+        }
     }
 
-    public function preRemove($event)
+    public function preRemove(LifecycleEventArgs $event)
     {
-        $this->getManager()->removeSolrIndex($event->getEntity());
+        if ($this->getEnabled()) {
+            $this->getManager()->removeSolrIndex($event->getEntity());
+        }
     }
 
     /**
@@ -42,9 +68,9 @@ class Subscriber implements \Doctrine\Common\EventSubscriber
     public function getSubscribedEvents()
     {
         return array(
-            \Doctrine\ORM\Events::postPersist,
-            \Doctrine\ORM\Events::preUpdate,
-            \Doctrine\ORM\Events::preRemove
+            Events::postPersist,
+            Events::preUpdate,
+            Events::preRemove
         );
     }
 }
