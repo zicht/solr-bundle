@@ -17,6 +17,9 @@ use \Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
  */
 class ReindexCommand extends ContainerAwareCommand
 {
+    /**
+     * @{inheritDoc}
+     */
     protected function configure()
     {
         $this
@@ -28,6 +31,9 @@ class ReindexCommand extends ContainerAwareCommand
         ;
     }
 
+    /**
+     * @{inheritDoc}
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         /** @var $solr \Zicht\Bundle\SolrBundle\Manager\SolrManager */

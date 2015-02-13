@@ -5,10 +5,10 @@
  */
 namespace Zicht\Bundle\SolrBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Solarium\Core\Client\Client;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Response;
+use \Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use \Solarium\Core\Client\Client;
+use \Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use \Symfony\Component\HttpFoundation\Response;
 
 /**
  * A controller that shows a status; useful for monitoring purposes. Routing should be mounted on some arbitratry base
@@ -44,5 +44,5 @@ class StatusController extends Controller
         }
 
         return $response;
-}
+    }
 };

@@ -11,8 +11,15 @@ use \Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use \Symfony\Component\Console\Input\InputInterface;
 use \Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Class PingCommand
+ * @package Zicht\Bundle\SolrBundle\Command
+ */
 class PingCommand extends ContainerAwareCommand
 {
+    /**
+     * @{inheritDoc}
+     */
     protected function configure()
     {
         $this
@@ -21,6 +28,9 @@ class PingCommand extends ContainerAwareCommand
         ;
     }
 
+    /**
+     * @{inheritDoc}
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         /** @var $client Client */

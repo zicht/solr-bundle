@@ -12,8 +12,15 @@ use \Symfony\Component\Console\Input\InputInterface;
 use \Symfony\Component\Console\Input\InputOption;
 use \Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Class PurgeCommand
+ * @package Zicht\Bundle\SolrBundle\Command
+ */
 class PurgeCommand extends ContainerAwareCommand
 {
+    /**
+     * @{inheritDoc}
+     */
     protected function configure()
     {
         $this
@@ -22,6 +29,9 @@ class PurgeCommand extends ContainerAwareCommand
         ;
     }
 
+    /**
+     * @{inheritDoc}
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $client = $this->getContainer()->get('solarium.client');

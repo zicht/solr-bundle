@@ -8,12 +8,21 @@ namespace Zicht\Bundle\SolrBundle\Manager;
 use \Doctrine\Bundle\DoctrineBundle\Registry;
 use \Solarium\Core\Client\Client;
 
+/**
+ * Central manager service for solr features.
+ */
 class SolrManager
 {
-	/**
-	 * @var Client
-	 */
-	protected $client = null;
+    /**
+     * Solarium client
+     *
+     * @var Client
+     */
+    protected $client = null;
+
+    /**
+     * @var bool
+     */
     protected $enabled = true;
 
     /**
@@ -23,18 +32,22 @@ class SolrManager
 
 
     /**
-     * @param Registry $doctrine1
+     * Constructor
+     *
      * @param Client $client
      */
     public function __construct(Client $client)
     {
-		$this->client = $client;
+        $this->client = $client;
         $this->mappers = array();
-	}
+    }
 
 
     /**
-     * @param $dataMapper
+     * Adds a data mapper
+     *
+     * @param DataMapperInterface $dataMapper
+     * @return void
      */
     public function addMapper($dataMapper)
     {
@@ -43,7 +56,9 @@ class SolrManager
 
 
     /**
-     * @param $entity
+     * Update an entity
+     *
+     * @param mixed $entity
      * @return bool
      */
     public function update($entity)
@@ -61,7 +76,9 @@ class SolrManager
 
 
     /**
-     * @param $entity
+     * Delete an entity
+     *
+     * @param mixed $entity
      * @return bool
      */
     public function delete($entity)
@@ -78,7 +95,10 @@ class SolrManager
     }
 
     /**
+     * Enables or disabled the solr manager.
+     *
      * @param boolean $enabled
+     * @return void
      */
     public function setEnabled($enabled)
     {
@@ -87,6 +107,8 @@ class SolrManager
 
 
     /**
+     * Returns a mapper based on the entity's type.
+     *
      * @param mixed $entity
      * @return DataMapperInterface
      */

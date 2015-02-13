@@ -11,6 +11,11 @@ use \Zicht\Bundle\UrlBundle\Url\Params\Params;
 use \Zicht\Bundle\FrameworkExtraBundle\Pager\Pager;
 use \Zicht\Bundle\SolrBundle\Pager\SolrPageable;
 
+/**
+ * Class SearchFacade
+ *
+ * @package Zicht\Bundle\SolrBundle\Facade
+ */
 abstract class SearchFacade
 {
     /**
@@ -65,18 +70,29 @@ abstract class SearchFacade
     }
 
 
+    /**
+     * @param string $urlTemplate
+     * @return void
+     */
     public function setUrlTemplate($urlTemplate)
     {
         $this->urlTemplate = $urlTemplate;
     }
 
 
+    /**
+     * @param Params $params
+     * @return void
+     */
     public function setParams(Params $params)
     {
         $this->searchParams = $params;
     }
 
 
+    /**
+     * @return Params
+     */
     public function getParams()
     {
         return $this->searchParams;
@@ -126,9 +142,6 @@ abstract class SearchFacade
      * Returns the page url for the specified index
      *
      * @param int    $index
-     *
-     * @param string $type
-     *
      * @return string
      */
     public function getPagerUrl($index = 0)
@@ -138,7 +151,11 @@ abstract class SearchFacade
 
 
     /**
-     * Handle a search request
+     * Execute the search
+     *
+     * @return void
+     *
+     * @throws \LogicException
      */
     final public function search()
     {
@@ -168,22 +185,37 @@ abstract class SearchFacade
     }
 
 
+    /**
+     * @param mixed $field
+     * @return array
+     */
     public function getActiveFacetValues($field)
     {
         return $this->searchParams->get($field);
     }
 
+    /**
+     * @return array
+     */
     public function getResults()
     {
         return $this->getResponse();
     }
 
+    /**
+     * @return mixed
+     */
     public function getNumFound()
     {
         return $this->response->getNumFound();
     }
 
 
+    /**
+     * @param string $name
+     * @param mixed $value
+     * @return int
+     */
     public function getFacetCount($name, $value)
     {
         $ret = 0;
@@ -197,6 +229,10 @@ abstract class SearchFacade
     }
 
 
+    /**
+     * @param null $fields
+     * @return array
+     */
     public function getFacetFilters($fields = null)
     {
         if (null === $fields) {
@@ -213,6 +249,11 @@ abstract class SearchFacade
     }
 
 
+    /**
+     * @param string $facetName
+     * @param mixed $value
+     * @return array
+     */
     public function getFacetMetaData($facetName, $value)
     {
         return array(
@@ -267,6 +308,10 @@ abstract class SearchFacade
         return $ret;
     }
 
+    /**
+     * @return array
+     * @throws \LogicException
+     */
     final public function getResponse()
     {
         if (!$this->response) {
@@ -284,12 +329,26 @@ abstract class SearchFacade
         return $this->pager;
     }
 
+    /**
+     * Create the search query
+     *
+     * @return mixed
+     */
     abstract protected function createQuery();
+
+    /**
+     * Return the field names that should act as a facet
+     *
+     * @return mixed
+     */
     abstract protected function getFacetFields();
 
     /**
-     * @param $facetFields
-     * @param $query
+     * Prepare the facet field query
+     *
+     * @param array $facetFields
+     * @param string $query
+     * @return void
      */
     protected function prepareFacetFieldQuery($facetFields, $query)
     {
