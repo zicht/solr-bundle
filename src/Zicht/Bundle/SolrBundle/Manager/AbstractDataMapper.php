@@ -49,30 +49,6 @@ abstract class AbstractDataMapper implements DataMapperInterface
     }
 
 
-    /**
-     * Extract a document.
-     *
-     * @param Client $client
-     * @param mixed $entity
-     * @param string $filePath
-     */
-    public function extract(Client $client, $entity, $filePath)
-    {
-        $query = $client->createExtract();
-        $document = $query->createDocument();
-
-        if (($boost = $this->getBoost($entity))) {
-            $document->setBoost($boost);
-        }
-        $document->addField('id', $this->generateObjectIdentity($entity));
-        $this->mapDocument($entity, $document);
-
-        $query->setDocument($document);
-        $query->setFile($filePath);
-        $query->setCommit(true);
-
-        $client->execute($query);
-    }
 
 
     /**
