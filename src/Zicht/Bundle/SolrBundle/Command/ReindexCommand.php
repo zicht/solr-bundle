@@ -5,13 +5,12 @@
  */
 namespace Zicht\Bundle\SolrBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepositoryAdapter;
-use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
+use \Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use \Symfony\Component\Console\Input\InputArgument;
+use \Symfony\Component\Console\Input\InputInterface;
+use \Symfony\Component\Console\Output\OutputInterface;
+use \Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepositoryAdapter;
+use \Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
 
 /**
  * Reindex a specified repository or entity in SOLR
@@ -32,7 +31,7 @@ class ReindexCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         /** @var $solr \Zicht\Bundle\SolrBundle\Manager\SolrManager */
-        $solr = $this->getContainer()->get('zicht_solr.solr_manager');
+        $solr = $this->getContainer()->get('zicht_solr.manager');
         $entity = $input->getArgument('entity');
         $repos = $this->getContainer()->get('doctrine')->getManager($input->getOption('em'))->getRepository($entity);
 
@@ -47,32 +46,13 @@ class ReindexCommand extends ContainerAwareCommand
         }
 
         $output->writeln(sprintf('Reindexing %d records', count($records)));
-        $indexer = $solr->createIndexer();
         $i = $j = $n = 0;
-
         foreach ($records as $record) {
             $i ++;
-            $builder = $solr->getBuilderForEntity($record);
-            if ($builder) {
-                $indexer->addDocumentBuilder($builder);
-                $j ++;
+            if ($solr->update($record)) {
                 $n ++;
-                if ($output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
-                    $output->writeln(sprintf(' - Added record %d of %d', $i, count($records)));
-                }
-            } else {
-                if ($output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
-                    $output->writeln(sprintf(' - Skipped record %d of %d', $i, count($records)));
-                }
-            }
-            if ($j >= 1000) {
-                $output->writeln('Flushing ' . $j . ' records');
-                $indexer->flush();
-                $j = 0;
             }
         }
-        $output->writeln('Flushing ' . $j . ' records');
-        $indexer->flush();
         $output->writeln("Processed $n of $i items");
     }
 }

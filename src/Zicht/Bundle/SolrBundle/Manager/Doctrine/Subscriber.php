@@ -9,8 +9,14 @@ namespace Zicht\Bundle\SolrBundle\Manager\Doctrine;
 use \Doctrine\Common\EventSubscriber;
 use \Doctrine\ORM\Event\LifecycleEventArgs;
 use \Doctrine\ORM\Events;
+use \Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use \Symfony\Component\DependencyInjection\ContainerInterface;
+use \Zicht\Bundle\SolrBundle\Manager\SolrManager;
 
+/**
+ * Class Subscriber
+ * @package Zicht\Bundle\SolrBundle\Manager\Doctrine
+ */
 class Subscriber implements EventSubscriber
 {
     protected $enabled = true;
@@ -38,32 +44,19 @@ class Subscriber implements EventSubscriber
 
     public function postPersist(LifecycleEventArgs $event)
     {
-        if ($this->getEnabled()) {
-            $this->getManager()->buildSolrIndex($event->getEntity());
-        }
+        $this->container->get('zicht_solr.manager')->update($event->getEntity());
     }
 
     public function preUpdate(LifecycleEventArgs $event)
     {
-        if ($this->getEnabled()) {
-            $this->getManager()->buildSolrIndex($event->getEntity());
-        }
+        $this->container->get('zicht_solr.manager')->update($event->getEntity());
     }
 
     public function preRemove(LifecycleEventArgs $event)
     {
-        if ($this->getEnabled()) {
-            $this->getManager()->removeSolrIndex($event->getEntity());
-        }
+        $this->container->get('zicht_solr.manager')->delete($event->getEntity());
     }
 
-    /**
-     * @return \Zicht\Bundle\SolrBundle\Manager\SolrManager
-     */
-    public function getManager()
-    {
-        return $this->container->get('zicht_solr.solr_manager');
-    }
 
     public function getSubscribedEvents()
     {

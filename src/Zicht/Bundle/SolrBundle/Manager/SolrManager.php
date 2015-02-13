@@ -5,126 +5,99 @@
  */
 namespace Zicht\Bundle\SolrBundle\Manager;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
-use Solarium\Core\Client\Client;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Zicht\Bundle\SolrBundle\Builder\Indexer;
+use \Doctrine\Bundle\DoctrineBundle\Registry;
+use \Solarium\Core\Client\Client;
 
-class SolrManager implements ContainerAwareInterface
+class SolrManager
 {
-	protected $mappings = array();
 	/**
-	 * @var null|\Solarium_Client
+	 * @var Client
 	 */
 	protected $client = null;
-	protected $container;
     protected $enabled = true;
 
-	function __construct(Registry $doctrine, Client $client)
+    /**
+     * @var DataMapperInterface[]
+     */
+    protected $mappers = array();
+
+
+    /**
+     * @param Registry $doctrine1
+     * @param Client $client
+     */
+    public function __construct(Client $client)
     {
-        $this->doctrine = $doctrine;
-		$this->em = $doctrine->getManager();
 		$this->client = $client;
-	}
-
-	public function addMapping($entityName, $type, $builderClass)
-    {
-		$this->mappings[$entityName] = array(
-            'class' => $entityName,
-            'builder' => $builderClass,
-            'type' => $type
-        );
+        $this->mappers = array();
 	}
 
 
-    public function removeSolrIndex($entity)
+    /**
+     * @param $dataMapper
+     */
+    public function addMapper($dataMapper)
     {
-        if (!$this->enabled) {
-            return;
-        }
-        if ($builder = $this->getBuilderForEntity($entity)) {
-            $id = $builder->generateObjectIdentity($entity);
-
-            $update = $this->client->createUpdate();
-            $update->addDeleteQuery('id:' . $id);
-            $update->addCommit();
-
-            $this->client->update($update);
-        }
+        $this->mappers[]= $dataMapper;
     }
 
 
-
-	public function buildSolrIndex($entity)
+    /**
+     * @param $entity
+     * @return bool
+     */
+    public function update($entity)
     {
         if (!$this->enabled) {
             return false;
         }
-        if ($builder = $this->getBuilderForEntity($entity))   {
-			$indexer = $this->createIndexer();
-			$indexer->addDocumentBuilder($builder);
-			$indexer->flush();
-            return true;
-		}
-        return false;
-	}
 
-    /**
-     * @return Indexer
-     */
-    public function createIndexer()
-    {
-        return new Indexer($this->client);
+        if ($mapper = $this->getMapper($entity)) {
+            $mapper->update($this->client, $entity);
+            return true;
+        }
+        return false;
     }
 
+
+    /**
+     * @param $entity
+     * @return bool
+     */
+    public function delete($entity)
+    {
+        if (!$this->enabled) {
+            return false;
+        }
+
+        if ($mapper = $this->getMapper($entity)) {
+            $mapper->delete($this->client, $entity);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param boolean $enabled
+     */
     public function setEnabled($enabled)
     {
         $this->enabled = $enabled;
     }
 
+
     /**
-     * @param $entity
-     * @return mixed
+     * @param mixed $entity
+     * @return DataMapperInterface
      */
-    public function getBuilderForEntity($entity)
+    protected function getMapper($entity)
     {
-        $builder = null;
-        foreach ($this->mappings as $entityClass => $mapping) {
-            $dummy_class = new $entityClass();
-            if ($entity instanceof $dummy_class) {
-                if (substr($mapping['builder'], 0, 1) === '@') {
-                    // service
-                    if ($entityClass === $mapping['class']) {
-                        $service_name = ltrim($mapping['builder'], '@');
-                        $builder      = $this->container->get($service_name);
-                    }
-                } else {
-                    // classname
-                    $builder = new $mapping['builder']();
-                }
-                break;
+        foreach ($this->mappers as $mapper) {
+            if ($mapper->supports($entity)) {
+                return $mapper;
             }
         }
-        if ($builder instanceof \Zicht\Bundle\SolrBundle\Manager\Doctrine\EntityBuilder) {
-            $result = $builder->setEntity($entity);
 
-            if (!is_bool($result)) {
-                throw new \UnexpectedValueException(
-                    "The setEntity method of " . get_class($builder) . " does not return a boolean, "
-                    . "but it should indicate whether this entity is to be indexed"
-                );
-            }
-
-            if (!$result) {
-                $builder = null;
-            }
-        }
-        return $builder;
+        return null;
     }
-
-
-    public function setContainer(ContainerInterface $container = null) {
-		$this->container = $container;
-	}
 }

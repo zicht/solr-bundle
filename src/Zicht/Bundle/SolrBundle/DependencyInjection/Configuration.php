@@ -5,8 +5,8 @@
  */
 namespace Zicht\Bundle\SolrBundle\DependencyInjection;
 
-use Symfony\Component\Config\Definition\Builder\TreeBuilder;
-use Symfony\Component\Config\Definition\ConfigurationInterface;
+use \Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use \Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
  * This is the class that validates and merges configuration from your app/config files
@@ -23,18 +23,6 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('zicht_solr');
 
-        $rootNode->children()
-            ->arrayNode('mappings')
-                ->isRequired()
-                ->prototype('array')
-                    ->children()
-                        ->scalarNode('type')->isRequired()->cannotBeEmpty()->end()
-                        ->scalarNode('builder')->isRequired()->cannotBeEmpty()->end()
-                        ->scalarNode('class')->isRequired()->cannotBeEmpty()->end()
-                    ->end()
-                ->end()
-            ->end();
-        
         // Here you should define the parameters that are allowed to
         // configure your bundle. See the documentation linked above for
         // more information on that topic.
