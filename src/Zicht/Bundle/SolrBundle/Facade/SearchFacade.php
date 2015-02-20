@@ -60,7 +60,7 @@ abstract class SearchFacade
      */
     public function __construct(Client $client, $defaultLimit = 30)
     {
-        $this->client       = $client;
+        $this->client = $client;
         $this->defaultLimit = $defaultLimit;
     }
 
@@ -125,7 +125,7 @@ abstract class SearchFacade
     /**
      * Returns the page url for the specified index
      *
-     * @param int    $index
+     * @param int $index
      *
      * @param string $type
      *
@@ -173,9 +173,29 @@ abstract class SearchFacade
         return $this->searchParams->get($field);
     }
 
-    public function getResults()
+    public function getResults($renameFields = null)
     {
-        return $this->getResponse();
+        if (null === $renameFields) {
+            $renameFields = $this->getRenameFacetFields();
+        }
+
+        $results = iterator_to_array($this->getResponse());
+
+        if (!empty($renameFields)) {
+            foreach ($results as $index => $values) {
+                /** @var \Solarium\QueryType\Select\Result\Document $values */
+                $fields = $values->getFields();
+                foreach ($fields as $key => $value) {
+                    if (array_key_exists($key, $renameFields)) {
+                        $fields[$renameFields[$key]] = $value;
+                        unset($fields[$key]);
+                    }
+                }
+                $results[$index] = (object)$fields;
+            }
+        }
+
+        return $results;
     }
 
     public function getNumFound()
@@ -197,16 +217,21 @@ abstract class SearchFacade
     }
 
 
-    public function getFacetFilters($fields = null)
+    public function getFacetFilters($fields = null, $renameFields = null)
     {
         if (null === $fields) {
             $fields = $this->getFacetFields();
         }
 
+        if (null === $renameFields) {
+            $renameFields = $this->getRenameFacetFields();
+        }
+
         $ret = array();
         foreach ($fields as $facetName) {
             foreach ($this->getResponse()->getFacetSet()->getFacet($facetName)->getValues() as $value => $count) {
-                $ret[$facetName][$value] = $this->getFacetMetaData($facetName, $value);
+                $renamed = array_key_exists($facetName, $renameFields) ? $renameFields[$facetName] : $facetName;
+                $ret[$renamed][$value] = $this->getFacetMetaData($facetName, $value);
             }
         }
         return $ret;
@@ -216,11 +241,11 @@ abstract class SearchFacade
     public function getFacetMetaData($facetName, $value)
     {
         return array(
-            'value'         => $value,
-            'count'         => $this->getFacetCount($facetName, $value),
-            'active'        => $this->searchParams->contains($facetName, $value),
-            'url'           => $this->getUrl($this->searchParams->without('page')->with($facetName, $value)),
-            'url_filter'    => $this->getUrl($this->searchParams->without($facetName)->with($facetName, $value)),
+            'value' => $value,
+            'count' => $this->getFacetCount($facetName, $value),
+            'active' => $this->searchParams->contains($facetName, $value),
+            'url' => $this->getUrl($this->searchParams->without('page')->with($facetName, $value)),
+            'url_filter' => $this->getUrl($this->searchParams->without($facetName)->with($facetName, $value)),
         );
     }
 
@@ -239,7 +264,7 @@ abstract class SearchFacade
     {
         $ret = array();
         foreach ($filters as $i => &$term) {
-            $ret[]= $term['id'];
+            $ret[] = $term['id'];
             $term += $this->getFacetMetaData($facetName, $term['id']);
 
             if (count($stack) < $depth && !empty($term['__children'])) {
@@ -285,6 +310,7 @@ abstract class SearchFacade
     }
 
     abstract protected function createQuery();
+
     abstract protected function getFacetFields();
 
     /**
@@ -308,5 +334,20 @@ abstract class SearchFacade
                 }
             }
         }
+    }
+
+    /**
+     * List with translations for field names.
+     *
+     * For example, there is a field title_nl and title_en and you
+     * want your results to only contain a title field, return:
+     *
+     *    array('title_nl' => 'title', 'title_en' => 'title')
+     *
+     * @return array
+     */
+    protected function getRenameFacetFields()
+    {
+        return array();
     }
 }
