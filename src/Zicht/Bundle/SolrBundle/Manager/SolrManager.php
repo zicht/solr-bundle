@@ -63,13 +63,18 @@ class SolrManager
      */
     public function updateBatch($records)
     {
-        $i = $n = 0;
+        $update = $this->client->createUpdate();
+
+        $n = $i = 0;
         foreach ($records as $record) {
-            $i ++;
-            if ($this->update($record)) {
-                $n ++;
+            if ($mapper = $this->getMapper($record)) {
+                $i ++;
+                $mapper->update($this->client, $record, $update);
             }
+            $n ++;
         }
+        $update->addCommit();
+        $this->client->update($update);
         return array($n, $i);
     }
 

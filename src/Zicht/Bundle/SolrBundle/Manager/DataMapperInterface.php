@@ -13,7 +13,7 @@ use \Solarium\Client;
  */
 interface DataMapperInterface
 {
-    public function update(Client $manager, $entity);
+    public function update(Client $manager, $entity, $batch = null);
     public function delete(Client $manager, $entity);
 
 

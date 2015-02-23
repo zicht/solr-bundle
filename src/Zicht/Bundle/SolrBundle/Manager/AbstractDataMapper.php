@@ -24,12 +24,16 @@ abstract class AbstractDataMapper implements DataMapperInterface
      * @param mixed $entity
      * @return void
      */
-    public function update(Client $client, $entity)
+    public function update(Client $client, $entity, $batch = null)
     {
-        $update = $client->createUpdate();
-        $this->addUpdateDocument($update, $entity);
-        $update->addCommit();
-        $client->update($update);
+        if (null !== $batch) {
+            $this->addUpdateDocument($batch, $entity);
+        } else {
+            $update = $client->createUpdate();
+            $this->addUpdateDocument($update, $entity);
+            $update->addCommit();
+            $client->update($update);
+        }
     }
 
 
@@ -47,8 +51,6 @@ abstract class AbstractDataMapper implements DataMapperInterface
         $update->addCommit();
         $client->update($update);
     }
-
-
 
 
     /**
