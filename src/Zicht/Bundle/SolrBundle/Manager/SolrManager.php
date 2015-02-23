@@ -56,6 +56,25 @@ class SolrManager
 
 
     /**
+     * Updates as batch. Acts as a stub for future optimization.
+     *
+     * @param array $records
+     * @return array
+     */
+    public function updateBatch($records)
+    {
+        $i = $n = 0;
+        foreach ($records as $record) {
+            $i ++;
+            if ($this->update($record)) {
+                $n ++;
+            }
+        }
+        return array($n, $i);
+    }
+
+
+    /**
      * Update an entity
      *
      * @param mixed $entity

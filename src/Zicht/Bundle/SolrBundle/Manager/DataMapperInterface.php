@@ -6,7 +6,7 @@
 
 namespace Zicht\Bundle\SolrBundle\Manager;
 
-use Solarium\Client;
+use \Solarium\Client;
 
 /**
  * Class DataMapperInterface
