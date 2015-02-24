@@ -15,7 +15,21 @@ use \Solarium\QueryType\Update\Query\Document;
  */
 abstract class AbstractDataMapper implements DataMapperInterface
 {
+    const DATE_FORMAT = 'Y-m-d\TH:i:s\Z';
+
     protected $classNames = array();
+
+    /**
+     * Format date for SOLR
+     *
+     * @param \DateTime $dateTime
+     *
+     * @return string
+     */
+    static function formatDate(\DateTime $dateTime)
+    {
+        return $dateTime->format(self::DATE_FORMAT);
+    }
 
     /**
      * Update the specified entity
