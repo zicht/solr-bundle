@@ -117,7 +117,7 @@ abstract class SearchFacade
      *
      * @return string
      */
-    public function getUrl($params)
+    public function getUrl($params = null)
     {
         return rtrim(sprintf($this->urlTemplate, $params), '/');
     }
@@ -214,6 +214,22 @@ abstract class SearchFacade
             }
         }
         return $ret;
+    }
+
+
+    public function getActiveFacetFilterCount($fields = null)
+    {
+        $count = 0;
+
+        foreach ($this->getFacetFilters($fields) as $facetType) {
+            foreach ($facetType as $facet) {
+                if ($facet['active']) {
+                    $count += 1;
+                }
+            }
+        }
+
+        return $count;
     }
 
 
