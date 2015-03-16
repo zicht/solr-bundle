@@ -26,8 +26,11 @@ abstract class AbstractDataMapper implements DataMapperInterface
      *
      * @return string
      */
-    static function formatDate(\DateTime $dateTime)
+    static function formatDate($dateTime)
     {
+        if (null === $dateTime) {
+            return null;
+        }
         return $dateTime->format(self::DATE_FORMAT);
     }
 
