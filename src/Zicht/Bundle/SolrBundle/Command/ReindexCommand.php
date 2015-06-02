@@ -53,6 +53,6 @@ class ReindexCommand extends ContainerAwareCommand
 
         $output->writeln(sprintf('Reindexing %d records', count($records)));
         list($n, $i) = $solr->updateBatch($records);
-        $output->writeln("Processed $n of $i items");
+        $output->writeln("Processed $i of $n items");
     }
 }
