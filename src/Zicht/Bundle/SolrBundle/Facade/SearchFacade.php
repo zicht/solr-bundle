@@ -73,7 +73,15 @@ abstract class SearchFacade
 
     public function setParams(Params $params)
     {
-        $this->searchParams = $params;
+        // $params contain *all* parameters, we only want to use the parameters that are relevant to the search facade
+        $this->searchParams = clone $params;
+        $whitelist = $this->getParameterWhitelist();
+
+        foreach (array_keys($this->searchParams->toArray()) as $key) {
+            if (!in_array($key, $whitelist)) {
+                $this->searchParams->removeKey($key);
+            }
+        }
     }
 
 
@@ -286,6 +294,24 @@ abstract class SearchFacade
 
     abstract protected function createQuery();
     abstract protected function getFacetFields();
+
+    /**
+     * Returns the names of the parameters that should be included in the url.
+     *
+     * Typically this array includes
+     * - all facet field names
+     * - the search keywords name
+     *
+     * This whitelist is used when the search page is called with, for example:
+     * /search?foo=bar
+     * In this example we do *not* want the parameter "foo" to be included in any generated url.
+     *
+     * @return array
+     */
+    protected function getParameterWhitelist()
+    {
+        return $this->getFacetFields();
+    }
 
     /**
      * @param $facetFields
