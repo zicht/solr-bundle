@@ -58,6 +58,11 @@ abstract class SearchFacade
     protected $facetResultLimit = -1;
 
     /**
+     * @var int
+     */
+    protected $defaultLimit;
+
+    /**
      * Construct the facade.
      *
      * @param \Solarium\Core\Client\Client $client
@@ -393,5 +398,25 @@ abstract class SearchFacade
                 }
             }
         }
+    }
+
+    /**
+     * @param int $defaultLimit
+     */
+    public function setDefaultLimit($defaultLimit)
+    {
+        if (!!$this->response) {
+            throw new \LogicException("There is already a response, call setDefaultLimit() before calling search()");
+        }
+
+        $this->defaultLimit = $defaultLimit;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDefaultLimit()
+    {
+        return $this->defaultLimit;
     }
 }
