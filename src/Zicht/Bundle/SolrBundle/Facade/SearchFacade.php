@@ -18,6 +18,8 @@ use \Zicht\Bundle\SolrBundle\Pager\SolrPageable;
  */
 abstract class SearchFacade
 {
+    protected static $defaultParameterWhitelist = array('keywords', 'page', 'type', 'perpage');
+
     /**
      * @var \Solarium\Core\Client\Client
      */
@@ -371,7 +373,10 @@ abstract class SearchFacade
      */
     protected function getParameterWhitelist()
     {
-        return $this->getFacetFields();
+        return array_merge(
+            $this->getFacetFields(),
+            self::$defaultParameterWhitelist
+        );
     }
 
     /**
