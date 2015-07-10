@@ -7,7 +7,8 @@
 namespace Zicht\Bundle\SolrBundle\Manager;
 
 use \Solarium\Client;
-use \Solarium\QueryType\Update\Query\Document;
+use \Solarium\QueryType\Update\Query\Document\Document;
+
 
 /**
  * Class DataMapper
