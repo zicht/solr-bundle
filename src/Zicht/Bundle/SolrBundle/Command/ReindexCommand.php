@@ -8,6 +8,7 @@ namespace Zicht\Bundle\SolrBundle\Command;
 use \Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use \Symfony\Component\Console\Input\InputArgument;
 use \Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use \Symfony\Component\Console\Output\OutputInterface;
 use \Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepositoryAdapter;
 use \Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
@@ -24,9 +25,11 @@ class ReindexCommand extends ContainerAwareCommand
     {
         $this
             ->setName('zicht:solr:reindex')
-            ->addOption('em', '', InputArgument::OPTIONAL, 'The entity manager to get the repository from', 'default')
             ->addArgument('entity', InputArgument::REQUIRED, 'The entity class to fetch records from')
-            ->addArgument('id', InputArgument::OPTIONAL, 'The id(s) in the repository to reindex')
+            ->addOption('em', '', InputArgument::OPTIONAL, 'The entity manager to get the repository from', 'default')
+            ->addOption('where', 'w', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'An optional where clause to pass to the query builder. The entity\'s query alias is "d" (as in document), so you need to pass criteria such as \'d.dateCreated > CURDATE()\'')
+            ->addOption('limit', 'l', InputArgument::OPTIONAL | InputOption::VALUE_REQUIRED, 'The LIMIT clause to facilitate paging (chunks) of indexing (number of items per chunk)')
+            ->addOption('offset', 'o', InputArgument::OPTIONAL | InputOption::VALUE_REQUIRED, 'The OFFSET clause to facilitate paging (chunks) of indexing (offset to start the chunk at)')
             ->setDescription('Reindexes entities in the SOLR index')
         ;
     }
@@ -45,11 +48,11 @@ class ReindexCommand extends ContainerAwareCommand
             $repos = new SearchDocumentRepositoryAdapter($repos);
         }
 
-        if ($id = $input->getArgument('id')) {
-            $records = $repos->findIndexableDocumentsById(array_map('intval', explode(',', $id)));
-        } else {
-            $records = $repos->findIndexableDocuments();
-        }
+        $records = $repos->findIndexableDocuments(
+            $input->getOption('where'),
+            $input->getOption('limit'),
+            $input->getOption('offset')
+        );
 
         $output->writeln(sprintf('Reindexing %d records', count($records)));
         list($n, $i) = $solr->updateBatch($records);
