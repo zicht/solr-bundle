@@ -61,7 +61,7 @@ class SolrManager
      * @param array $records
      * @return array
      */
-    public function updateBatch($records)
+    public function updateBatch($records, $incrementCallback = null)
     {
         $update = $this->client->createUpdate();
 
@@ -70,6 +70,9 @@ class SolrManager
             if ($mapper = $this->getMapper($record)) {
                 $i ++;
                 $mapper->update($this->client, $record, $update);
+            }
+            if ($incrementCallback) {
+                call_user_func($incrementCallback, $n);
             }
             $n ++;
         }

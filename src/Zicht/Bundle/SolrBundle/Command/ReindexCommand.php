@@ -6,6 +6,7 @@
 namespace Zicht\Bundle\SolrBundle\Command;
 
 use \Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Helper\ProgressBar;
 use \Symfony\Component\Console\Input\InputArgument;
 use \Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -48,14 +49,26 @@ class ReindexCommand extends ContainerAwareCommand
             $repos = new SearchDocumentRepositoryAdapter($repos);
         }
 
+        $output->writeln("Querying records ...");
         $records = $repos->findIndexableDocuments(
             $input->getOption('where'),
             $input->getOption('limit'),
             $input->getOption('offset')
         );
 
-        $output->writeln(sprintf('Reindexing %d records', count($records)));
-        list($n, $i) = $solr->updateBatch($records);
+        $total = count($records);
+
+        $output->write(sprintf('Reindexing %d records ', $total));
+        $progress = new ProgressBar($output, $total);
+        $progress->setRedrawFrequency($total / 40);
+        $progress->display();
+        list($n, $i) = $solr->updateBatch(
+            $records,
+            function($n) use($progress, $total) {
+                $progress->setProgress($n);
+            }
+        );
+        $output->write("\n");
         $output->writeln("Processed $i of $n items");
     }
 }
