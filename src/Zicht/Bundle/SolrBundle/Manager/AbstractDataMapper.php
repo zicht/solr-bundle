@@ -32,6 +32,7 @@ abstract class AbstractDataMapper implements DataMapperInterface
         if (null === $dateTime) {
             return null;
         }
+        $dateTime->setTimezone(new \DateTimeZone('UTC'));
         return $dateTime->format(self::DATE_FORMAT);
     }
 
