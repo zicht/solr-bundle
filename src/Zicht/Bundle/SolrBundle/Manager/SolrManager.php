@@ -7,6 +7,7 @@ namespace Zicht\Bundle\SolrBundle\Manager;
 
 use \Doctrine\Bundle\DoctrineBundle\Registry;
 use \Solarium\Core\Client\Client;
+use Solarium\Core\Client\Request;
 
 /**
  * Central manager service for solr features.
@@ -119,6 +120,56 @@ class SolrManager
             return true;
         }
         return false;
+    }
+
+
+    public function updateFieldValues($documentId, $values)
+    {
+        $instructions = array();
+        foreach ($values as $key => $value) {
+            $instructions[$key] = array('set' => $value);
+        }
+        $data =
+            json_encode(
+                array(
+                    'add' => array(
+                        array('id' => $documentId)
+                        + $instructions
+                    )
+                )
+            );
+
+        $request = new Request();
+        $request->setHandler('update/json');
+        $request->setMethod(Request::METHOD_POST);
+        $request->setHeaders(
+            array(
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($data)
+            )
+        );
+
+        $request->setRawData($data);
+        $this->client->getAdapter()->execute($request, $this->client->getEndpoint());
+    }
+
+
+    public function commit()
+    {
+        $data = json_encode(array('commit' => array()), JSON_FORCE_OBJECT);
+
+        $request = new Request();
+        $request->setHandler('update/json');
+        $request->setMethod(Request::METHOD_POST);
+        $request->setHeaders(
+            array(
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($data)
+            )
+        );
+
+        $request->setRawData($data);
+        $this->client->getAdapter()->execute($request, $this->client->getEndpoint());
     }
 
     /**

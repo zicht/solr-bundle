@@ -5,11 +5,12 @@
  */
 namespace Zicht\Bundle\SolrBundle\Facade;
 
-use \Solarium\Core\Client\Client;
+use Solarium\Core\Client\Client;
+use Solarium\QueryType\Select\Result\Document;
 
-use \Zicht\Bundle\UrlBundle\Url\Params\Params;
-use \Zicht\Bundle\FrameworkExtraBundle\Pager\Pager;
-use \Zicht\Bundle\SolrBundle\Pager\SolrPageable;
+use Zicht\Bundle\UrlBundle\Url\Params\Params;
+use Zicht\Bundle\FrameworkExtraBundle\Pager\Pager;
+use Zicht\Bundle\SolrBundle\Pager\SolrPageable;
 
 /**
  * Class SearchFacade
@@ -210,7 +211,7 @@ abstract class SearchFacade
     }
 
     /**
-     * @return array
+     * @return Document[]
      */
     public function getResults()
     {
