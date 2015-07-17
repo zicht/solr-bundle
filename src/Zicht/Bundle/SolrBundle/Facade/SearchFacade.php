@@ -294,7 +294,7 @@ abstract class SearchFacade
         foreach ($this->getFacetQueries() as $facetName => $facetQueries) {
             foreach (array_values($facetQueries) as $i => $facetLabel) {
                 $count =  $this->getResponse()->getFacetSet()->getFacet($facetName . '-' . $i)->getValue();
-                if ($count > $this->facetMinimumCount) {
+                if ($count >= $this->facetMinimumCount) {
                     $ret[$facetName][$i]= $this->getFacetMetaData(
                         $facetName,
                         $i,
