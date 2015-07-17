@@ -224,7 +224,7 @@ abstract class SearchFacade
             }
         }
         foreach ($this->getFacetQueries() as $field => $queries) {
-            foreach ($queries as $i => $filterQuery) {
+            foreach (array_keys($queries) as $i => $filterQuery) {
                 $facetSet->createFacetQuery($field . '-' . $i)->setQuery($field . ':' . $filterQuery);
 
                 if ($this->searchParams->contains($field, $i)) {
@@ -286,15 +286,23 @@ abstract class SearchFacade
     public function getFacetFilters()
     {
         $ret = array();
-        foreach ($this->getResponse()->getFacetSet() as $f => $v) {
-            var_dump($v);
-        }
-        die();
         foreach ($this->getFacetFields() as $facetName) {
-            if (!in_array($facetName, $fields)) {
-                continue;
+            foreach ($this->getResponse()->getFacetSet()->getFacet($facetName)->getValues() as $value => $count) {
+                $ret[$facetName][$value] = $this->getFacetMetaData($facetName, $value, $count);
             }
-//                $ret[$facetName][$value] = $this->getFacetMetaData($facetName, $value);
+        }
+        foreach ($this->getFacetQueries() as $facetName => $facetQueries) {
+            foreach (array_values($facetQueries) as $i => $facetLabel) {
+                $count =  $this->getResponse()->getFacetSet()->getFacet($facetName . '-' . $i)->getValue();
+                if ($count > $this->facetMinimumCount) {
+                    $ret[$facetName][$i]= $this->getFacetMetaData(
+                        $facetName,
+                        $i,
+                        $count,
+                        $facetLabel
+                    );
+                }
+            }
         }
         return $ret;
     }
@@ -305,11 +313,12 @@ abstract class SearchFacade
      * @param mixed $value
      * @return array
      */
-    public function getFacetMetaData($facetName, $value)
+    public function getFacetMetaData($facetName, $value, $count, $label = null)
     {
         return array(
             'value'         => $value,
-            'count'         => $this->getFacetCount($facetName, $value),
+            'label'         => ($label === null ? $value : $label),
+            'count'         => $count,
             'active'        => $this->searchParams->contains($facetName, $value),
             'url'           => $this->getUrl($this->searchParams->without('page')->with($facetName, $value)),
             'url_filter'    => $this->getUrl($this->searchParams->without($facetName)->with($facetName, $value)),
@@ -418,6 +427,7 @@ abstract class SearchFacade
     {
         return array_merge(
             $this->getFacetFields(),
+            array_keys($this->getFacetQueries()),
             self::$defaultParameterWhitelist
         );
     }
