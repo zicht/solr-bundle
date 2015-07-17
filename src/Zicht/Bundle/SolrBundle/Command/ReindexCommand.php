@@ -58,7 +58,7 @@ class ReindexCommand extends ContainerAwareCommand
 
         $total = count($records);
 
-        $output->write(sprintf('Reindexing %d records ', $total));
+        $output->writeln("Reindexing records ...");
         $progress = new ProgressBar($output, $total);
         $progress->setRedrawFrequency($total / 40);
         $progress->display();
@@ -66,8 +66,12 @@ class ReindexCommand extends ContainerAwareCommand
             $records,
             function($n) use($progress, $total) {
                 $progress->setProgress($n);
+            },
+            function($record, $e) use($output, $progress) {
+                $output->write(sprintf("\nError indexing record: %s (%s)\n", (string)$record, $e->getMessage()));
             }
         );
+        $progress->setProgress($total);
         $output->write("\n");
         $output->writeln("Processed $i of $n items");
     }
