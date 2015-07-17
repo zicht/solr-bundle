@@ -6,6 +6,8 @@
 namespace Zicht\Bundle\SolrBundle\Facade;
 
 use Solarium\Core\Client\Client;
+use Solarium\QueryType\Select\Query\Component\FacetSet;
+use Solarium\QueryType\Select\Query\Query;
 use Solarium\QueryType\Select\Result\Document;
 
 use Zicht\Bundle\UrlBundle\Url\Params\Params;
@@ -59,6 +61,11 @@ abstract class SearchFacade
      * @var int
      */
     protected $facetResultLimit = -1;
+
+    /**
+     * @var string
+     */
+    protected $facetSort = 'count';
 
     /**
      * @var int
@@ -188,9 +195,7 @@ abstract class SearchFacade
          * @var $query \Solarium\QueryType\Select\Query\Query
          */
         $query = $this->createQuery();
-
-        $facetFields = $this->getFacetFields();
-        $this->prepareFacetFieldQuery($facetFields, $query);
+        $this->prepareFacetSet($query);
 
         $currentPage = $this->searchParams->getOne('page', 0);
         $limit = $this->searchParams->getOne('limit', $this->defaultLimit);
@@ -198,6 +203,35 @@ abstract class SearchFacade
         $this->pager->setCurrentPage($currentPage);
 
         $this->response = $this->client->select($query);
+    }
+
+
+    protected function prepareFacetSet(Query $query)
+    {
+        $facetSet = $query->getFacetSet();
+
+        $facetSet
+            ->setMinCount($this->facetMinimumCount)
+            ->setLimit($this->facetResultLimit)
+            ->setSort($this->facetSort)
+        ;
+
+        foreach ($this->getFacetFields() as $field) {
+            $facetSet->createFacetField($field)->setField($field);
+
+            foreach ($this->searchParams->get($field) as $i => $value) {
+                $query->createFilterQuery($field . '-' . $i)->setQuery($field . ':"' . $value . '"');
+            }
+        }
+        foreach ($this->getFacetQueries() as $field => $queries) {
+            foreach ($queries as $i => $filterQuery) {
+                $facetSet->createFacetQuery($field . '-' . $i)->setQuery($field . ':' . $filterQuery);
+
+                if ($this->searchParams->contains($field, $i)) {
+                    $query->createFilterQuery($field . '-' . $i)->setQuery($field . ':' . $filterQuery);
+                }
+            }
+        }
     }
 
 
@@ -249,17 +283,18 @@ abstract class SearchFacade
      * @param null $fields
      * @return array
      */
-    public function getFacetFilters($fields = null)
+    public function getFacetFilters()
     {
-        if (null === $fields) {
-            $fields = $this->getFacetFields();
-        }
-
         $ret = array();
-        foreach ($fields as $facetName) {
-            foreach ($this->getResponse()->getFacetSet()->getFacet($facetName)->getValues() as $value => $count) {
-                $ret[$facetName][$value] = $this->getFacetMetaData($facetName, $value);
+        foreach ($this->getResponse()->getFacetSet() as $f => $v) {
+            var_dump($v);
+        }
+        die();
+        foreach ($this->getFacetFields() as $facetName) {
+            if (!in_array($facetName, $fields)) {
+                continue;
             }
+//                $ret[$facetName][$value] = $this->getFacetMetaData($facetName, $value);
         }
         return $ret;
     }
@@ -353,11 +388,18 @@ abstract class SearchFacade
     abstract protected function createQuery();
 
     /**
-     * Return the field names that should act as a facet
+     * Return the field names that should act as a facet. Implement with an empty array return value to ignore.
      *
      * @return mixed
      */
     abstract protected function getFacetFields();
+
+    /**
+     * Return additional facet field queries. Implement with an empty array return value to ignore.
+     *
+     * @return array
+     */
+    abstract protected function getFacetQueries();
 
     /**
      * Returns the names of the parameters that should be included in the url.
@@ -378,32 +420,6 @@ abstract class SearchFacade
             $this->getFacetFields(),
             self::$defaultParameterWhitelist
         );
-    }
-
-    /**
-     * Prepare the facet field query
-     *
-     * @param array $facetFields
-     * @param string $query
-     * @return void
-     */
-    protected function prepareFacetFieldQuery($facetFields, $query)
-    {
-        if (count($facetFields)) {
-            // Setup facetting
-            /** @var $facetSet \Solarium\QueryType\Select\Query\Component\FacetSet */
-            $facetSet = $query->getFacetSet();
-            $facetSet
-                ->setMinCount($this->facetMinimumCount)
-                ->setLimit($this->facetResultLimit);
-            foreach ($facetFields as $field) {
-                $facetSet->createFacetField($field)->setField($field);
-
-                foreach ($this->searchParams->get($field) as $i => $value) {
-                    $query->createFilterQuery($field . '-' . $i)->setQuery($field . ':"' . $value . '"');
-                }
-            }
-        }
     }
 
     /**
