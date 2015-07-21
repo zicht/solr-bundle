@@ -60,7 +60,9 @@ class ReindexCommand extends ContainerAwareCommand
 
         $output->writeln("Reindexing records ...");
         $progress = new ProgressBar($output, $total);
-        $progress->setRedrawFrequency($total / 40);
+        if ($total > 40) {
+            $progress->setRedrawFrequency($total / 40);
+        }
         $progress->display();
         list($n, $i) = $solr->updateBatch(
             $records,
