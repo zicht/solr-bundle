@@ -225,10 +225,10 @@ abstract class SearchFacade
         }
         foreach ($this->getFacetQueries() as $field => $queries) {
             foreach (array_keys($queries) as $i => $filterQuery) {
-                $facetSet->createFacetQuery($field . '-' . $i)->setQuery($field . ':' . $filterQuery);
+                $facetSet->createFacetQuery($field . '-' . $i)->setQuery($filterQuery);
 
                 if ($this->searchParams->contains($field, $i)) {
-                    $query->createFilterQuery($field . '-' . $i)->setQuery($field . ':' . $filterQuery);
+                    $query->createFilterQuery($field . '-' . $i)->setQuery($filterQuery);
                 }
             }
         }
