@@ -19,8 +19,6 @@ use \Zicht\Bundle\SolrBundle\Manager\SolrManager;
  */
 class Subscriber implements EventSubscriber
 {
-    protected $enabled = true;
-
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
@@ -28,18 +26,10 @@ class Subscriber implements EventSubscriber
 
     /**
      * @param boolean $enabled
+     * @deprecated Enable or disable the manager in stead.
      */
     public function setEnabled($enabled)
     {
-        $this->enabled = $enabled;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function getEnabled()
-    {
-        return $this->enabled;
     }
 
     public function postPersist(LifecycleEventArgs $event)
