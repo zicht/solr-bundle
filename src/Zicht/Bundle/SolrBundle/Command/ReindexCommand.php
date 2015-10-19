@@ -32,6 +32,7 @@ class ReindexCommand extends ContainerAwareCommand
             ->addOption('limit', 'l', InputArgument::OPTIONAL | InputOption::VALUE_REQUIRED, 'The LIMIT clause to facilitate paging (chunks) of indexing (number of items per chunk)')
             ->addOption('offset', 'o', InputArgument::OPTIONAL | InputOption::VALUE_REQUIRED, 'The OFFSET clause to facilitate paging (chunks) of indexing (offset to start the chunk at)')
             ->setDescription('Reindexes entities in the SOLR index')
+            ->addOption('debug', '', InputOption::VALUE_NONE, 'Debug: i.e. don\'t catch exceptions while indexing')
         ;
     }
 
@@ -69,8 +70,12 @@ class ReindexCommand extends ContainerAwareCommand
             function($n) use($progress, $total) {
                 $progress->setProgress($n);
             },
-            function($record, $e) use($output, $progress) {
-                $output->write(sprintf("\nError indexing record: %s (%s)\n", (string)$record, $e->getMessage()));
+            function($record, $e) use($input, $output, $progress) {
+                if (!$input->getOption('debug')) {
+                    $output->write(sprintf("\nError indexing record: %s (%s)\n", (string)$record, $e->getMessage()));
+                } else {
+                    throw $e;
+                }
             }
         );
         $progress->setProgress($total);
