@@ -44,6 +44,8 @@ class ReindexCommand extends ContainerAwareCommand
     {
         /** @var $solr \Zicht\Bundle\SolrBundle\Manager\SolrManager */
         $solr = $this->getContainer()->get('zicht_solr.manager');
+        $solr->disableTimeout();
+
         $entity = $input->getArgument('entity');
         $repos = $this->getContainer()->get('doctrine')->getManager($input->getOption('em'))->getRepository($entity);
 

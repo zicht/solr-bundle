@@ -209,4 +209,25 @@ class SolrManager
 
         return null;
     }
+
+    /**
+     * Disables the timeout on all client's endpoints. Convenience for command line usage.
+     */
+    public function disableTimeout()
+    {
+        $this->setTimeout(0);
+    }
+
+
+    /**
+     * Set the timeout for all the client's endpoints.
+     *
+     * @param string $timeout
+     */
+    public function setTimeout($timeout)
+    {
+        foreach ($this->client->getEndpoints() as $endpoint) {
+            $endpoint->setTimeout($timeout);
+        }
+    }
 }
