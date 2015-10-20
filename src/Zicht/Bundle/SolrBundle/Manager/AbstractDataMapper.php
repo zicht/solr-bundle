@@ -63,12 +63,16 @@ abstract class AbstractDataMapper implements DataMapperInterface
      * @param mixed $entity
      * @return void
      */
-    public function delete(Client $client, $entity)
+    public function delete(Client $client, $entity, $batch = null)
     {
-        $update = $client->createUpdate();
-        $this->addDeleteDocument($update, $entity);
-        $update->addCommit();
-        $client->update($update);
+        if (null !== $batch) {
+            $this->addDeleteDocument($batch, $entity);
+        } else {
+            $update = $client->createUpdate();
+            $this->addDeleteDocument($update, $entity);
+            $update->addCommit();
+            $client->update($update);
+        }
     }
 
 

@@ -31,8 +31,9 @@ class ReindexCommand extends ContainerAwareCommand
             ->addOption('where', 'w', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'An optional where clause to pass to the query builder. The entity\'s query alias is "d" (as in document), so you need to pass criteria such as \'d.dateCreated > CURDATE()\'')
             ->addOption('limit', 'l', InputArgument::OPTIONAL | InputOption::VALUE_REQUIRED, 'The LIMIT clause to facilitate paging (chunks) of indexing (number of items per chunk)')
             ->addOption('offset', 'o', InputArgument::OPTIONAL | InputOption::VALUE_REQUIRED, 'The OFFSET clause to facilitate paging (chunks) of indexing (offset to start the chunk at)')
-            ->setDescription('Reindexes entities in the SOLR index')
             ->addOption('debug', '', InputOption::VALUE_NONE, 'Debug: i.e. don\'t catch exceptions while indexing')
+            ->addOption('delete-first', 'd', InputOption::VALUE_NONE, 'Delete the document from solr before updating')
+            ->setDescription('Reindexes entities in the SOLR index')
         ;
     }
 
@@ -76,7 +77,8 @@ class ReindexCommand extends ContainerAwareCommand
                 } else {
                     throw $e;
                 }
-            }
+            },
+            (bool)$input->getOption('delete-first')
         );
         $progress->setProgress($total);
         $output->write("\n");
