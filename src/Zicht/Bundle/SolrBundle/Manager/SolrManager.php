@@ -212,6 +212,8 @@ class SolrManager
 
     /**
      * Disables the timeout on all client's endpoints. Convenience for command line usage.
+     *
+     * @return void
      */
     public function disableTimeout()
     {
@@ -223,6 +225,7 @@ class SolrManager
      * Set the timeout for all the client's endpoints.
      *
      * @param string $timeout
+     * @return void
      */
     public function setTimeout($timeout)
     {
