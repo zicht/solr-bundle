@@ -1,12 +1,13 @@
 <?php
 /**
- * @author    Gerard van Helden / Rik van der Kemp <rik@zicht.nl>
+ * @author Gerard van Helden <gerard@zicht.nl>
+ * @author Rik van der Kemp <rik@zicht.nl>
+ *
  * @copyright Zicht Online <http://zicht.nl>
  */
 namespace Zicht\Bundle\SolrBundle\Manager;
 
-use \Doctrine\Bundle\DoctrineBundle\Registry;
-use \Solarium\Core\Client\Client;
+use Solarium\Core\Client\Client;
 use Solarium\Core\Client\Request;
 use Solarium\QueryType\Update\Query\Document\Document;
 
@@ -268,11 +269,13 @@ class SolrManager
         $update = $this->client->createUpdate();
         foreach ($documents as $id => $values) {
             /** @var Document $doc */
-            $doc = $update->createDocument($values);
-            $doc->setKey('id', $id);
-            foreach (array_keys($values) as $fieldName) {
+            $doc = $update->createDocument();
+            foreach ($values as $fieldName => $value) {
                 $doc->setFieldModifier($fieldName, Document::MODIFIER_SET);
+                // NOTE it seems that 'null' values aren't working here.
+                $doc->setField($fieldName, $value);
             }
+            $doc->setKey('id', $id);
             $update->addDocument($doc);
             $found ++;
         }
