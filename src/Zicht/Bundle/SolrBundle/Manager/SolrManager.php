@@ -8,6 +8,7 @@ namespace Zicht\Bundle\SolrBundle\Manager;
 use \Doctrine\Bundle\DoctrineBundle\Registry;
 use \Solarium\Core\Client\Client;
 use Solarium\Core\Client\Request;
+use Solarium\QueryType\Update\Query\Document\Document;
 
 /**
  * Central manager service for solr features.
@@ -232,5 +233,56 @@ class SolrManager
         foreach ($this->client->getEndpoints() as $endpoint) {
             $endpoint->setTimeout($timeout);
         }
+    }
+
+    /**
+     * Get all document ids for the specified query.
+     *
+     * @param string $query
+     * @return \Solarium\Core\Query\Result\ResultInterface
+     */
+    public function getDocumentIds($query, $fieldName = 'id')
+    {
+        $ret = [];
+        $select = $this->client->createSelect();
+        $select->setFields($fieldName);
+        $select->setQuery($query);
+        foreach ($this->client->execute($select) as $doc) {
+            $ret[]= $doc->$fieldName;
+        }
+        return $ret;
+    }
+
+
+    /**
+     * Update the values. All keys must have solr document ids, and all values should be key => value mappings for
+     * each of the values to be set.
+     *
+     * @param array $values
+     * @return int
+     */
+    public function updateValues($documents)
+    {
+        $found = 0;
+
+        $update = $this->client->createUpdate();
+        foreach ($documents as $id => $values) {
+            /** @var Document $doc */
+            $doc = $update->createDocument($values);
+            $doc->setKey('id', $id);
+            foreach (array_keys($values) as $fieldName) {
+                $doc->setFieldModifier($fieldName, Document::MODIFIER_SET);
+            }
+            $update->addDocument($doc);
+            $found ++;
+        }
+
+        // if the docs are not in solr, don't bother.
+        if ($found > 0) {
+            $update->addCommit();
+            $this->client->execute($update);
+        }
+
+        return $found;
     }
 }
