@@ -283,24 +283,29 @@ abstract class SearchFacade
      * @param null $fields
      * @return array
      */
-    public function getFacetFilters()
+    public function getFacetFilters($blacklist=null)
     {
+        if (null === $blacklist) { $blacklist = array(); }
         $ret = array();
         foreach ($this->getFacetFields() as $facetName) {
-            foreach ($this->getResponse()->getFacetSet()->getFacet($facetName)->getValues() as $value => $count) {
-                $ret[$facetName][$value] = $this->getFacetMetaData($facetName, $value, $count);
+            if (!in_array($facetName, $blacklist)) {
+                foreach ($this->getResponse()->getFacetSet()->getFacet($facetName)->getValues() as $value => $count) {
+                    $ret[$facetName][$value] = $this->getFacetMetaData($facetName, $value, $count);
+                }
             }
         }
         foreach ($this->getFacetQueries() as $facetName => $facetQueries) {
-            foreach (array_values($facetQueries) as $i => $facetLabel) {
-                $count =  $this->getResponse()->getFacetSet()->getFacet($facetName . '-' . $i)->getValue();
-                if ($count >= $this->facetMinimumCount) {
-                    $ret[$facetName][$i]= $this->getFacetMetaData(
-                        $facetName,
-                        $i,
-                        $count,
-                        $facetLabel
-                    );
+            if (!in_array($facetName, $blacklist)) {
+                foreach (array_values($facetQueries) as $i => $facetLabel) {
+                    $count = $this->getResponse()->getFacetSet()->getFacet($facetName . '-' . $i)->getValue();
+                    if ($count >= $this->facetMinimumCount) {
+                        $ret[$facetName][$i] = $this->getFacetMetaData(
+                            $facetName,
+                            $i,
+                            $count,
+                            $facetLabel
+                        );
+                    }
                 }
             }
         }
