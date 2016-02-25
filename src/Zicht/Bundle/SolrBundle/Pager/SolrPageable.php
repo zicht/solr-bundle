@@ -10,7 +10,7 @@ use \Solarium\QueryType\Select\Result\Result;
 
 class SolrPageable implements Pageable
 {
-    private $total = null;
+    protected $total = null;
 
     /**
      * @param \Solarium\Core\Client\Client $client

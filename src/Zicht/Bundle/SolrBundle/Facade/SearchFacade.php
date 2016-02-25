@@ -10,6 +10,7 @@ use Solarium\QueryType\Select\Query\Component\FacetSet;
 use Solarium\QueryType\Select\Query\Query;
 use Solarium\QueryType\Select\Result\Document;
 
+use Zicht\Bundle\SolrBundle\Pager\GroupedSolrPageable;
 use Zicht\Bundle\UrlBundle\Url\Params\Params;
 use Zicht\Bundle\FrameworkExtraBundle\Pager\Pager;
 use Zicht\Bundle\SolrBundle\Pager\SolrPageable;
@@ -205,11 +206,41 @@ abstract class SearchFacade
         $this->response = $this->client->select($query);
     }
 
+    /**
+     * Execute the search
+     *
+     * @return void
+     *
+     * @throws \LogicException
+     */
+    final public function searchGrouped()
+    {
+        if (!isset($this->searchParams)) {
+            throw new \LogicException("You need to call setParams() first");
+        }
+
+        if (!empty($_POST['search'])) {
+            $this->redirectPost($_POST['search']);
+            return null;
+        }
+
+        /**
+         * @var $query \Solarium\QueryType\Select\Query\Query
+         */
+        $query = $this->createGroupedQuery();
+        $this->prepareFacetSet($query);
+
+        $currentPage = $this->searchParams->getOne('page', 0);
+        $limit = $this->searchParams->getOne('limit', 10);
+        $this->pager = new Pager(new GroupedSolrPageable($this->client, $query, 'interview_id'), $limit);
+        $this->pager->setCurrentPage($currentPage);
+        $this->response = $this->client->select($query);
+    }
+
 
     protected function prepareFacetSet(Query $query)
     {
         $facetSet = $query->getFacetSet();
-
         $facetSet
             ->setMinCount($this->facetMinimumCount)
             ->setLimit($this->facetResultLimit)
@@ -218,9 +249,9 @@ abstract class SearchFacade
 
         foreach ($this->getFacetFields() as $field) {
             $facetSet->createFacetField($field)->setField($field);
-
             foreach ($this->searchParams->get($field) as $i => $value) {
                 $query->createFilterQuery($field . '-' . $i)->setQuery($field . ':"' . $value . '"');
+
             }
         }
         foreach ($this->getFacetQueries() as $field => $queries) {
@@ -278,7 +309,6 @@ abstract class SearchFacade
         return $ret;
     }
 
-
     /**
      * @param null $fields
      * @return array
@@ -294,6 +324,7 @@ abstract class SearchFacade
                 }
             }
         }
+
         foreach ($this->getFacetQueries() as $facetName => $facetQueries) {
             if (!in_array($facetName, $blacklist)) {
                 foreach (array_values($facetQueries) as $i => $facetLabel) {
@@ -400,6 +431,11 @@ abstract class SearchFacade
      * @return mixed
      */
     abstract protected function createQuery();
+
+    /**
+     * Create the search grouped query
+     */
+    abstract protected function createGroupedQuery();
 
     /**
      * Return the field names that should act as a facet. Implement with an empty array return value to ignore.
