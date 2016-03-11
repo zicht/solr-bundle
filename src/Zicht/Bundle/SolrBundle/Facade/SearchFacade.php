@@ -209,11 +209,12 @@ abstract class SearchFacade
     /**
      * Execute the search
      *
+     * @param null|string $groupName
      * @return void
      *
      * @throws \LogicException
      */
-    final public function searchGrouped()
+    final public function searchGrouped($groupName = null)
     {
         if (!isset($this->searchParams)) {
             throw new \LogicException("You need to call setParams() first");
@@ -228,11 +229,25 @@ abstract class SearchFacade
          * @var $query \Solarium\QueryType\Select\Query\Query
          */
         $query = $this->createGroupedQuery();
+
+        // If there is no groupName provided try to get it from the grouping fields
+        if (null === $groupName) {
+            $groupedFields = $query->getGrouping()->getFields();
+
+            if (0 < count($groupedFields)) {
+                $groupName = reset($groupedFields);
+            }
+        }
+
+        if (!$groupName) {
+            throw new \InvalidArgumentException("You need to provide a groupName");
+        }
+
         $this->prepareFacetSet($query);
 
         $currentPage = $this->searchParams->getOne('page', 0);
         $limit = $this->searchParams->getOne('limit', 10);
-        $this->pager = new Pager(new GroupedSolrPageable($this->client, $query, 'interview_id'), $limit);
+        $this->pager = new Pager(new GroupedSolrPageable($this->client, $query, $groupName), $limit);
         $this->pager->setCurrentPage($currentPage);
         $this->response = $this->client->select($query);
     }
@@ -251,7 +266,6 @@ abstract class SearchFacade
             $facetSet->createFacetField($field)->setField($field);
             foreach ($this->searchParams->get($field) as $i => $value) {
                 $query->createFilterQuery($field . '-' . $i)->setQuery($field . ':"' . $value . '"');
-
             }
         }
         foreach ($this->getFacetQueries() as $field => $queries) {

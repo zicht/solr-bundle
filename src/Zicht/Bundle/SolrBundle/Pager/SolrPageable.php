@@ -5,16 +5,37 @@
  */
 namespace Zicht\Bundle\SolrBundle\Pager;
 
+use Solarium\Core\Client\Client;
+use Solarium\QueryType\Select\Query\Query;
 use Zicht\Bundle\FrameworkExtraBundle\Pager\Pageable;
-use \Solarium\QueryType\Select\Result\Result;
 
+/**
+ * Class SolrPageable
+ *
+ * @package Zicht\Bundle\SolrBundle\Pager
+ */
 class SolrPageable implements Pageable
 {
+    /**
+     * @var null|int
+     */
     protected $total = null;
 
     /**
-     * @param \Solarium\Core\Client\Client $client
-     * @param \Solarium\QueryType\Select\Query\Query $selectQuery
+     * @var Client
+     */
+    protected $client;
+
+    /**
+     * @var Query
+     */
+    protected $query;
+
+    /**
+     * SolrPageable constructor.
+     *
+     * @param Client $client
+     * @param Query $selectQuery
      */
     public function __construct($client, $selectQuery)
     {
