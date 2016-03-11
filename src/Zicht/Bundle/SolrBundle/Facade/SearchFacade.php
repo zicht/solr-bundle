@@ -177,11 +177,12 @@ abstract class SearchFacade
     /**
      * Execute the search
      *
+     * @param bool $usePager
      * @return void
      *
      * @throws \LogicException
      */
-    final public function search()
+    final public function search($usePager = false)
     {
         if (!isset($this->searchParams)) {
             throw new \LogicException("You need to call setParams() first");
@@ -200,8 +201,11 @@ abstract class SearchFacade
 
         $currentPage = $this->searchParams->getOne('page', 0);
         $limit = $this->searchParams->getOne('limit', $this->defaultLimit);
-        $this->pager = new Pager(new SolrPageable($this->client, $query), $limit);
-        $this->pager->setCurrentPage($currentPage);
+
+        if ($usePager) {
+            $this->pager = new Pager(new SolrPageable($this->client, $query), $limit);
+            $this->pager->setCurrentPage($currentPage);
+        }
 
         $this->response = $this->client->select($query);
     }
@@ -209,12 +213,13 @@ abstract class SearchFacade
     /**
      * Execute the search
      *
+     * @param bool $usePager
      * @param null|string $groupName
      * @return void
      *
      * @throws \LogicException
      */
-    final public function searchGrouped($groupName = null)
+    final public function searchGrouped($usePager = true, $groupName = null)
     {
         if (!isset($this->searchParams)) {
             throw new \LogicException("You need to call setParams() first");
@@ -247,8 +252,12 @@ abstract class SearchFacade
 
         $currentPage = $this->searchParams->getOne('page', 0);
         $limit = $this->searchParams->getOne('limit', 10);
-        $this->pager = new Pager(new GroupedSolrPageable($this->client, $query, $groupName), $limit);
-        $this->pager->setCurrentPage($currentPage);
+
+        if ($usePager) {
+            $this->pager = new Pager(new GroupedSolrPageable($this->client, $query, $groupName), $limit);
+            $this->pager->setCurrentPage($currentPage);
+        }
+
         $this->response = $this->client->select($query);
     }
 
