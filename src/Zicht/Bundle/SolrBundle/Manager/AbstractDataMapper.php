@@ -23,19 +23,19 @@ abstract class AbstractDataMapper implements DataMapperInterface
     /**
      * Format date for SOLR
      *
-     * @param \DateTime $dateTime
+     * @param mixed|\DateTime $dateTime
      *
      * @return string
      */
     static function formatDate($dateTime)
     {
-        if (null === $dateTime) {
-            return null;
+        if ($dateTime instanceof \DateTime) {
+            // force the timezone to be set to UTC, but DON'T mutate the object.
+            $cloned = clone $dateTime;
+            $cloned->setTimezone(new \DateTimeZone('UTC'));
+            return $cloned->format(self::DATE_FORMAT);
         }
-        // force the timezone to be set to UTC, but DON'T mutate the object.
-        $cloned = clone $dateTime;
-        $cloned->setTimezone(new \DateTimeZone('UTC'));
-        return $cloned->format(self::DATE_FORMAT);
+        return null;
     }
 
     /**
