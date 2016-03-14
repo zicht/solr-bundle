@@ -182,7 +182,7 @@ abstract class SearchFacade
      *
      * @throws \LogicException
      */
-    final public function search($usePager = false)
+    final public function search($usePager = true)
     {
         if (!isset($this->searchParams)) {
             throw new \LogicException("You need to call setParams() first");
