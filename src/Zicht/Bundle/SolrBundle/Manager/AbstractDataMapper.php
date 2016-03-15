@@ -6,6 +6,7 @@
 
 namespace Zicht\Bundle\SolrBundle\Manager;
 
+use Doctrine\Common\Util\ClassUtils;
 use \Solarium\Client;
 use \Solarium\QueryType\Update\Query\Document\Document;
 
@@ -127,12 +128,13 @@ abstract class AbstractDataMapper implements DataMapperInterface
      */
     protected function generateObjectIdentity($entity)
     {
+        $className = ClassUtils::getRealClass(get_class($entity));
+
         if (method_exists($entity, 'getId')) {
-            return sha1(get_class($entity) . ':' . $entity->getId());
+            return sha1($className . ':' . $entity->getId());
         }
 
         $me = get_class($this);
-        $className = get_class($entity);
 
         throw new \UnexpectedValueException("$className has no getId() method. Either implement it, or override $me::generateObjectIdentity()");
     }
