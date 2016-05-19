@@ -313,12 +313,13 @@ abstract class SearchFacade
      * @param null $fields
      * @return array
      */
-    public function getFacetFilters($blacklist=null)
+    public function getFacetFilters($blacklist=null, $whitelist=null)
     {
         if (null === $blacklist) { $blacklist = array(); }
+        if (null === $whitelist) { $whitelist = $this->getFacetFields(); }
         $ret = array();
         foreach ($this->getFacetFields() as $facetName) {
-            if (!in_array($facetName, $blacklist)) {
+            if (in_array($facetName, $whitelist) && !in_array($facetName, $blacklist)) {
                 foreach ($this->getResponse()->getFacetSet()->getFacet($facetName)->getValues() as $value => $count) {
                     $ret[$facetName][$value] = $this->getFacetMetaData($facetName, $value, $count);
                 }
@@ -326,7 +327,7 @@ abstract class SearchFacade
         }
 
         foreach ($this->getFacetQueries() as $facetName => $facetQueries) {
-            if (!in_array($facetName, $blacklist)) {
+            if (in_array($facetName, $whitelist) && !in_array($facetName, $blacklist)) {
                 foreach (array_values($facetQueries) as $i => $facetLabel) {
                     $count = $this->getResponse()->getFacetSet()->getFacet($facetName . '-' . $i)->getValue();
                     if ($count >= $this->facetMinimumCount) {
