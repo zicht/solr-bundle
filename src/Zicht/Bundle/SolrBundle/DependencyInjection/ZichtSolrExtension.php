@@ -27,5 +27,9 @@ class ZichtSolrExtension extends Extension
 
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
+
+        if ($config['enabled'] === false) {
+            $container->getDefinition('zicht_solr.manager')->addMethodCall('setEnabled', [false]);
+        }
     }
 }

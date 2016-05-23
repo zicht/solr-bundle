@@ -5,11 +5,15 @@
  */
 namespace Zicht\Bundle\SolrBundle\Facade;
 
-use \Solarium\Core\Client\Client;
+use Solarium\Core\Client\Client;
+use Solarium\QueryType\Select\Query\Component\FacetSet;
+use Solarium\QueryType\Select\Query\Query;
+use Solarium\QueryType\Select\Result\Document;
 
-use \Zicht\Bundle\UrlBundle\Url\Params\Params;
-use \Zicht\Bundle\FrameworkExtraBundle\Pager\Pager;
-use \Zicht\Bundle\SolrBundle\Pager\SolrPageable;
+use Zicht\Bundle\SolrBundle\Pager\GroupedSolrPageable;
+use Zicht\Bundle\UrlBundle\Url\Params\Params;
+use Zicht\Bundle\FrameworkExtraBundle\Pager\Pager;
+use Zicht\Bundle\SolrBundle\Pager\SolrPageable;
 
 /**
  * Class SearchFacade
@@ -58,6 +62,11 @@ abstract class SearchFacade
      * @var int
      */
     protected $facetResultLimit = -1;
+
+    /**
+     * @var string
+     */
+    protected $facetSort = 'count';
 
     /**
      * @var int
@@ -168,11 +177,12 @@ abstract class SearchFacade
     /**
      * Execute the search
      *
+     * @param bool $usePager
      * @return void
      *
      * @throws \LogicException
      */
-    final public function search()
+    final public function search($usePager = true)
     {
         if (!isset($this->searchParams)) {
             throw new \LogicException("You need to call setParams() first");
@@ -187,16 +197,95 @@ abstract class SearchFacade
          * @var $query \Solarium\QueryType\Select\Query\Query
          */
         $query = $this->createQuery();
-
-        $facetFields = $this->getFacetFields();
-        $this->prepareFacetFieldQuery($facetFields, $query);
+        $this->prepareFacetSet($query);
 
         $currentPage = $this->searchParams->getOne('page', 0);
         $limit = $this->searchParams->getOne('limit', $this->defaultLimit);
-        $this->pager = new Pager(new SolrPageable($this->client, $query), $limit);
-        $this->pager->setCurrentPage($currentPage);
+
+        if ($usePager) {
+            $this->pager = new Pager(new SolrPageable($this->client, $query), $limit);
+            $this->pager->setCurrentPage($currentPage);
+        }
 
         $this->response = $this->client->select($query);
+    }
+
+    /**
+     * Execute the search
+     *
+     * @param bool $usePager
+     * @param null|string $groupName
+     * @return void
+     *
+     * @throws \LogicException
+     */
+    final public function searchGrouped($usePager = true, $groupName = null)
+    {
+        if (!isset($this->searchParams)) {
+            throw new \LogicException("You need to call setParams() first");
+        }
+
+        if (!empty($_POST['search'])) {
+            $this->redirectPost($_POST['search']);
+            return null;
+        }
+
+        /**
+         * @var $query \Solarium\QueryType\Select\Query\Query
+         */
+        $query = $this->createGroupedQuery();
+
+        // If there is no groupName provided try to get it from the grouping fields
+        if (null === $groupName) {
+            $groupedFields = $query->getGrouping()->getFields();
+
+            if (0 < count($groupedFields)) {
+                $groupName = reset($groupedFields);
+            }
+        }
+
+        if (!$groupName) {
+            throw new \InvalidArgumentException("You need to provide a groupName");
+        }
+
+        $this->prepareFacetSet($query);
+
+        $currentPage = $this->searchParams->getOne('page', 0);
+        $limit = $this->searchParams->getOne('limit', 10);
+
+        if ($usePager) {
+            $this->pager = new Pager(new GroupedSolrPageable($this->client, $query, $groupName), $limit);
+            $this->pager->setCurrentPage($currentPage);
+        }
+
+        $this->response = $this->client->select($query);
+    }
+
+
+    protected function prepareFacetSet(Query $query)
+    {
+        $facetSet = $query->getFacetSet();
+        $facetSet
+            ->setMinCount($this->facetMinimumCount)
+            ->setLimit($this->facetResultLimit)
+            ->setSort($this->facetSort)
+        ;
+
+        foreach ($this->getFacetFields() as $field) {
+            $facetSet->createFacetField($field)->setField($field);
+            foreach ($this->searchParams->get($field) as $i => $value) {
+                $query->createFilterQuery($field . '-' . $i)->setQuery($field . ':"' . $value . '"');
+            }
+        }
+        foreach ($this->getFacetQueries() as $field => $queries) {
+            foreach (array_keys($queries) as $i => $filterQuery) {
+                $facetSet->createFacetQuery($field . '-' . $i)->setQuery($filterQuery);
+
+                if ($this->searchParams->contains($field, $i)) {
+                    $query->createFilterQuery($field . '-' . $i)->setQuery($filterQuery);
+                }
+            }
+        }
     }
 
 
@@ -210,7 +299,7 @@ abstract class SearchFacade
     }
 
     /**
-     * @return array
+     * @return Document[]
      */
     public function getResults()
     {
@@ -243,21 +332,35 @@ abstract class SearchFacade
         return $ret;
     }
 
-
     /**
      * @param null $fields
      * @return array
      */
-    public function getFacetFilters($fields = null)
+    public function getFacetFilters($blacklist=null)
     {
-        if (null === $fields) {
-            $fields = $this->getFacetFields();
+        if (null === $blacklist) { $blacklist = array(); }
+        $ret = array();
+        foreach ($this->getFacetFields() as $facetName) {
+            if (!in_array($facetName, $blacklist)) {
+                foreach ($this->getResponse()->getFacetSet()->getFacet($facetName)->getValues() as $value => $count) {
+                    $ret[$facetName][$value] = $this->getFacetMetaData($facetName, $value, $count);
+                }
+            }
         }
 
-        $ret = array();
-        foreach ($fields as $facetName) {
-            foreach ($this->getResponse()->getFacetSet()->getFacet($facetName)->getValues() as $value => $count) {
-                $ret[$facetName][$value] = $this->getFacetMetaData($facetName, $value);
+        foreach ($this->getFacetQueries() as $facetName => $facetQueries) {
+            if (!in_array($facetName, $blacklist)) {
+                foreach (array_values($facetQueries) as $i => $facetLabel) {
+                    $count = $this->getResponse()->getFacetSet()->getFacet($facetName . '-' . $i)->getValue();
+                    if ($count >= $this->facetMinimumCount) {
+                        $ret[$facetName][$i] = $this->getFacetMetaData(
+                            $facetName,
+                            $i,
+                            $count,
+                            $facetLabel
+                        );
+                    }
+                }
             }
         }
         return $ret;
@@ -269,11 +372,12 @@ abstract class SearchFacade
      * @param mixed $value
      * @return array
      */
-    public function getFacetMetaData($facetName, $value)
+    public function getFacetMetaData($facetName, $value, $count, $label = null)
     {
         return array(
             'value'         => $value,
-            'count'         => $this->getFacetCount($facetName, $value),
+            'label'         => ($label === null ? $value : $label),
+            'count'         => $count,
             'active'        => $this->searchParams->contains($facetName, $value),
             'url'           => $this->getUrl($this->searchParams->without('page')->with($facetName, $value)),
             'url_filter'    => $this->getUrl($this->searchParams->without($facetName)->with($facetName, $value)),
@@ -352,11 +456,23 @@ abstract class SearchFacade
     abstract protected function createQuery();
 
     /**
-     * Return the field names that should act as a facet
+     * Create the search grouped query
+     */
+    abstract protected function createGroupedQuery();
+
+    /**
+     * Return the field names that should act as a facet. Implement with an empty array return value to ignore.
      *
      * @return mixed
      */
     abstract protected function getFacetFields();
+
+    /**
+     * Return additional facet field queries. Implement with an empty array return value to ignore.
+     *
+     * @return array
+     */
+    abstract protected function getFacetQueries();
 
     /**
      * Returns the names of the parameters that should be included in the url.
@@ -375,34 +491,9 @@ abstract class SearchFacade
     {
         return array_merge(
             $this->getFacetFields(),
+            array_keys($this->getFacetQueries()),
             self::$defaultParameterWhitelist
         );
-    }
-
-    /**
-     * Prepare the facet field query
-     *
-     * @param array $facetFields
-     * @param string $query
-     * @return void
-     */
-    protected function prepareFacetFieldQuery($facetFields, $query)
-    {
-        if (count($facetFields)) {
-            // Setup facetting
-            /** @var $facetSet \Solarium\QueryType\Select\Query\Component\FacetSet */
-            $facetSet = $query->getFacetSet();
-            $facetSet
-                ->setMinCount($this->facetMinimumCount)
-                ->setLimit($this->facetResultLimit);
-            foreach ($facetFields as $field) {
-                $facetSet->createFacetField($field)->setField($field);
-
-                foreach ($this->searchParams->get($field) as $i => $value) {
-                    $query->createFilterQuery($field . '-' . $i)->setQuery($field . ':"' . $value . '"');
-                }
-            }
-        }
     }
 
     /**

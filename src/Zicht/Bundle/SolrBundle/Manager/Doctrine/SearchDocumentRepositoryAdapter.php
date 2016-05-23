@@ -23,20 +23,27 @@ class SearchDocumentRepositoryAdapter implements SearchDocumentRepository
     }
 
     /**
+     * Returns all documents that are indexable.
+     *
+     * Typically simply returns everything
+     *
      * @return object[]
      */
-    public function findIndexableDocuments()
+    public function findIndexableDocuments($where = null, $limit = null, $offset = null)
     {
-        return $this->repository->findAll();
-    }
+        $qb = $this->repository->createQueryBuilder('d');
 
-
-    /**
-     * @param array $ids
-     * @return object
-     */
-    public function findIndexableDocumentsById(array $ids)
-    {
-        return $this->repository->find($ids);
+        if ($where) {
+            foreach ((array)$where as $w) {
+                $qb->andWhere($w);
+            }
+        }
+        if ('' !== $limit && null !== $limit) {
+            $qb->setMaxResults((int)$limit);
+        }
+        if ('' !== $offset && null !== $offset) {
+            $qb->setFirstResult((int)$offset);
+        }
+        return $qb->getQuery()->execute();
     }
 }

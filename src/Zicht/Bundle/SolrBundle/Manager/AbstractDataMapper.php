@@ -6,8 +6,10 @@
 
 namespace Zicht\Bundle\SolrBundle\Manager;
 
+use Doctrine\Common\Util\ClassUtils;
 use \Solarium\Client;
-use \Solarium\QueryType\Update\Query\Document;
+use \Solarium\QueryType\Update\Query\Document\Document;
+
 
 /**
  * Class DataMapper
@@ -22,16 +24,19 @@ abstract class AbstractDataMapper implements DataMapperInterface
     /**
      * Format date for SOLR
      *
-     * @param \DateTime $dateTime
+     * @param mixed|\DateTime $dateTime
      *
      * @return string
      */
     static function formatDate($dateTime)
     {
-        if (null === $dateTime) {
-            return null;
+        if ($dateTime instanceof \DateTime) {
+            // force the timezone to be set to UTC, but DON'T mutate the object.
+            $cloned = clone $dateTime;
+            $cloned->setTimezone(new \DateTimeZone('UTC'));
+            return $cloned->format(self::DATE_FORMAT);
         }
-        return $dateTime->format(self::DATE_FORMAT);
+        return null;
     }
 
     /**
@@ -61,12 +66,16 @@ abstract class AbstractDataMapper implements DataMapperInterface
      * @param mixed $entity
      * @return void
      */
-    public function delete(Client $client, $entity)
+    public function delete(Client $client, $entity, $batch = null)
     {
-        $update = $client->createUpdate();
-        $this->addDeleteDocument($update, $entity);
-        $update->addCommit();
-        $client->update($update);
+        if (null !== $batch) {
+            $this->addDeleteDocument($batch, $entity);
+        } else {
+            $update = $client->createUpdate();
+            $this->addDeleteDocument($update, $entity);
+            $update->addCommit();
+            $client->update($update);
+        }
     }
 
 
@@ -119,12 +128,13 @@ abstract class AbstractDataMapper implements DataMapperInterface
      */
     protected function generateObjectIdentity($entity)
     {
+        $className = ClassUtils::getRealClass(get_class($entity));
+
         if (method_exists($entity, 'getId')) {
-            return sha1(get_class($entity) . ':' . $entity->getId());
+            return sha1($className . ':' . $entity->getId());
         }
 
         $me = get_class($this);
-        $className = get_class($entity);
 
         throw new \UnexpectedValueException("$className has no getId() method. Either implement it, or override $me::generateObjectIdentity()");
     }

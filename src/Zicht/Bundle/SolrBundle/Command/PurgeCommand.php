@@ -26,6 +26,7 @@ class PurgeCommand extends ContainerAwareCommand
         $this
             ->setName('zicht:solr:purge')
             ->setDescription('Purges SOLR Index')
+            ->addArgument('query', InputArgument::OPTIONAL, 'Only delete documents matching this query', '*:*')
         ;
     }
 
@@ -37,7 +38,7 @@ class PurgeCommand extends ContainerAwareCommand
         $client = $this->getContainer()->get('solarium.client');
 
         $update = $client->createUpdate();
-        $update->addDeleteQuery('*:*');
+        $update->addDeleteQuery($input->getArgument('query'));
         $update->addCommit();
         $result = $client->update($update);
         

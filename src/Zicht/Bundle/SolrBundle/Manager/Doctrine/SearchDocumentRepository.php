@@ -19,13 +19,5 @@ interface SearchDocumentRepository
      *
      * @return object[]
      */
-    public function findIndexableDocuments();
-
-    /**
-     * Returns documents by their id
-     *
-     * @param array $ids
-     * @return object[]
-     */
-    public function findIndexableDocumentsById(array $ids);
+    public function findIndexableDocuments($where = null, $limit = null, $offset = null);
 }
