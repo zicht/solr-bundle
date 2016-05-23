@@ -25,6 +25,7 @@ class ReindexCommand extends ContainerAwareCommand
             ->addOption('em', '', InputArgument::OPTIONAL, 'The entity manager to get the repository from', 'default')
             ->addArgument('entity', InputArgument::REQUIRED, 'The entity class to fetch records from')
             ->addArgument('id', InputArgument::OPTIONAL, 'The id(s) in the repository to reindex')
+            ->addOption('offset', '', InputArgument::OPTIONAL, 'Feature forward compatibility, does nothing in this version. Upgrade to 2.x')
             ->setDescription('Reindexes entities in the SOLR index')
         ;
     }
