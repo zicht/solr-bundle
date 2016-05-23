@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service abstract="true" id="zicht_solr.command.abstract" class="Zicht\Bundle\SolrBundle\Command\AbstractCommand">
+            <argument type="service" id="zicht_solr.solr" />
+        </service>
+        <service id="zicht_solr.command.ping" class="Zicht\Bundle\SolrBundle\Command\PingCommand" parent="zicht_solr.command.abstract">
+            <tag name="console.command"/>
+        </service>
+        <service id="zicht_solr.command.select" class="Zicht\Bundle\SolrBundle\Command\SelectCommand" parent="zicht_solr.command.abstract">
+            <tag name="console.command"/>
+        </service>
+        <service id="zicht_solr.command.purge" class="Zicht\Bundle\SolrBundle\Command\PurgeCommand" parent="zicht_solr.command.abstract">
+            <tag name="console.command"/>
+        </service>
+
+        <service id="zicht_solr.command.reindex" class="Zicht\Bundle\SolrBundle\Command\ReindexCommand" parent="zicht_solr.command.abstract">
+            <argument type="service" id="zicht_solr.manager" />
+            <argument type="service" id="doctrine" />
+            <tag name="console.command"/>
+        </service>
+    </services>
+</container>

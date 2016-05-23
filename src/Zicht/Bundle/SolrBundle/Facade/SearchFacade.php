@@ -5,14 +5,10 @@
  */
 namespace Zicht\Bundle\SolrBundle\Facade;
 
-use Solarium\Core\Client\Client;
-use Solarium\QueryType\Select\Query\Component\FacetSet;
-use Solarium\QueryType\Select\Query\Query;
-use Solarium\QueryType\Select\Result\Document;
-
-use Zicht\Bundle\SolrBundle\Pager\GroupedSolrPageable;
-use Zicht\Bundle\UrlBundle\Url\Params\Params;
 use Zicht\Bundle\FrameworkExtraBundle\Pager\Pager;
+use Zicht\Bundle\SolrBundle\Solr\Client;
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Select;
+use Zicht\Bundle\UrlBundle\Url\Params\Params;
 use Zicht\Bundle\SolrBundle\Pager\SolrPageable;
 
 /**
@@ -25,7 +21,7 @@ abstract class SearchFacade
     protected static $defaultParameterWhitelist = array('keywords', 'page', 'type', 'perpage');
 
     /**
-     * @var \Solarium\Core\Client\Client
+     * @var Client
      */
     protected $client = null;
 
@@ -76,8 +72,8 @@ abstract class SearchFacade
     /**
      * Construct the facade.
      *
-     * @param \Solarium\Core\Client\Client $client
-     * @param int $defaultLimit
+     * @var Client $client
+     * @var int $defaultLimit
      */
     public function __construct(Client $client, $defaultLimit = 30)
     {
@@ -182,7 +178,7 @@ abstract class SearchFacade
      *
      * @throws \LogicException
      */
-    final public function search($usePager = true)
+    final public function search()
     {
         if (!isset($this->searchParams)) {
             throw new \LogicException("You need to call setParams() first");
@@ -193,96 +189,35 @@ abstract class SearchFacade
             return null;
         }
 
-        /**
-         * @var $query \Solarium\QueryType\Select\Query\Query
-         */
-        $query = $this->createQuery();
+        $query = $this->createQueryBuilder();
         $this->prepareFacetSet($query);
+        $this->initPager($query);
 
-        $currentPage = $this->searchParams->getOne('page', 0);
-        $limit = $this->searchParams->getOne('limit', $this->defaultLimit);
-
-        if ($usePager) {
-            $this->pager = new Pager(new SolrPageable($this->client, $query), $limit);
-            $this->pager->setCurrentPage($currentPage);
-        }
-
-        $this->response = $this->client->select($query);
+        $this->response = $this->execSearch($query);
     }
+    
 
-    /**
-     * Execute the search
-     *
-     * @param bool $usePager
-     * @param null|string $groupName
-     * @return void
-     *
-     * @throws \LogicException
-     */
-    final public function searchGrouped($usePager = true, $groupName = null)
+    protected function prepareFacetSet(Select $query)
     {
-        if (!isset($this->searchParams)) {
-            throw new \LogicException("You need to call setParams() first");
-        }
-
-        if (!empty($_POST['search'])) {
-            $this->redirectPost($_POST['search']);
-            return null;
-        }
-
-        /**
-         * @var $query \Solarium\QueryType\Select\Query\Query
-         */
-        $query = $this->createGroupedQuery();
-
-        // If there is no groupName provided try to get it from the grouping fields
-        if (null === $groupName) {
-            $groupedFields = $query->getGrouping()->getFields();
-
-            if (0 < count($groupedFields)) {
-                $groupName = reset($groupedFields);
-            }
-        }
-
-        if (!$groupName) {
-            throw new \InvalidArgumentException("You need to provide a groupName");
-        }
-
-        $this->prepareFacetSet($query);
-
-        $currentPage = $this->searchParams->getOne('page', 0);
-        $limit = $this->searchParams->getOne('limit', 10);
-
-        if ($usePager) {
-            $this->pager = new Pager(new GroupedSolrPageable($this->client, $query, $groupName), $limit);
-            $this->pager->setCurrentPage($currentPage);
-        }
-
-        $this->response = $this->client->select($query);
-    }
-
-
-    protected function prepareFacetSet(Query $query)
-    {
-        $facetSet = $query->getFacetSet();
-        $facetSet
-            ->setMinCount($this->facetMinimumCount)
-            ->setLimit($this->facetResultLimit)
-            ->setSort($this->facetSort)
+        $query
+            ->setParam('facet', 'true')
+            ->setParam('facet.mincount', 1)
         ;
 
         foreach ($this->getFacetFields() as $field) {
-            $facetSet->createFacetField($field)->setField($field);
+            $query->addFacetField($field);
+
             foreach ($this->searchParams->get($field) as $i => $value) {
-                $query->createFilterQuery($field . '-' . $i)->setQuery($field . ':"' . $value . '"');
+                $query->addFilterQuery(sprintf('%s:"%s"', $field, $value));
             }
         }
+
         foreach ($this->getFacetQueries() as $field => $queries) {
             foreach (array_keys($queries) as $i => $filterQuery) {
-                $facetSet->createFacetQuery($field . '-' . $i)->setQuery($filterQuery);
+                $query->addFacetQuery($query);
 
                 if ($this->searchParams->contains($field, $i)) {
-                    $query->createFilterQuery($field . '-' . $i)->setQuery($filterQuery);
+                    $query->addFilterQuery($filterQuery);
                 }
             }
         }
@@ -299,11 +234,19 @@ abstract class SearchFacade
     }
 
     /**
-     * @return Document[]
+     * @return object[]
      */
     public function getResults()
     {
-        return $this->getResponse();
+        return $this->getResponse()->docs;
+    }
+
+    /**
+     * @return
+     */
+    public function getDebug()
+    {
+        return $this->response->debug;
     }
 
     /**
@@ -311,7 +254,7 @@ abstract class SearchFacade
      */
     public function getNumFound()
     {
-        return $this->response->getNumFound();
+        return $this->response->response->numFound;
     }
 
 
@@ -338,11 +281,14 @@ abstract class SearchFacade
      */
     public function getFacetFilters($blacklist=null)
     {
-        if (null === $blacklist) { $blacklist = array(); }
+        if (null === $blacklist) {
+            $blacklist = array();
+        }
+
         $ret = array();
         foreach ($this->getFacetFields() as $facetName) {
             if (!in_array($facetName, $blacklist)) {
-                foreach ($this->getResponse()->getFacetSet()->getFacet($facetName)->getValues() as $value => $count) {
+                foreach (array_chunk($this->response->facet_counts->facet_fields->$facetName, 2) as list($value, $count)) {
                     $ret[$facetName][$value] = $this->getFacetMetaData($facetName, $value, $count);
                 }
             }
@@ -351,6 +297,8 @@ abstract class SearchFacade
         foreach ($this->getFacetQueries() as $facetName => $facetQueries) {
             if (!in_array($facetName, $blacklist)) {
                 foreach (array_values($facetQueries) as $i => $facetLabel) {
+                    throw new \Exception("not implemented yet");
+
                     $count = $this->getResponse()->getFacetSet()->getFacet($facetName . '-' . $i)->getValue();
                     if ($count >= $this->facetMinimumCount) {
                         $ret[$facetName][$i] = $this->getFacetMetaData(
@@ -437,7 +385,7 @@ abstract class SearchFacade
             throw new \LogicException("There is no response, call search() first");
         }
 
-        return $this->response;
+        return $this->response->response;
     }
 
     /**
@@ -453,12 +401,7 @@ abstract class SearchFacade
      *
      * @return mixed
      */
-    abstract protected function createQuery();
-
-    /**
-     * Create the search grouped query
-     */
-    abstract protected function createGroupedQuery();
+    abstract protected function createQueryBuilder();
 
     /**
      * Return the field names that should act as a facet. Implement with an empty array return value to ignore.
@@ -514,5 +457,21 @@ abstract class SearchFacade
     public function getDefaultLimit()
     {
         return $this->defaultLimit;
+    }
+
+    /**
+     * @param $query
+     */
+    protected function initPager($query)
+    {
+        $currentPage = $this->searchParams->getOne('page', 0);
+        $limit = $this->searchParams->getOne('limit', $this->defaultLimit);
+        $this->pager = new Pager(new SolrPageable($this->client, $query), $limit);
+        $this->pager->setCurrentPage($currentPage);
+    }
+
+    protected function execSearch($query)
+    {
+        return $this->client->select($query);
     }
 }

@@ -7,9 +7,9 @@
  */
 namespace Zicht\Bundle\SolrBundle\Manager;
 
-use Solarium\Core\Client\Client;
-use Solarium\Core\Client\Request;
-use Solarium\QueryType\Update\Query\Document\Document;
+use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
+use Zicht\Bundle\SolrBundle\Solr\Client;
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
 /**
  * Central manager service for solr features.
@@ -17,8 +17,6 @@ use Solarium\QueryType\Update\Query\Document\Document;
 class SolrManager
 {
     /**
-     * Solarium client
-     *
      * @var Client
      */
     protected $client = null;
@@ -32,6 +30,7 @@ class SolrManager
      * @var DataMapperInterface[]
      */
     protected $mappers = array();
+    private $repositories;
 
 
     /**
@@ -57,6 +56,33 @@ class SolrManager
         $this->mappers[]= $dataMapper;
     }
 
+    /**
+     * Adds a document repository
+     *
+     * @param SearchDocumentRepository $dataMapper
+     * @return void
+     */
+    public function addRepository($class, $repository)
+    {
+        $this->repositories[$class]= $repository;
+    }
+
+
+    /**
+     * Get a class-specific repository implementation
+     *
+     * @param $entity
+     * @return SearchDocumentRepository|null
+     */
+    public function getRepository($entity)
+    {
+        if (!isset($this->repositories[$entity])) {
+            return null;
+        }
+
+        return $this->repositories[$entity];
+    }
+
 
     /**
      * Updates as batch. Acts as a stub for future optimization.
@@ -66,7 +92,7 @@ class SolrManager
      */
     public function updateBatch($records, $incrementCallback = null, $errorCallback = null, $delete = false)
     {
-        $update = $this->client->createUpdate();
+        $update = new QueryBuilder\Update();
 
         $n = $i = 0;
         foreach ($records as $record) {
@@ -74,9 +100,9 @@ class SolrManager
                 $i ++;
                 try {
                     if ($delete) {
-                        $mapper->delete($this->client, $record, $update);
+                        $mapper->delete($update, $record, $update);
                     }
-                    $mapper->update($this->client, $record, $update);
+                    $mapper->update($update, $record, $update);
                 } catch (\Exception $e) {
                     if ($errorCallback) {
                         call_user_func($errorCallback, $record, $e);
@@ -88,7 +114,9 @@ class SolrManager
             }
             $n ++;
         }
-        $update->addCommit();
+        call_user_func($incrementCallback, $n);
+
+        $update->commit();
         $this->client->update($update);
         return array($n, $i);
     }
@@ -107,7 +135,10 @@ class SolrManager
         }
 
         if ($mapper = $this->getMapper($entity)) {
-            $mapper->update($this->client, $entity);
+            $update = new QueryBuilder\Update();
+            $mapper->update($update, $entity);
+            $update->commit();
+            $this->client->update($update);
             return true;
         }
         return false;
@@ -127,7 +158,10 @@ class SolrManager
         }
 
         if ($mapper = $this->getMapper($entity)) {
-            $mapper->delete($this->client, $entity);
+            $update = new QueryBuilder\Update();
+            $mapper->delete($update, $entity);
+            $update->commit();
+            $this->client->update($update);
             return true;
         }
         return false;
@@ -136,51 +170,53 @@ class SolrManager
 
     public function updateFieldValues($documentId, $values)
     {
-        $instructions = array();
-        foreach ($values as $key => $value) {
-            $instructions[$key] = array('set' => $value);
-        }
-        $data =
-            json_encode(
-                array(
-                    'add' => array(
-                        array('id' => $documentId)
-                        + $instructions
-                    )
-                )
-            );
+        die('TODO');
 
-        $request = new Request();
-        $request->setHandler('update/json');
-        $request->setMethod(Request::METHOD_POST);
-        $request->setHeaders(
-            array(
-                'Content-Type: application/json',
-                'Content-Length: ' . strlen($data)
-            )
-        );
-
-        $request->setRawData($data);
-        $this->client->getAdapter()->execute($request, $this->client->getEndpoint());
+//        $instructions = array();
+//        foreach ($values as $key => $value) {
+//            $instructions[$key] = array('set' => $value);
+//        }
+//        $data =
+//            json_encode(
+//                array(
+//                    'add' => array(
+//                        array('id' => $documentId)
+//                        + $instructions
+//                    )
+//                )
+//            );
+//
+//        $request = new Request();
+//        $request->setHandler('update/json');
+//        $request->setMethod(Request::METHOD_POST);
+//        $request->setHeaders(
+//            array(
+//                'Content-Type: application/json',
+//                'Content-Length: ' . strlen($data)
+//            )
+//        );
+//
+//        $request->setRawData($data);
+//        $this->client->getAdapter()->execute($request, $this->client->getEndpoint());
     }
 
 
     public function commit()
     {
-        $data = json_encode(array('commit' => array()), JSON_FORCE_OBJECT);
-
-        $request = new Request();
-        $request->setHandler('update/json');
-        $request->setMethod(Request::METHOD_POST);
-        $request->setHeaders(
-            array(
-                'Content-Type: application/json',
-                'Content-Length: ' . strlen($data)
-            )
-        );
-
-        $request->setRawData($data);
-        $this->client->getAdapter()->execute($request, $this->client->getEndpoint());
+//        $data = json_encode(array('commit' => array()), JSON_FORCE_OBJECT);
+//
+//        $request = new Request();
+//        $request->setHandler('update/json');
+//        $request->setMethod(Request::METHOD_POST);
+//        $request->setHeaders(
+//            array(
+//                'Content-Type: application/json',
+//                'Content-Length: ' . strlen($data)
+//            )
+//        );
+//
+//        $request->setRawData($data);
+//        $this->client->getAdapter()->execute($request, $this->client->getEndpoint());
     }
 
     /**
@@ -219,6 +255,7 @@ class SolrManager
      */
     public function disableTimeout()
     {
+        die('TODO');
         $this->setTimeout(0);
     }
 
@@ -231,6 +268,7 @@ class SolrManager
      */
     public function setTimeout($timeout)
     {
+        die('TODO');
         foreach ($this->client->getEndpoints() as $endpoint) {
             $endpoint->setTimeout($timeout);
         }
@@ -238,20 +276,18 @@ class SolrManager
 
     /**
      * Get all document ids for the specified query.
-     *
-     * @param string $query
-     * @return \Solarium\Core\Query\Result\ResultInterface
      */
     public function getDocumentIds($query, $fieldName = 'id')
     {
-        $ret = [];
-        $select = $this->client->createSelect();
-        $select->setFields($fieldName);
-        $select->setQuery($query);
-        foreach ($this->client->execute($select) as $doc) {
-            $ret[]= $doc->$fieldName;
-        }
-        return $ret;
+        die('TODO');
+//        $ret = [];
+//        $select = $this->client->createSelect();
+//        $select->setFields($fieldName);
+//        $select->setQuery($query);
+//        foreach ($this->client->execute($select) as $doc) {
+//            $ret[]= $doc->$fieldName;
+//        }
+//        return $ret;
     }
 
 
@@ -264,28 +300,30 @@ class SolrManager
      */
     public function updateValues($documents)
     {
-        $found = 0;
-
-        $update = $this->client->createUpdate();
-        foreach ($documents as $id => $values) {
-            /** @var Document $doc */
-            $doc = $update->createDocument();
-            foreach ($values as $fieldName => $value) {
-                $doc->setFieldModifier($fieldName, Document::MODIFIER_SET);
-                // NOTE it seems that 'null' values aren't working here.
-                $doc->setField($fieldName, $value);
-            }
-            $doc->setKey('id', $id);
-            $update->addDocument($doc);
-            $found ++;
-        }
-
-        // if the docs are not in solr, don't bother.
-        if ($found > 0) {
-            $update->addCommit();
-            $this->client->execute($update);
-        }
-
-        return $found;
+        die('TODO');
+//
+//        $found = 0;
+//
+//        $update = $this->client->createUpdate();
+//        foreach ($documents as $id => $values) {
+//            /** @var Document $doc */
+//            $doc = $update->createDocument();
+//            foreach ($values as $fieldName => $value) {
+//                $doc->setFieldModifier($fieldName, Document::MODIFIER_SET);
+//                // NOTE it seems that 'null' values aren't working here.
+//                $doc->setField($fieldName, $value);
+//            }
+//            $doc->setKey('id', $id);
+//            $update->addDocument($doc);
+//            $found ++;
+//        }
+//
+//        // if the docs are not in solr, don't bother.
+//        if ($found > 0) {
+//            $update->addCommit();
+//            $this->client->execute($update);
+//        }
+//
+//        return $found;
     }
 }

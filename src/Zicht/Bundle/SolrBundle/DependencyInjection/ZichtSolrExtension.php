@@ -27,9 +27,10 @@ class ZichtSolrExtension extends Extension
 
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
+        $loader->load('commands.xml');
 
-        if ($config['enabled'] === false) {
-            $container->getDefinition('zicht_solr.manager')->addMethodCall('setEnabled', [false]);
-        }
+        $container->getDefinition('_zicht_solr.http_client')->setArguments([
+            ['base_url' => sprintf('http://%s:%d%s/%s/', $config['host'], $config['port'], $config['path'], $config['core'])]
+        ]);
     }
 }

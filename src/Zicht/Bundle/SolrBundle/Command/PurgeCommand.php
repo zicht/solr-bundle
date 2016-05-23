@@ -11,12 +11,13 @@ use \Symfony\Component\Console\Input\InputArgument;
 use \Symfony\Component\Console\Input\InputInterface;
 use \Symfony\Component\Console\Input\InputOption;
 use \Symfony\Component\Console\Output\OutputInterface;
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 
 /**
  * Class PurgeCommand
  * @package Zicht\Bundle\SolrBundle\Command
  */
-class PurgeCommand extends ContainerAwareCommand
+class PurgeCommand extends AbstractCommand
 {
     /**
      * @{inheritDoc}
@@ -35,13 +36,11 @@ class PurgeCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $client = $this->getContainer()->get('solarium.client');
+        $update = new Update();
+        $update->delete($input->getArgument('query'));
+        $update->commit();
 
-        $update = $client->createUpdate();
-        $update->addDeleteQuery($input->getArgument('query'));
-        $update->addCommit();
-        $result = $client->update($update);
-        
+        $result = $this->solr->update($update);
 
         if ($result) {
             $output->writeln('SOLR Index purged');

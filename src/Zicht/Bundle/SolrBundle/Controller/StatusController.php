@@ -6,7 +6,6 @@
 namespace Zicht\Bundle\SolrBundle\Controller;
 
 use \Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use \Solarium\Core\Client\Client;
 use \Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use \Symfony\Component\HttpFoundation\Response;
 
@@ -30,10 +29,9 @@ class StatusController extends Controller
     {
         $response = new Response('', 200, array('Content-Type' => 'text/plain'));
 
-        /** @var $client Client */
-        $client = $this->get('solarium.client');
+        $client = $this->get('zicht_solr.solr');
         try {
-            $client->ping($client->createPing());
+            $client->ping();
 
             $response->setContent('ping succeeded');
         } catch (\Exception $e) {

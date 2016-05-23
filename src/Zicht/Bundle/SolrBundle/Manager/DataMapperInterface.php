@@ -6,15 +6,16 @@
 
 namespace Zicht\Bundle\SolrBundle\Manager;
 
-use \Solarium\Client;
+use Zicht\Bundle\SolrBundle\Solr\Client;
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 
 /**
  * Class DataMapperInterface
  */
 interface DataMapperInterface
 {
-    public function update(Client $manager, $entity, $batch = null);
-    public function delete(Client $manager, $entity);
+    public function update(Update $client, $entity, $batch = null);
+    public function delete(Update $client, $entity);
 
 
     /**
@@ -23,13 +24,13 @@ interface DataMapperInterface
      * @param mixed $data
      * @return mixed
      */
-    public function addUpdateDocument($updateQuery, $entity);
+    public function addUpdateDocument(Update $updateQuery, $entity);
 
     /**
      * @param $entity
      * @return mixed
      */
-    public function addDeleteDocument($updateQuery, $entity);
+    public function addDeleteDocument(Update $updateQuery, $entity);
 
 
     /**

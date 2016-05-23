@@ -5,20 +5,32 @@
  */
 namespace Zicht\Bundle\SolrBundle\Command;
 
-use \Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\DBAL\Logging\EchoSQLLogger;
 use Symfony\Component\Console\Helper\ProgressBar;
-use \Symfony\Component\Console\Input\InputArgument;
-use \Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use \Symfony\Component\Console\Output\OutputInterface;
-use \Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepositoryAdapter;
-use \Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
+use Symfony\Component\Console\Output\OutputInterface;
+use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepositoryAdapter;
+use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
+use Zicht\Bundle\SolrBundle\Manager\Doctrine\WrappedSearchDocumentRepository;
+use Zicht\Bundle\SolrBundle\Manager\SolrManager;
+use Zicht\Bundle\SolrBundle\Solr\Client;
 
 /**
  * Reindex a specified repository or entity in SOLR
  */
-class ReindexCommand extends ContainerAwareCommand
+class ReindexCommand extends AbstractCommand
 {
+    public function __construct(Client $solr, SolrManager $solrManager, Registry $doctrine)
+    {
+        parent::__construct($solr);
+
+        $this->solrManager = $solrManager;
+        $this->doctrine = $doctrine;
+    }
+
     /**
      * @{inheritDoc}
      */
@@ -42,15 +54,30 @@ class ReindexCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        /** @var $solr \Zicht\Bundle\SolrBundle\Manager\SolrManager */
-        $solr = $this->getContainer()->get('zicht_solr.manager');
-        $solr->disableTimeout();
+        /** @var $solrManager \Zicht\Bundle\SolrBundle\Manager\SolrManager */
 
-        $entity = $input->getArgument('entity');
-        $repos = $this->getContainer()->get('doctrine')->getManager($input->getOption('em'))->getRepository($entity);
+        $em = $this->doctrine->getManager($input->getOption('em'));
 
-        if (!$repos instanceof SearchDocumentRepository) {
-            $repos = new SearchDocumentRepositoryAdapter($repos);
+        $entity = $em->getClassMetadata($input->getArgument('entity'))->getReflectionClass()->name;
+
+        if (null !== ($repos = $this->solrManager->getRepository($entity))) {
+            if ($repos instanceof WrappedSearchDocumentRepository) {
+                $repos->setSourceRepository($em->getRepository($entity));
+            }
+        } else {
+            $repos = $em->getRepository($entity);
+
+            if (!$repos instanceof SearchDocumentRepository) {
+                $repos = new SearchDocumentRepositoryAdapter($repos);
+            }
+        }
+
+        if ($input->getOption('debug')) {
+            $this->doctrine
+                ->getConnection()
+                ->getConfiguration()
+                ->setSQLLogger(new EchoSQLLogger())
+            ;
         }
 
         $output->writeln("Querying records ...");
@@ -64,16 +91,13 @@ class ReindexCommand extends ContainerAwareCommand
 
         $output->writeln("Reindexing records ...");
         $progress = new ProgressBar($output, $total);
-        if ($total > 40) {
-            $progress->setRedrawFrequency($total / 40);
-        }
         $progress->display();
-        list($n, $i) = $solr->updateBatch(
+        list($n, $i) = $this->solrManager->updateBatch(
             $records,
             function($n) use($progress, $total) {
                 $progress->setProgress($n);
             },
-            function($record, $e) use($input, $output, $progress) {
+            function($record, $e) use($input, $output) {
                 if (!$input->getOption('debug')) {
                     $output->write(sprintf("\nError indexing record: %s (%s)\n", (string)$record, $e->getMessage()));
                 } else {
@@ -84,6 +108,6 @@ class ReindexCommand extends ContainerAwareCommand
         );
         $progress->setProgress($total);
         $output->write("\n");
-        $output->writeln("Processed $i of $n items");
+        $output->writeln("Processed $i of $n items. Peak mem usage: " . sprintf('.%2d Mb', memory_get_peak_usage() / 1024 / 1024));
     }
 }

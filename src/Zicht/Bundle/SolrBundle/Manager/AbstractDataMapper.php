@@ -6,10 +6,8 @@
 
 namespace Zicht\Bundle\SolrBundle\Manager;
 
-use Doctrine\Common\Util\ClassUtils;
-use \Solarium\Client;
-use \Solarium\QueryType\Update\Query\Document\Document;
-
+use Zicht\Bundle\SolrBundle\Solr\Client;
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 
 /**
  * Class DataMapper
@@ -24,19 +22,19 @@ abstract class AbstractDataMapper implements DataMapperInterface
     /**
      * Format date for SOLR
      *
-     * @param mixed|\DateTime $dateTime
+     * @param \DateTime $dateTime
      *
      * @return string
      */
     static function formatDate($dateTime)
     {
-        if ($dateTime instanceof \DateTime) {
-            // force the timezone to be set to UTC, but DON'T mutate the object.
-            $cloned = clone $dateTime;
-            $cloned->setTimezone(new \DateTimeZone('UTC'));
-            return $cloned->format(self::DATE_FORMAT);
+        if (null === $dateTime) {
+            return null;
         }
-        return null;
+        // force the timezone to be set to UTC, but DON'T mutate the object.
+        $cloned = clone $dateTime;
+        $cloned->setTimezone(new \DateTimeZone('UTC'));
+        return $cloned->format(self::DATE_FORMAT);
     }
 
     /**
@@ -46,16 +44,9 @@ abstract class AbstractDataMapper implements DataMapperInterface
      * @param mixed $entity
      * @return void
      */
-    public function update(Client $client, $entity, $batch = null)
+    public function update(Update $update, $entity, $batch = null)
     {
-        if (null !== $batch) {
-            $this->addUpdateDocument($batch, $entity);
-        } else {
-            $update = $client->createUpdate();
-            $this->addUpdateDocument($update, $entity);
-            $update->addCommit();
-            $client->update($update);
-        }
+        $this->addUpdateDocument($update, $entity);
     }
 
 
@@ -66,46 +57,39 @@ abstract class AbstractDataMapper implements DataMapperInterface
      * @param mixed $entity
      * @return void
      */
-    public function delete(Client $client, $entity, $batch = null)
+    public function delete(Update $update, $entity, $batch = null)
     {
-        if (null !== $batch) {
-            $this->addDeleteDocument($batch, $entity);
-        } else {
-            $update = $client->createUpdate();
-            $this->addDeleteDocument($update, $entity);
-            $update->addCommit();
-            $client->update($update);
-        }
+        $update->deleteOne($this->generateObjectIdentity($entity));
     }
 
 
     /**
      * Maps the data to an indexable document for Solr
      *
-     * @param \Solarium\QueryType\Update\Query\Query $updateQuery
      * @param mixed $entity
      * @return void
      */
-    public function addUpdateDocument($updateQuery, $entity)
+    public function addUpdateDocument(Update $updateQuery, $entity)
     {
-        $document = $updateQuery->createDocument();
-
+        $params = [];
         if (($boost = $this->getBoost($entity))) {
-            $document->setBoost($boost);
+            $params['boost'] = $boost;
         }
-        $document->addField('id', $this->generateObjectIdentity($entity));
-        $this->mapDocument($entity, $document);
-        $updateQuery->addDocument($document);
+        $doc = ['id' => $this->generateObjectIdentity($entity)];
+        $doc += $this->mapDocument($entity);
+        $updateQuery->add($doc, $params);
     }
 
+
     /**
-     * @param \Solarium\QueryType\Update\Query\Query $updateQuery
-     * @param mixed $entity
-     * @return mixed
+     * Adds a delete instruction
+     *
+     * @param Update $updateQuery
+     * @param $entity
      */
-    public function addDeleteDocument($updateQuery, $entity)
+    public function addDeleteDocument(Update $updateQuery, $entity)
     {
-        $updateQuery->addDeleteQuery('id:' . $this->generateObjectIdentity($entity));
+        $updateQuery->deleteOne($this->generateObjectIdentity($entity));
     }
 
 
@@ -128,13 +112,12 @@ abstract class AbstractDataMapper implements DataMapperInterface
      */
     protected function generateObjectIdentity($entity)
     {
-        $className = ClassUtils::getRealClass(get_class($entity));
-
         if (method_exists($entity, 'getId')) {
-            return sha1($className . ':' . $entity->getId());
+            return sha1(get_class($entity) . ':' . $entity->getId());
         }
 
         $me = get_class($this);
+        $className = get_class($entity);
 
         throw new \UnexpectedValueException("$className has no getId() method. Either implement it, or override $me::generateObjectIdentity()");
     }
@@ -168,5 +151,5 @@ abstract class AbstractDataMapper implements DataMapperInterface
      * @param Document $document
      * @return mixed
      */
-    abstract protected function mapDocument($entity, Document $document);
+    abstract protected function mapDocument($entity);
 }

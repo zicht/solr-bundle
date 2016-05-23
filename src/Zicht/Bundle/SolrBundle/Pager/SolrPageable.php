@@ -5,39 +5,18 @@
  */
 namespace Zicht\Bundle\SolrBundle\Pager;
 
-use Solarium\Core\Client\Client;
-use Solarium\QueryType\Select\Query\Query;
 use Zicht\Bundle\FrameworkExtraBundle\Pager\Pageable;
+use Zicht\Bundle\SolrBundle\Solr\Client;
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Select;
 
-/**
- * Class SolrPageable
- *
- * @package Zicht\Bundle\SolrBundle\Pager
- */
 class SolrPageable implements Pageable
 {
-    /**
-     * @var null|int
-     */
     protected $total = null;
 
     /**
-     * @var Client
-     */
-    protected $client;
-
-    /**
-     * @var Query
-     */
-    protected $query;
-
-    /**
-     * SolrPageable constructor.
      *
-     * @param Client $client
-     * @param Query $selectQuery
      */
-    public function __construct($client, $selectQuery)
+    public function __construct(Client $client, Select $selectQuery)
     {
         $this->client = $client;
         $this->query = $selectQuery;
@@ -55,7 +34,9 @@ class SolrPageable implements Pageable
             $countQuery = clone $this->query;
             // makes sure only the total number of results is fetched.
             $countQuery->setRows(0);
-            $this->total = $this->client->select($countQuery)->getNumFound();
+            $response = $this->client->select($countQuery);
+
+            $this->total = $response->response->numFound;
         }
 
         return $this->total;

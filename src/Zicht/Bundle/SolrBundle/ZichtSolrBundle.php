@@ -5,9 +5,8 @@
  */
 namespace Zicht\Bundle\SolrBundle;
 
-use \Symfony\Component\DependencyInjection\ContainerBuilder;
-use \Symfony\Component\HttpKernel\Bundle\Bundle;
-use \Zicht\Bundle\SolrBundle\DependencyInjection\CompilerPass\AddMapperPass;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class ZichtSolrBundle extends Bundle
 {
@@ -15,6 +14,7 @@ class ZichtSolrBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new AddMapperPass());
+        $container->addCompilerPass(new DependencyInjection\CompilerPass\AddMapperPass());
+        $container->addCompilerPass(new DependencyInjection\CompilerPass\AddRepositoryPass());
     }
 }

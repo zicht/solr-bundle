@@ -6,14 +6,11 @@
 
 namespace Zicht\Bundle\SolrBundle\Manager\Doctrine;
 
-use Zicht\Bundle\SolrBundle\Manager\AbstractDataMapper;
-
 /**
- * Base class used for doctrine entity mapping
- *
- * Class EntityMapper
+ * Interface SearchDocumentRepository
  * @package Zicht\Bundle\SolrBundle\Manager\Doctrine
  */
-abstract class EntityMapper extends AbstractDataMapper
+interface WrappedSearchDocumentRepository extends SearchDocumentRepository
 {
+    public function setSourceRepository($repository);
 }

@@ -23,10 +23,14 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('zicht_solr');
 
-        $rootNode->canBeDisabled();
-        // Here you should define the parameters that are allowed to
-        // configure your bundle. See the documentation linked above for
-        // more information on that topic.
+        $rootNode
+            ->children()
+                ->scalarNode('port')->end()
+                ->scalarNode('host')->end()
+                ->scalarNode('path')->defaultValue('/solr')->end()
+                ->scalarNode('core')->end()
+            ->end()
+        ;
 
         return $treeBuilder;
     }
