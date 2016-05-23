@@ -1,4 +1,0 @@
-zicht_sro_controllers:
-    resource: "@ZichtSolrBundle/Controller/"
-    type: annotation
-
