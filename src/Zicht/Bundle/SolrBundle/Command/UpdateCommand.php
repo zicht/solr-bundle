@@ -5,18 +5,11 @@
  */
 namespace Zicht\Bundle\SolrBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepositoryAdapter;
-use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
+use Symfony\Component\Console;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 
 /**
- * Reindex a specified repository or entity in SOLR
+ * Updates a field within the solr index to a specified value.
  */
 class UpdateCommand extends AbstractCommand
 {
@@ -27,17 +20,17 @@ class UpdateCommand extends AbstractCommand
     {
         $this
             ->setName('zicht:solr:update')
-            ->setDescription('Update a document\'s fields')
-            ->addArgument('select', InputArgument::REQUIRED, "Select these documents to update (e.g.: 'id:abc')")
-            ->addArgument('field', InputArgument::REQUIRED, 'Solr field name (e.g "title")')
-            ->addArgument('value', InputArgument::REQUIRED, 'Set the value (e.g. "New title")')
+            ->setDescription('Update a document\'s fields.')
+            ->addArgument('select', Console\Input\InputArgument::REQUIRED, "Select these documents to update (e.g.: 'id:abc')")
+            ->addArgument('field', Console\Input\InputArgument::REQUIRED, 'Solr field name (e.g "title")')
+            ->addArgument('value', Console\Input\InputArgument::REQUIRED, 'Set the value (e.g. "New title")')
         ;
     }
 
     /**
      * @{inheritDoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {
         $i = 0;
         $update = new Update();
