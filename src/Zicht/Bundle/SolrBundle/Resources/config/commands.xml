@@ -14,10 +14,10 @@
         <service id="zicht_solr.command.select" class="Zicht\Bundle\SolrBundle\Command\SelectCommand" parent="zicht_solr.command.abstract">
             <tag name="console.command"/>
         </service>
-        <service id="zicht_solr.command.purge" class="Zicht\Bundle\SolrBundle\Command\PurgeCommand" parent="zicht_solr.command.abstract">
+        <service id="zicht_solr.command.delete" class="Zicht\Bundle\SolrBundle\Command\DeleteCommand" parent="zicht_solr.command.abstract">
             <tag name="console.command"/>
         </service>
-        <service id="zicht_solr.command.set" class="Zicht\Bundle\SolrBundle\Command\SetCommand" parent="zicht_solr.command.abstract">
+        <service id="zicht_solr.command.update" class="Zicht\Bundle\SolrBundle\Command\UpdateCommand" parent="zicht_solr.command.abstract">
             <tag name="console.command"/>
         </service>
 

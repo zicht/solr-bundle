@@ -20,6 +20,7 @@ class SelectCommand extends AbstractCommand
     {
         $this
             ->setName('zicht:solr:select')
+            ->setDescription('Do a select (search) query in SOLR')
             ->addArgument(
                 'query',
                 Console\Input\InputArgument::OPTIONAL,

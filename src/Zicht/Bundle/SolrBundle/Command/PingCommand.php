@@ -20,7 +20,7 @@ class PingCommand extends AbstractCommand
     {
         $this
             ->setName('zicht:solr:ping')
-            ->setDescription('Purges SOLR Index')
+            ->setDescription('Do a PING request on the client')
         ;
     }
 

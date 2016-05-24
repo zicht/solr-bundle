@@ -18,7 +18,7 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 /**
  * Reindex a specified repository or entity in SOLR
  */
-class SetCommand extends AbstractCommand
+class UpdateCommand extends AbstractCommand
 {
     /**
      * @{inheritDoc}
@@ -26,7 +26,8 @@ class SetCommand extends AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('zicht:solr:set')
+            ->setName('zicht:solr:update')
+            ->setDescription('Update a document\'s fields')
             ->addArgument('select', InputArgument::REQUIRED, "Select these documents to update (e.g.: 'id:abc')")
             ->addArgument('field', InputArgument::REQUIRED, 'Solr field name (e.g "title")')
             ->addArgument('value', InputArgument::REQUIRED, 'Set the value (e.g. "New title")')

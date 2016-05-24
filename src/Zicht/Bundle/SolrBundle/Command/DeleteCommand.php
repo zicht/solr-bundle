@@ -12,7 +12,7 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 /**
  * Class PurgeCommand
  */
-class PurgeCommand extends AbstractCommand
+class DeleteCommand extends AbstractCommand
 {
     /**
      * @{inheritDoc}
@@ -20,7 +20,8 @@ class PurgeCommand extends AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('zicht:solr:purge')
+            ->setName('zicht:solr:delete')
+            ->setAliases(['zicht:solr:purge'])
             ->setDescription('Purges SOLR Index')
             ->addArgument('query', Console\Input\InputArgument::OPTIONAL, 'Only delete documents matching this query', '*:*')
         ;
