@@ -6,48 +6,63 @@
 
 namespace Zicht\Bundle\SolrBundle\Manager\Doctrine;
 
-use \Doctrine\Common\EventSubscriber;
-use \Doctrine\ORM\Event\LifecycleEventArgs;
-use \Doctrine\ORM\Events;
-use \Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use \Symfony\Component\DependencyInjection\ContainerInterface;
-use \Zicht\Bundle\SolrBundle\Manager\SolrManager;
+use Doctrine\Common\EventSubscriber;
+use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\ORM\Events;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class Subscriber
- * @package Zicht\Bundle\SolrBundle\Manager\Doctrine
  */
 class Subscriber implements EventSubscriber
 {
+    /**
+     * Construct the subscriber
+     *
+     * @param ContainerInterface $container
+     */
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
     }
 
     /**
-     * @param boolean $enabled
-     * @deprecated Enable or disable the manager in stead.
+     * Triggers an update in the solrmanager
+     *
+     * @param LifecycleEventArgs $event
+     * @return void
      */
-    public function setEnabled($enabled)
-    {
-    }
-
     public function postPersist(LifecycleEventArgs $event)
     {
         $this->container->get('zicht_solr.manager')->update($event->getEntity());
     }
 
+
+    /**
+     * Triggers an update in the solrmanager
+     *
+     * @param LifecycleEventArgs $event
+     * @return void
+     */
     public function preUpdate(LifecycleEventArgs $event)
     {
         $this->container->get('zicht_solr.manager')->update($event->getEntity());
     }
 
+    /**
+     * Triggers a deletein the solrmanager
+     *
+     * @param LifecycleEventArgs $event
+     * @return void
+     */
     public function preRemove(LifecycleEventArgs $event)
     {
         $this->container->get('zicht_solr.manager')->delete($event->getEntity());
     }
 
-
+    /**
+     * @{inheritDoc}
+     */
     public function getSubscribedEvents()
     {
         return array(

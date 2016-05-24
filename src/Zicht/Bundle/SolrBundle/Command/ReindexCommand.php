@@ -23,6 +23,13 @@ use Zicht\Bundle\SolrBundle\Solr\Client;
  */
 class ReindexCommand extends AbstractCommand
 {
+    /**
+     * Setup the reindex command
+     *
+     * @param Client $solr
+     * @param SolrManager $solrManager
+     * @param Registry $doctrine
+     */
     public function __construct(Client $solr, SolrManager $solrManager, Registry $doctrine)
     {
         parent::__construct($solr);

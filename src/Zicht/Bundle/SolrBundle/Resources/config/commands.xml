@@ -17,6 +17,9 @@
         <service id="zicht_solr.command.purge" class="Zicht\Bundle\SolrBundle\Command\PurgeCommand" parent="zicht_solr.command.abstract">
             <tag name="console.command"/>
         </service>
+        <service id="zicht_solr.command.set" class="Zicht\Bundle\SolrBundle\Command\SetCommand" parent="zicht_solr.command.abstract">
+            <tag name="console.command"/>
+        </service>
 
         <service id="zicht_solr.command.reindex" class="Zicht\Bundle\SolrBundle\Command\ReindexCommand" parent="zicht_solr.command.abstract">
             <argument type="service" id="zicht_solr.manager" />

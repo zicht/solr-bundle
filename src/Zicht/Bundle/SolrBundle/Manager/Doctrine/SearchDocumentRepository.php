@@ -8,15 +8,17 @@ namespace Zicht\Bundle\SolrBundle\Manager\Doctrine;
 
 /**
  * Interface SearchDocumentRepository
- * @package Zicht\Bundle\SolrBundle\Manager\Doctrine
  */
 interface SearchDocumentRepository
 {
     /**
      * Returns all documents that are indexable.
      *
-     * Typically simply returns everything
+     * Typically simply returns everything from the repository
      *
+     * @param string[] $where
+     * @param int $limit
+     * @param int $offset
      * @return object[]
      */
     public function findIndexableDocuments($where = null, $limit = null, $offset = null);

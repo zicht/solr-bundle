@@ -9,12 +9,19 @@ use Zicht\Bundle\FrameworkExtraBundle\Pager\Pageable;
 use Zicht\Bundle\SolrBundle\Solr\Client;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Select;
 
+/**
+ * Implements 'pageable' for a solr query. Assumes that the `numFound` will be in the response, and the query's
+ * `start' and `rows' may be overwritten.
+ */
 class SolrPageable implements Pageable
 {
     protected $total = null;
 
     /**
+     * Construct the pager.
      *
+     * @param Client $client
+     * @param Select $selectQuery
      */
     public function __construct(Client $client, Select $selectQuery)
     {

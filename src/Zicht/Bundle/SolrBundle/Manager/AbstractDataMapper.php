@@ -10,11 +10,15 @@ use Zicht\Bundle\SolrBundle\Solr\Client;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 
 /**
- * Class DataMapper
- * @package Zicht\Bundle\SolrBundle\Manager
+ * Provides a Template Method object to implement several different parts of the update process.
+ *
+ * Typically, you would only implement mapDocument() to return the values for the passed entity to index.
  */
 abstract class AbstractDataMapper implements DataMapperInterface
 {
+    /**
+     * SOLR date format
+     */
     const DATE_FORMAT = 'Y-m-d\TH:i:s\Z';
 
     protected $classNames = array();
@@ -23,7 +27,6 @@ abstract class AbstractDataMapper implements DataMapperInterface
      * Format date for SOLR
      *
      * @param \DateTime $dateTime
-     *
      * @return string
      */
     static function formatDate($dateTime)
@@ -40,11 +43,11 @@ abstract class AbstractDataMapper implements DataMapperInterface
     /**
      * Update the specified entity
      *
-     * @param Client $client
+     * @param Client $update
      * @param mixed $entity
      * @return void
      */
-    public function update(Update $update, $entity, $batch = null)
+    public function update(Update $update, $entity)
     {
         $this->addUpdateDocument($update, $entity);
     }
@@ -53,11 +56,11 @@ abstract class AbstractDataMapper implements DataMapperInterface
     /**
      * Delete the specified entity from the database
      *
-     * @param Client $client
+     * @param Update $update
      * @param mixed $entity
      * @return void
      */
-    public function delete(Update $update, $entity, $batch = null)
+    public function delete(Update $update, $entity)
     {
         $update->deleteOne($this->generateObjectIdentity($entity));
     }
@@ -66,10 +69,11 @@ abstract class AbstractDataMapper implements DataMapperInterface
     /**
      * Maps the data to an indexable document for Solr
      *
+     * @param Update $update
      * @param mixed $entity
      * @return void
      */
-    public function addUpdateDocument(Update $updateQuery, $entity)
+    public function addUpdateDocument(Update $update, $entity)
     {
         $params = [];
         if (($boost = $this->getBoost($entity))) {
@@ -77,23 +81,26 @@ abstract class AbstractDataMapper implements DataMapperInterface
         }
         $doc = ['id' => $this->generateObjectIdentity($entity)];
         $doc += $this->mapDocument($entity);
-        $updateQuery->add($doc, $params);
+        $update->add($doc, $params);
     }
 
 
     /**
      * Adds a delete instruction
      *
-     * @param Update $updateQuery
-     * @param $entity
+     * @param Update $update
+     * @param mixed $entity
+     * @return void
      */
-    public function addDeleteDocument(Update $updateQuery, $entity)
+    public function addDeleteDocument(Update $update, $entity)
     {
-        $updateQuery->deleteOne($this->generateObjectIdentity($entity));
+        $update->deleteOne($this->generateObjectIdentity($entity));
     }
 
 
     /**
+     * Stub that can be overwritten to returns a boost value for the specified entity
+     *
      * @param mixed $entity
      * @return float
      */
@@ -123,8 +130,7 @@ abstract class AbstractDataMapper implements DataMapperInterface
     }
 
     /**
-     * @param mixed $entity
-     * @return mixed
+     * @{inheritDoc}
      */
     public function supports($entity)
     {
@@ -137,7 +143,10 @@ abstract class AbstractDataMapper implements DataMapperInterface
     }
 
     /**
+     * Set a list of classnames that are supported by this mapper.
+     *
      * @param array $classNames
+     * @return void
      */
     public function setClassNames($classNames)
     {
@@ -148,7 +157,6 @@ abstract class AbstractDataMapper implements DataMapperInterface
      * Map document data
      *
      * @param mixed $entity
-     * @param Document $document
      * @return mixed
      */
     abstract protected function mapDocument($entity);

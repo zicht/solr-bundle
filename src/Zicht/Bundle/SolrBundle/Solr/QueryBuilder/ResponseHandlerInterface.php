@@ -7,7 +7,17 @@ namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
 use GuzzleHttp\Message\Response;
 
+/**
+ * If the request implements this interface, it's response is filtered through the handle() method by `doRequest`
+ * in the client. Otherwise the response is returned as-is.
+ */
 interface ResponseHandlerInterface
 {
+    /**
+     * Handle the response and returns the parsed value
+     *
+     * @param Response $response
+     * @return mixed
+     */
     public function handle(Response $response);
 }

@@ -6,11 +6,14 @@
 
 namespace Zicht\Bundle\SolrBundle\Pager;
 
-use Zicht\Bundle\SolrBundle\Solr\Client;
-use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Select;
-
+/**
+ * Paging for grouped solr queries.
+ */
 class GroupedSolrPageable extends SolrPageable
 {
+    /**
+     * @{inheritDoc}
+     */
     public function getTotal()
     {
         if (!isset($this->total)) {

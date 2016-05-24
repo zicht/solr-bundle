@@ -72,8 +72,8 @@ abstract class SearchFacade
     /**
      * Construct the facade.
      *
-     * @var Client $client
-     * @var int $defaultLimit
+     * @param Client $client
+     * @param int $defaultLimit
      */
     public function __construct(Client $client, $defaultLimit = 30)
     {
@@ -173,10 +173,7 @@ abstract class SearchFacade
     /**
      * Execute the search
      *
-     * @param bool $usePager
      * @return void
-     *
-     * @throws \LogicException
      */
     final public function search()
     {
@@ -191,12 +188,17 @@ abstract class SearchFacade
 
         $query = $this->createQueryBuilder();
         $this->prepareFacetSet($query);
-        $this->initPager($query);
-
+        $this->pager = $this->initPager($query);
         $this->response = $this->execSearch($query);
     }
-    
 
+
+    /**
+     * Adds the facet options to the query and apply filter queries if facets are selected.
+     *
+     * @param Select $query
+     * @return void
+     */
     protected function prepareFacetSet(Select $query)
     {
         $query
@@ -242,7 +244,7 @@ abstract class SearchFacade
     }
 
     /**
-     * @return
+     * @return object
      */
     public function getDebug()
     {
@@ -276,10 +278,12 @@ abstract class SearchFacade
     }
 
     /**
-     * @param null $fields
+     * Get the facet filters for use in the template
+     *
+     * @param null $blacklist
      * @return array
      */
-    public function getFacetFilters($blacklist=null)
+    public function getFacetFilters($blacklist = null)
     {
         if (null === $blacklist) {
             $blacklist = array();
@@ -297,7 +301,11 @@ abstract class SearchFacade
         foreach ($this->getFacetQueries() as $facetName => $facetQueries) {
             if (!in_array($facetName, $blacklist)) {
                 foreach (array_values($facetQueries) as $i => $facetLabel) {
-                    throw new \Exception("not implemented yet");
+                    // This was not yet ported to the new Solarium-less implementation.
+                    // It should be similar to the above implementation of the facets. Dump the response to find out
+                    // dump($this->response)
+
+                    throw new \Exception("not implemented yet: reading facet queries from response. Read source for info");
 
                     $count = $this->getResponse()->getFacetSet()->getFacet($facetName . '-' . $i)->getValue();
                     if ($count >= $this->facetMinimumCount) {
@@ -316,8 +324,12 @@ abstract class SearchFacade
 
 
     /**
+     * Get facet data for use in the templates for one specific facet value
+     *
      * @param string $facetName
      * @param mixed $value
+     * @param int $count
+     * @param string $label
      * @return array
      */
     public function getFacetMetaData($facetName, $value, $count, $label = null)
@@ -385,7 +397,7 @@ abstract class SearchFacade
             throw new \LogicException("There is no response, call search() first");
         }
 
-        return $this->response->response;
+        return $this->response;
     }
 
     /**
@@ -440,7 +452,10 @@ abstract class SearchFacade
     }
 
     /**
+     * Override the default limit
+     *
      * @param int $defaultLimit
+     * @return void
      */
     public function setDefaultLimit($defaultLimit)
     {
@@ -460,18 +475,51 @@ abstract class SearchFacade
     }
 
     /**
-     * @param $query
+     * Initialize the pager.
+     *
+     * @param Select $query
+     * @return Pager
      */
     protected function initPager($query)
     {
         $currentPage = $this->searchParams->getOne('page', 0);
         $limit = $this->searchParams->getOne('limit', $this->defaultLimit);
-        $this->pager = new Pager(new SolrPageable($this->client, $query), $limit);
-        $this->pager->setCurrentPage($currentPage);
+        $pager = new Pager(new SolrPageable($this->client, $query), $limit);
+        $pager->setCurrentPage($currentPage);
+        return $pager;
     }
 
+    /**
+     * Execute the query.
+     *
+     * @param Select $query
+     * @return \GuzzleHttp\Message\ResponseInterface
+     */
     protected function execSearch($query)
     {
         return $this->client->select($query);
+    }
+
+
+    /**
+     * Check user input against retrieved values
+     *
+     * @param string $field
+     * @param string $userValue
+     * @return bool
+     */
+    public function isFacetActive($field, $userValue)
+    {
+        $filters = $this->getFacetFilters();
+
+        if (isset($filters[$field]) && sizeof($filters[$field])) {
+            foreach ($filters[$field] as $k => $details) {
+                if (strcmp(strtolower($userValue), strtolower(urlencode($k)))) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

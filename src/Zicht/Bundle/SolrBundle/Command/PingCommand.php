@@ -10,7 +10,6 @@ use Symfony\Component\Console;
 
 /**
  * Class PingCommand
- * @package Zicht\Bundle\SolrBundle\Command
  */
 class PingCommand extends AbstractCommand
 {

@@ -6,7 +6,6 @@
 
 namespace Zicht\Bundle\SolrBundle\Manager;
 
-use Zicht\Bundle\SolrBundle\Solr\Client;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 
 /**
@@ -14,26 +13,45 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
  */
 interface DataMapperInterface
 {
-    public function update(Update $client, $entity, $batch = null);
-    public function delete(Update $client, $entity);
-
-
     /**
-     * Maps the data to an indexable document for Solr
+     * Request an update for the specified entity
      *
-     * @param mixed $data
+     * @param Update $update
+     * @param mixed $entity
      * @return mixed
      */
-    public function addUpdateDocument(Update $updateQuery, $entity);
+    public function update(Update $update, $entity);
 
     /**
-     * @param $entity
+     * Request an update for the specified entity
+     *
+     * @param Update $update
+     * @param mixed $entity
      * @return mixed
      */
-    public function addDeleteDocument(Update $updateQuery, $entity);
-
+    public function delete(Update $update, $entity);
 
     /**
+     * Add an update to the query
+     *
+     * @param Update $update
+     * @param mixed $entity
+     * @return mixed
+     */
+    public function addUpdateDocument(Update $update, $entity);
+
+    /**
+     * Add a delete to the update query
+     *
+     * @param Update $update
+     * @param mixed $entity
+     * @return mixed
+     */
+    public function addDeleteDocument(Update $update, $entity);
+
+    /**
+     * Whether or not the mapper supports the passed entity.
+     *
      * @param mixed $entity
      * @return mixed
      */

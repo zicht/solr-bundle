@@ -13,11 +13,12 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepositoryAdapter;
 use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 
 /**
  * Reindex a specified repository or entity in SOLR
  */
-class SetCommand extends ContainerAwareCommand
+class SetCommand extends AbstractCommand
 {
     /**
      * @{inheritDoc}
@@ -37,15 +38,16 @@ class SetCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        /** @var $solr \Zicht\Bundle\SolrBundle\Manager\SolrManager */
-        $solr = $this->getContainer()->get('zicht_solr.manager');
-        $solr->disableTimeout();
-
-        $update = [];
-        foreach ($solr->getDocumentIds($input->getArgument('select')) as $id) {
-            $update[$id] = [$input->getArgument('field') => $input->getArgument('value')];
+        $i = 0;
+        $update = new Update();
+        foreach ($this->solr->getDocumentIds($input->getArgument('select')) as $id) {
+            $i ++;
+            $update->update($id, [$input->getArgument('field') => $input->getArgument('value')]);
         }
-
-        $output->writeln(sprintf('%d documents updated', $solr->updateValues($update)));
+        if ($i > 0) {
+            $update->commit();
+            $this->solr->update($update);
+        }
+        $output->writeln(sprintf('%d document(s) updated', $i));
     }
 }

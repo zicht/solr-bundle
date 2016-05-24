@@ -6,16 +6,11 @@
 
 namespace Zicht\Bundle\SolrBundle\Command;
 
-use \Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use \Symfony\Component\Console\Input\InputArgument;
-use \Symfony\Component\Console\Input\InputInterface;
-use \Symfony\Component\Console\Input\InputOption;
-use \Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 
 /**
  * Class PurgeCommand
- * @package Zicht\Bundle\SolrBundle\Command
  */
 class PurgeCommand extends AbstractCommand
 {
@@ -27,14 +22,14 @@ class PurgeCommand extends AbstractCommand
         $this
             ->setName('zicht:solr:purge')
             ->setDescription('Purges SOLR Index')
-            ->addArgument('query', InputArgument::OPTIONAL, 'Only delete documents matching this query', '*:*')
+            ->addArgument('query', Console\Input\InputArgument::OPTIONAL, 'Only delete documents matching this query', '*:*')
         ;
     }
 
     /**
      * @{inheritDoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {
         $update = new Update();
         $update->delete($input->getArgument('query'));

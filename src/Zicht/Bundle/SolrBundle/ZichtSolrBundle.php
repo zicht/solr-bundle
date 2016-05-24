@@ -8,8 +8,14 @@ namespace Zicht\Bundle\SolrBundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
+/**
+ * Class ZichtSolrBundle
+ */
 class ZichtSolrBundle extends Bundle
 {
+    /**
+     * @{inheritDoc}
+     */
     public function build(ContainerBuilder $container)
     {
         parent::build($container);

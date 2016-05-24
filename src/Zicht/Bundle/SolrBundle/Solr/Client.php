@@ -8,39 +8,62 @@ namespace Zicht\Bundle\SolrBundle\Solr;
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Exception\ClientException;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
+/**
+ * Class Client
+ */
 class Client
 {
+    /**
+     * Setup the client
+     *
+     * @param GuzzleClient $client
+     */
     public function __construct(GuzzleClient $client)
     {
         $this->http = $client;
     }
 
 
-    public function select($query)
+    /**
+     * Selects documents based on the specified query.
+     *
+     * @param QueryBuilder\Select $query
+     * @return mixed
+     */
+    public function select(QueryBuilder\Select $query)
     {
-        if (is_array($query)) {
-            $query = new QueryBuilder\Select($query);
-        }
-
         return $this->doRequest($query);
     }
 
 
-    public function update($update)
+    /**
+     * Do an update query
+     *
+     * @param QueryBuilder\Update $update
+     * @return mixed
+     */
+    public function update(QueryBuilder\Update $update)
     {
         return $this->doRequest($update);
     }
 
 
+    /**
+     * Do the request and return the response.
+     *
+     * Throw an exception wrapping the internal exception if an error occurs
+     *
+     * @param QueryBuilder\RequestBuilderInterface $handler
+     * @return mixed
+     */
     protected function doRequest(QueryBuilder\RequestBuilderInterface $handler)
     {
         $request = $handler->createRequest($this->http);
         try {
             $response = $this->http->send($request);
-            if ($handler instanceof QueryBuilder\ResponseHandlerInterface)  {
+            if ($handler instanceof QueryBuilder\ResponseHandlerInterface) {
                 $response = $handler->handle($response);
             }
         } catch (BadResponseException $e) {
@@ -52,8 +75,34 @@ class Client
         return $response;
     }
 
+    /**
+     * Do a ping request. Should be configured at 'admin/ping'.
+     *
+     * @return mixed
+     */
     public function ping()
     {
         return $this->doRequest(new QueryBuilder\Ping());
+    }
+
+
+    /**
+     * Get all document ids for the specified query.
+     *
+     * @param string $query
+     * @param string $fieldName
+     * @return string[]
+     */
+    public function getDocumentIds($query, $fieldName = 'id')
+    {
+        $ret = [];
+        $select = (new QueryBuilder\Select())
+            ->setFieldList($fieldName)
+            ->setQuery($query)
+        ;
+        foreach ($this->select($select)->response->docs as $doc) {
+            $ret[]= $doc->$fieldName;
+        }
+        return $ret;
     }
 }

@@ -5,7 +5,7 @@
  */
 namespace Zicht\Bundle\SolrBundle\Manager\Doctrine;
 
-use \Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\EntityRepository;
 
 /**
  * Doctrine adapter for the SearchDocumentRepository interface
@@ -15,6 +15,8 @@ use \Doctrine\ORM\EntityRepository;
 class SearchDocumentRepositoryAdapter implements SearchDocumentRepository
 {
     /**
+     * Create the SearchDocumentRepository
+     *
      * @param EntityRepository $repository
      */
     public function __construct(EntityRepository $repository)
@@ -23,11 +25,7 @@ class SearchDocumentRepositoryAdapter implements SearchDocumentRepository
     }
 
     /**
-     * Returns all documents that are indexable.
-     *
-     * Typically simply returns everything
-     *
-     * @return object[]
+     * @{inheritDoc}
      */
     public function findIndexableDocuments($where = null, $limit = null, $offset = null)
     {

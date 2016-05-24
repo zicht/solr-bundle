@@ -57,9 +57,10 @@ class SolrManager
     }
 
     /**
-     * Adds a document repository
+     * Adds a document repository responsible for querying documents when doing a reindex of multiple records
      *
-     * @param SearchDocumentRepository $dataMapper
+     * @param string $class
+     * @param SearchDocumentRepository $repository
      * @return void
      */
     public function addRepository($class, $repository)
@@ -71,23 +72,26 @@ class SolrManager
     /**
      * Get a class-specific repository implementation
      *
-     * @param $entity
+     * @param string $entityClass
      * @return SearchDocumentRepository|null
      */
-    public function getRepository($entity)
+    public function getRepository($entityClass)
     {
-        if (!isset($this->repositories[$entity])) {
+        if (!isset($this->repositories[$entityClass])) {
             return null;
         }
 
-        return $this->repositories[$entity];
+        return $this->repositories[$entityClass];
     }
 
 
     /**
-     * Updates as batch. Acts as a stub for future optimization.
+     * Updates as batch.
      *
      * @param array $records
+     * @param callable|null $incrementCallback
+     * @param callable|null $errorCallback
+     * @param boolean $delete
      * @return array
      */
     public function updateBatch($records, $incrementCallback = null, $errorCallback = null, $delete = false)
@@ -168,57 +172,6 @@ class SolrManager
     }
 
 
-    public function updateFieldValues($documentId, $values)
-    {
-        die('TODO');
-
-//        $instructions = array();
-//        foreach ($values as $key => $value) {
-//            $instructions[$key] = array('set' => $value);
-//        }
-//        $data =
-//            json_encode(
-//                array(
-//                    'add' => array(
-//                        array('id' => $documentId)
-//                        + $instructions
-//                    )
-//                )
-//            );
-//
-//        $request = new Request();
-//        $request->setHandler('update/json');
-//        $request->setMethod(Request::METHOD_POST);
-//        $request->setHeaders(
-//            array(
-//                'Content-Type: application/json',
-//                'Content-Length: ' . strlen($data)
-//            )
-//        );
-//
-//        $request->setRawData($data);
-//        $this->client->getAdapter()->execute($request, $this->client->getEndpoint());
-    }
-
-
-    public function commit()
-    {
-//        $data = json_encode(array('commit' => array()), JSON_FORCE_OBJECT);
-//
-//        $request = new Request();
-//        $request->setHandler('update/json');
-//        $request->setMethod(Request::METHOD_POST);
-//        $request->setHeaders(
-//            array(
-//                'Content-Type: application/json',
-//                'Content-Length: ' . strlen($data)
-//            )
-//        );
-//
-//        $request->setRawData($data);
-//        $this->client->getAdapter()->execute($request, $this->client->getEndpoint());
-    }
-
     /**
      * Enables or disabled the solr manager.
      *
@@ -246,84 +199,5 @@ class SolrManager
         }
 
         return null;
-    }
-
-    /**
-     * Disables the timeout on all client's endpoints. Convenience for command line usage.
-     *
-     * @return void
-     */
-    public function disableTimeout()
-    {
-        die('TODO');
-        $this->setTimeout(0);
-    }
-
-
-    /**
-     * Set the timeout for all the client's endpoints.
-     *
-     * @param string $timeout
-     * @return void
-     */
-    public function setTimeout($timeout)
-    {
-        die('TODO');
-        foreach ($this->client->getEndpoints() as $endpoint) {
-            $endpoint->setTimeout($timeout);
-        }
-    }
-
-    /**
-     * Get all document ids for the specified query.
-     */
-    public function getDocumentIds($query, $fieldName = 'id')
-    {
-        die('TODO');
-//        $ret = [];
-//        $select = $this->client->createSelect();
-//        $select->setFields($fieldName);
-//        $select->setQuery($query);
-//        foreach ($this->client->execute($select) as $doc) {
-//            $ret[]= $doc->$fieldName;
-//        }
-//        return $ret;
-    }
-
-
-    /**
-     * Update the values. All keys must have solr document ids, and all values should be key => value mappings for
-     * each of the values to be set.
-     *
-     * @param array $values
-     * @return int
-     */
-    public function updateValues($documents)
-    {
-        die('TODO');
-//
-//        $found = 0;
-//
-//        $update = $this->client->createUpdate();
-//        foreach ($documents as $id => $values) {
-//            /** @var Document $doc */
-//            $doc = $update->createDocument();
-//            foreach ($values as $fieldName => $value) {
-//                $doc->setFieldModifier($fieldName, Document::MODIFIER_SET);
-//                // NOTE it seems that 'null' values aren't working here.
-//                $doc->setField($fieldName, $value);
-//            }
-//            $doc->setKey('id', $id);
-//            $update->addDocument($doc);
-//            $found ++;
-//        }
-//
-//        // if the docs are not in solr, don't bother.
-//        if ($found > 0) {
-//            $update->addCommit();
-//            $this->client->execute($update);
-//        }
-//
-//        return $found;
     }
 }

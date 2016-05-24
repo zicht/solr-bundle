@@ -5,25 +5,22 @@
  */
 namespace Zicht\Bundle\SolrBundle\Controller;
 
-use \Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use \Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use \Symfony\Component\HttpFoundation\Response;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
- * A controller that shows a status; useful for monitoring purposes. Routing should be mounted on some arbitratry base
- * url, such as _status, like this:
- *
- * (routing.yml)
- *
- *
- *
- * Class StatusController
- * @package Zicht\Bundle\SolrBundle\Controller
+ * A controller that shows a status; useful for monitoring purposes.
  */
 class StatusController extends Controller
 {
     /**
+     * Reports a 503 if SOLR's ping query does not succeed.
+     *
+     * @return Response
+     *
      * @Route("solr")
+     * @Template
      */
     public function statusAction()
     {
@@ -43,4 +40,4 @@ class StatusController extends Controller
 
         return $response;
     }
-};
+}
