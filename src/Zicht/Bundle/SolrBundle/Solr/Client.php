@@ -67,8 +67,6 @@ class Client
                 $response = $handler->handle($response);
             }
         } catch (BadResponseException $e) {
-            $response = $e->getResponse();
-            var_dump($response->getBody()->getContents());
             throw new Exception($e->getMessage(), null, $e);
         }
 
