@@ -32,6 +32,36 @@ class SelectCommand extends AbstractCommand
                 Console\Input\InputOption::VALUE_REQUIRED | Console\Input\InputOption::VALUE_IS_ARRAY,
                 "Fields to display. Defaults to all fields and score"
             )
+            ->addOption(
+                'deftype',
+                '',
+                Console\Input\InputOption::VALUE_REQUIRED,
+                'Set the `defType` of the query, e.g. `edismax`'
+            )
+            ->addOption(
+                'qf',
+                '',
+                Console\Input\InputOption::VALUE_REQUIRED | Console\Input\InputOption::VALUE_IS_ARRAY,
+                'Specify a `qf` (query fields) parameter for when the deftype is set to dismax or edismax. Ignored if defType is not set'
+            )
+            ->addOption(
+                'fq',
+                '',
+                Console\Input\InputOption::VALUE_REQUIRED | Console\Input\InputOption::VALUE_IS_ARRAY,
+                'Specify a `fq` (filter query)'
+            )
+            ->addOption(
+                'rows',
+                '',
+                Console\Input\InputOption::VALUE_REQUIRED,
+                'Specify the number of rows to return'
+            )
+            ->addOption(
+                'start',
+                '',
+                Console\Input\InputOption::VALUE_REQUIRED,
+                'Specify the start of the paged results'
+            )
         ;
     }
 
@@ -41,13 +71,30 @@ class SelectCommand extends AbstractCommand
     protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {
         $select = new QueryBuilder\Select();
-
         $select->setQuery($input->getArgument('query'));
-
+        if ($input->getOption('deftype')) {
+            $select
+                ->setDefType($input->getOption('deftype'))
+                ->setQueryFields($input->getOption('qf'))
+            ;
+        }
+        if ($fq = $input->getOption('fq')) {
+            $select->setFilterQuery($fq);
+        }
         if ($fl = $input->getOption('field')) {
             $select->setFieldList($fl);
         }
-        foreach ($this->solr->select($select)->response->docs as $doc) {
+        if ($rows = $input->getOption('rows')) {
+            $select->setRows($rows);
+        }
+        if ($start = $input->getOption('start')) {
+            $select->setStart($start);
+        }
+        $results = $this->solr->select($select)->response->docs;
+        if ($output->getVerbosity() > 0) {
+            $output->writeln($this->solr->getLastResponse()->getEffectiveUrl() . PHP_EOL. PHP_EOL);
+        }
+        foreach ($results as $doc) {
             $output->writeln(json_encode($doc, JSON_PRETTY_PRINT));
         }
     }

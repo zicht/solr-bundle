@@ -8,6 +8,7 @@ namespace Zicht\Bundle\SolrBundle\Solr;
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Message\ResponseInterface;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
 /**
@@ -15,6 +16,9 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
  */
 class Client
 {
+    private $lastRequest = null;
+    private $lastResponse = null;
+
     /**
      * Setup the client
      *
@@ -61,12 +65,17 @@ class Client
     protected function doRequest(QueryBuilder\RequestBuilderInterface $handler)
     {
         $request = $handler->createRequest($this->http);
+
+        $this->lastRequest = $request;
         try {
             $response = $this->http->send($request);
+            $this->lastResponse = $response;
+
             if ($handler instanceof QueryBuilder\ResponseHandlerInterface) {
                 $response = $handler->handle($response);
             }
         } catch (BadResponseException $e) {
+            $this->lastResponse = $e->getResponse();
             throw new Exception($e->getMessage(), null, $e);
         }
 
@@ -102,5 +111,26 @@ class Client
             $ret[]= $doc->$fieldName;
         }
         return $ret;
+    }
+
+
+    /**
+     * Returns the last request issued to SOLR. This is typically for debugging purposes.
+     *
+     * @return mixed
+     */
+    public function getLastRequest()
+    {
+        return $this->lastRequest;
+    }
+
+    /**
+     * Returns the last response issued by SOLR. This is typically for debugging purposes.
+     *
+     * @return ResponseInterface
+     */
+    public function getLastResponse()
+    {
+        return $this->lastResponse;
     }
 }

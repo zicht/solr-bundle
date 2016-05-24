@@ -55,7 +55,9 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      */
     public function setStart($start)
     {
-        return $this->setParam('start', (int)$start);
+        $this->setParam('start', (int)$start);
+
+        return $this;
     }
 
 
