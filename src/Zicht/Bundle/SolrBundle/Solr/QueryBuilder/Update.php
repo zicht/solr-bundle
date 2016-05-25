@@ -13,7 +13,13 @@ use GuzzleHttp\Stream\Stream;
  */
 class Update extends AbstractQueryBuilder
 {
-    private $instructions = [];
+    private $stream = null;
+
+    public function __construct()
+    {
+        $this->stream = fopen('php://temp', 'rw');
+        fwrite($this->stream, '{');
+    }
 
     /**
      * Add a document to the update request
@@ -102,22 +108,25 @@ class Update extends AbstractQueryBuilder
      * @param array $value
      * @return void
      */
-    private function addInstruction($type, $value = [])
+    protected function addInstruction($type, $value = [])
     {
-        $this->instructions[]= [$type, $value];
+        // note that the first comma is overwritten with a '{' before sending the request. This is a performance
+        // optimization, skipping the need if an if every call
+        fwrite($this->stream, json_encode($type) . ':' . json_encode($value) . ',');
     }
 
 
-    /**
-     * @{inheritDoc}
-     */
-    public function createRequest(Client $client)
+    public function createRequest(Client $httpClient)
     {
-        $req = $client->createRequest('POST', 'update');
+        $req = $httpClient->createRequest('POST', 'update');
 
         $req->setHeader('Content-Type', 'application/json');
-        $req->setBody(Stream::factory($this->createRequestBody($this->instructions)));
 
+        fseek($this->stream, -1, SEEK_END);
+        fwrite($this->stream, '}');
+        fseek($this->stream, 0);
+
+        $req->setBody(Stream::factory($this->stream));
         return $req;
     }
 }

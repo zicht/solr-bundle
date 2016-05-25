@@ -63,6 +63,8 @@ class ReindexCommand extends AbstractCommand
     {
         /** @var $solrManager \Zicht\Bundle\SolrBundle\Manager\SolrManager */
 
+        $output->writeln("Preparing entities ...");
+
         $em = $this->doctrine->getManager($input->getOption('em'));
 
         $entity = $em->getClassMetadata($input->getArgument('entity'))->getReflectionClass()->name;
@@ -86,8 +88,8 @@ class ReindexCommand extends AbstractCommand
                 ->setSQLLogger(new EchoSQLLogger())
             ;
         }
+        $output->writeln("Finding indexable documents...");
 
-        $output->writeln("Querying records ...");
         $records = $repos->findIndexableDocuments(
             $input->getOption('where'),
             $input->getOption('limit'),
