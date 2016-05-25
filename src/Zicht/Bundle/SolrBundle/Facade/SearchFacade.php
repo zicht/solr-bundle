@@ -235,12 +235,33 @@ abstract class SearchFacade
         return $this->searchParams->get($field);
     }
 
+
+    /**
+     * Returns currently enabled and active fields through params or uri
+     *
+     * returns ['field1' => 'value field1', 'field2' => 'value field2']
+     *
+     * @return array
+     */
+    public function getActiveFacets()
+    {
+        $active = array();
+
+        foreach ($this->getFacetFields() as $field) {
+            if (($value = $this->searchParams->getOne($field)) && $this->isFacetActive($field, $value)) {
+                $active[$field] = $value;
+            }
+        }
+
+        return $active;
+    }
+
     /**
      * @return object[]
      */
     public function getResults()
     {
-        return $this->getResponse()->docs;
+        return $this->response->response->docs;
     }
 
     /**
@@ -480,14 +501,7 @@ abstract class SearchFacade
      * @param Select $query
      * @return Pager
      */
-    protected function initPager($query)
-    {
-        $currentPage = $this->searchParams->getOne('page', 0);
-        $limit = $this->searchParams->getOne('limit', $this->defaultLimit);
-        $pager = new Pager(new SolrPageable($this->client, $query), $limit);
-        $pager->setCurrentPage($currentPage);
-        return $pager;
-    }
+    abstract protected function initPager($query);
 
     /**
      * Execute the query.
