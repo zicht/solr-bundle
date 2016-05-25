@@ -15,6 +15,9 @@ class Update extends AbstractQueryBuilder
 {
     private $stream = null;
 
+    /**
+     * Initialize the update request.
+     */
     public function __construct()
     {
         $this->stream = fopen('php://temp', 'rw');
@@ -116,6 +119,9 @@ class Update extends AbstractQueryBuilder
     }
 
 
+    /**
+     * @{inheritDoc}
+     */
     public function createRequest(Client $httpClient)
     {
         $req = $httpClient->createRequest('POST', 'update');

@@ -6,10 +6,14 @@
 
 namespace Zicht\Bundle\SolrBundle\Facade\Traits;
 
-use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Select;
-
+/**
+ * Disables pager
+ */
 trait DisablePager
 {
+    /**
+     * @{inheritDoc}
+     */
     protected function initPager($query)
     {
         return null;

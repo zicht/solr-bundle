@@ -8,8 +8,14 @@ namespace Zicht\Bundle\SolrBundle\Facade\Traits;
 use Zicht\Bundle\FrameworkExtraBundle\Pager\Pager;
 use Zicht\Bundle\SolrBundle\Pager\SolrPageable;
 
+/**
+ * Initializes a pager based on a regular solr query
+ */
 trait DefaultPager
 {
+    /**
+     * @{inheritDoc}
+     */
     protected function initPager($query)
     {
         $currentPage = $this->searchParams->getOne('page', 0);

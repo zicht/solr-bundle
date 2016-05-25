@@ -9,8 +9,14 @@ namespace Zicht\Bundle\SolrBundle\Facade\Traits;
 use Zicht\Bundle\FrameworkExtraBundle\Pager\Pager;
 use Zicht\Bundle\SolrBundle\Pager\GroupedSolrPageable;
 
+/**
+ * Initializes a pager for a grouped solr query.
+ */
 trait GroupedPager
 {
+    /**
+     * @{inheritDoc}
+     */
     protected function initPager($query)
     {
         $currentPage = $this->searchParams->getOne('page', 0);
