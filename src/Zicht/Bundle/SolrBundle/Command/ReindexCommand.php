@@ -103,8 +103,13 @@ class ReindexCommand extends AbstractCommand
         $progress->display();
         list($n, $i) = $this->solrManager->updateBatch(
             $records,
-            function($n) use($progress, $total) {
+            function($n) use($progress, $total, $output) {
                 $progress->setProgress($n);
+                if ($n == $total) {
+                    $progress->finish();
+                    $output->write("\n");
+                    $output->writeln("Flushing ...");
+                }
             },
             function($record, $e) use($input, $output) {
                 if (!$input->getOption('debug')) {
@@ -115,7 +120,6 @@ class ReindexCommand extends AbstractCommand
             },
             (bool)$input->getOption('delete-first')
         );
-        $progress->setProgress($total);
         $output->write("\n");
         $output->writeln("Processed $i of $n items. Peak mem usage: " . sprintf('.%2d Mb', memory_get_peak_usage() / 1024 / 1024));
     }

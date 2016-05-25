@@ -269,9 +269,9 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      *
      * @return $this
      */
-    public function setDebugQuery()
+    public function setDebugQuery($value)
     {
-        $this->setParam('debugQuery', 'on');
+        $this->setParam('debugQuery', $value);
 
         return $this;
     }

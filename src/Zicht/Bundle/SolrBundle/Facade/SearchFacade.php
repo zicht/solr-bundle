@@ -536,4 +536,14 @@ abstract class SearchFacade
 
         return false;
     }
+
+
+    public function getHighlightedField($docId, $field)
+    {
+        if (isset($this->response->highlighting->$docId->$field)) {
+            return $this->response->highlighting->$docId->$field;
+        }
+
+        return null;
+    }
 }
