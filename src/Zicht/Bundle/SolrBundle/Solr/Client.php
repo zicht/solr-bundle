@@ -76,7 +76,10 @@ class Client
             }
         } catch (BadResponseException $e) {
             $this->lastResponse = $e->getResponse();
-            fprintf(STDERR, $e->getResponse()->getBody()->getContents());
+            $e->getRequest()->getBody()->seek(0);
+            fwrite(STDERR, $e->getRequest()->getBody()->getContents());
+            fwrite(STDERR, "\n\n");
+            fwrite(STDERR, $e->getResponse()->getBody()->getContents());
             throw new Exception($e->getMessage(), null, $e);
         }
 

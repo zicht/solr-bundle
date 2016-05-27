@@ -7,6 +7,7 @@ namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Stream\Stream;
+use Zicht\Bundle\SolrBundle\Solr\DateHelper;
 
 /**
  * Class Update
@@ -35,7 +36,16 @@ class Update extends AbstractQueryBuilder
     {
         $this->addInstruction(
             'add',
-            ['doc' => $document] + $params
+            ['doc' => array_map(
+                function ($v) {
+                    if ($v instanceof \DateTime) {
+                        $v = DateHelper::formatDate($v);
+                    }
+
+                    return $v;
+                },
+                $document
+            )] + $params
         );
 
         return $this;

@@ -16,29 +16,7 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
  */
 abstract class AbstractDataMapper implements DataMapperInterface
 {
-    /**
-     * SOLR date format
-     */
-    const DATE_FORMAT = 'Y-m-d\TH:i:s\Z';
-
     protected $classNames = array();
-
-    /**
-     * Format date for SOLR
-     *
-     * @param \DateTime $dateTime
-     * @return string
-     */
-    static function formatDate($dateTime)
-    {
-        if (null === $dateTime) {
-            return null;
-        }
-        // force the timezone to be set to UTC, but DON'T mutate the object.
-        $cloned = clone $dateTime;
-        $cloned->setTimezone(new \DateTimeZone('UTC'));
-        return $cloned->format(self::DATE_FORMAT);
-    }
 
     /**
      * Update the specified entity
