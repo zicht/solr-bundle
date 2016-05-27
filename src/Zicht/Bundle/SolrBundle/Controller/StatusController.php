@@ -20,7 +20,6 @@ class StatusController extends Controller
      * @return Response
      *
      * @Route("solr")
-     * @Template
      */
     public function statusAction()
     {
