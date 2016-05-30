@@ -123,9 +123,9 @@ abstract class SearchFacade
      *
      * @return void
      */
-    protected function redirectPost()
+    public function redirectPost()
     {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header(sprintf('Location: %s', $this->getPostRedirect($_POST['search'])));
             exit;
         }
