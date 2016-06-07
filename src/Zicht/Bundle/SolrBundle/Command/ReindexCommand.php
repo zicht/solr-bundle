@@ -25,6 +25,8 @@ class ReindexCommand extends ContainerAwareCommand
             ->addOption('em', '', InputArgument::OPTIONAL, 'The entity manager to get the repository from', 'default')
             ->addArgument('entity', InputArgument::REQUIRED, 'The entity class to fetch records from')
             ->addArgument('id', InputArgument::OPTIONAL, 'The id(s) in the repository to reindex')
+            ->addOption('limit', 'l', InputArgument::OPTIONAL, 'Specify document limit')
+            ->addOption('offset', 'o', InputArgument::OPTIONAL, 'Specify query offset')
             ->setDescription('Reindexes entities in the SOLR index')
         ;
     }
@@ -43,7 +45,7 @@ class ReindexCommand extends ContainerAwareCommand
         if ($id = $input->getArgument('id')) {
             $records = $repos->findIndexableDocumentsById(array_map('intval', explode(',', $id)));
         } else {
-            $records = $repos->findIndexableDocuments();
+            $records = $repos->findIndexableDocuments($input->getOption('offset'), $input->getOption('limit'));
         }
 
         $output->writeln(sprintf('Reindexing %d records', count($records)));

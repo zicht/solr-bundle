@@ -8,6 +8,6 @@ namespace Zicht\Bundle\SolrBundle\Manager\Doctrine;
 
 interface SearchDocumentRepository
 {
-    public function findIndexableDocuments();
+    public function findIndexableDocuments($offset = null, $limit = null);
     public function findIndexableDocumentsById(array $ids);
 }

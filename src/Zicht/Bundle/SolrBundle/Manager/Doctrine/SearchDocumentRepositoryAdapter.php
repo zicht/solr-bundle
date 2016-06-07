@@ -15,9 +15,16 @@ class SearchDocumentRepositoryAdapter implements SearchDocumentRepository
     }
 
 
-    public function findIndexableDocuments()
+    public function findIndexableDocuments($offset = null, $limit = null)
     {
-        return $this->repository->findAll();
+        $qb = $this->repository->createQueryBuilder('d');
+        if (null !== $offset) {
+            $qb->setFirstResult($offset);
+        }
+        if (null !== $limit) {
+            $qb->setMaxResults($limit);
+        }
+        return $qb->getQuery()->execute();
     }
 
 
