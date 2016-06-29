@@ -76,10 +76,14 @@ class Client
             }
         } catch (BadResponseException $e) {
             $this->lastResponse = $e->getResponse();
-            $e->getRequest()->getBody()->seek(0);
-            fwrite(STDERR, $e->getRequest()->getBody()->getContents());
-            fwrite(STDERR, "\n\n");
-            fwrite(STDERR, $e->getResponse()->getBody()->getContents());
+            if ($e->getRequest()->getBody()) {
+                $e->getRequest()->getBody()->seek(0);
+            }
+            if (defined('STDERR')) {
+                // fwrite(STDERR, $e->getRequest()->getBody()->getContents());
+                // fwrite(STDERR, "\n\n");
+                fwrite(STDERR, $e->getResponse()->getBody()->getContents());
+            }
             throw new Exception($e->getMessage(), null, $e);
         }
 
