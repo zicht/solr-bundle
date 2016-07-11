@@ -25,12 +25,20 @@ class ReindexCommand extends ContainerAwareCommand
             ->addOption('em', '', InputArgument::OPTIONAL, 'The entity manager to get the repository from', 'default')
             ->addArgument('entity', InputArgument::REQUIRED, 'The entity class to fetch records from')
             ->addArgument('id', InputArgument::OPTIONAL, 'The id(s) in the repository to reindex')
+            ->addOption('offset', 'o', InputArgument::OPTIONAL | InputOption::VALUE_REQUIRED, 'The OFFSET clause to facilitate paging (chunks) of indexing (offset to start the chunk at)')
             ->setDescription('Reindexes entities in the SOLR index')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        if (!empty($input->getOption('offset'))) {
+            // the offset option was introduced in a later version of the solr bundle but is being used by the z solr plugin.
+            // this causes a backwards compatibility problem that we resolve by having the option offset but simply ignoring it.
+            // for safety we will throw an exception whenever the option is used, i.e. its value is not zero.
+            throw new \Exception('The offset option is not supported in this version of the solr bundle');
+        }
+
         /** @var $solr \Zicht\Bundle\SolrBundle\Manager\SolrManager */
         $solr = $this->getContainer()->get('zicht_solr.solr_manager');
         $entity = $input->getArgument('entity');
