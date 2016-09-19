@@ -1,3 +1,6 @@
+# 3.1 #
+* Added SolrDataCollector to show request send from debug toolbar
+
 # 3.0 #
 
 * Dependency on Solarium was removed

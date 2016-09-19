@@ -1,0 +1,50 @@
+{% extends 'WebProfilerBundle:Profiler:layout.html.twig' %}
+
+{% block toolbar %}
+    {% set icon %}
+        <a href="{{ path('_profiler', { 'token': token, 'panel': name }) }}">
+            <span>
+                <span class="icon">{{ include('@ZichtSolrBundle/Resources/public/images/solr_icon.svg') }}</span>
+                <span class="sf-toolbar-status">{{ collector.requests|length }}</span>
+            </span>
+        </a>
+    {% endset %}
+
+    {% set text %}
+        <div class="sf-toolbar-info-piece">
+            <b>Requests</b><span class="sf-toolbar-status">{{ collector.requests|length }}</span>
+        </div>
+    {% endset %}
+
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: false }) }}
+{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+{% endblock %}
+
+{% block menu %}
+    {# This left-hand menu appears when using the full-screen profiler. #}
+    <span class="label">
+        <span class="icon">
+            {{ include('@ZichtSolrBundle/Resources/public/images/solr_icon.svg') }}
+        </span>
+        <strong>Solr Requests</strong><span class="count">{{ collector.requests|length }}</span>
+    </span>
+{% endblock %}
+
+{% block panel %}
+    {# Optional, for showing the most details. #}
+    <h2>Executed queries</h2>
+
+    <table>
+        {% for i in collector.requests %}
+            <tr>
+                <td><a href="{{ i.requestUri }}" target="_blank">{{ i.requestUri }}</a></td>
+            </tr>
+            <tr>
+                <td>{{ dump(i.response) }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

@@ -8,6 +8,7 @@ namespace Zicht\Bundle\SolrBundle\Solr;
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Message\Request;
 use GuzzleHttp\Message\ResponseInterface;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
@@ -18,6 +19,11 @@ class Client
 {
     private $lastRequest = null;
     private $lastResponse = null;
+
+    /**
+     * @var array
+     */
+    public $logs = [];
 
     /**
      * Setup the client
@@ -64,6 +70,7 @@ class Client
      */
     protected function doRequest(QueryBuilder\RequestBuilderInterface $handler)
     {
+        /** @var Request $request */
         $request = $handler->createRequest($this->http);
 
         $this->lastRequest = $request;
@@ -74,6 +81,8 @@ class Client
             if ($handler instanceof QueryBuilder\ResponseHandlerInterface) {
                 $response = $handler->handle($response);
             }
+
+            $this->logs[] = ['response' => $response, 'requestUri' => $request->getUrl()];
         } catch (BadResponseException $e) {
             $this->lastResponse = $e->getResponse();
             if ($e->getRequest()->getBody()) {
