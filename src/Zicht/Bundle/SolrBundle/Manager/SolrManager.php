@@ -213,6 +213,22 @@ class SolrManager
     }
 
     /**
+     * Check if entity is supported
+     *
+     * @param mixed $entity
+     * @return bool
+     */
+    public function support($entity)
+    {
+        foreach ($this->mappers as $mapper) {
+            if ($mapper->supports($entity)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Disables the timeout on all client's endpoints. Convenience for command line usage.
      *
      * @return void
