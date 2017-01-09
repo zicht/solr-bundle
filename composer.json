@@ -2,7 +2,7 @@
     "name": "zicht/solr-bundle",
     "description": "Solr utilities for Symfony",
     "type": "symfony-bundle",
-    "repositories": { },
+    "repositories": [],
     "authors": [
         {
             "name": "Zicht online",
@@ -12,10 +12,16 @@
     "require": {
         "php": ">=5.3",
         "symfony/symfony": ">=2.1",
-        "guzzlehttp/guzzle": "5.3.*@stable" 
+        "guzzlehttp/guzzle": "5.3.*@stable"
     },
     "autoload": {
-        "psr-0": { "": ["src/", "tests/"] }
+        "psr-0": {
+            "": [
+                "src/",
+                "tests/"
+            ]
+        }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "license": "MIT"
 }
