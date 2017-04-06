@@ -200,4 +200,20 @@ class SolrManager
 
         return null;
     }
+
+    /**
+     * Check if entity is supported
+     *
+     * @param mixed $entity
+     * @return bool
+     */
+    public function support($entity)
+    {
+        foreach ($this->mappers as $mapper) {
+            if ($mapper->supports($entity)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
