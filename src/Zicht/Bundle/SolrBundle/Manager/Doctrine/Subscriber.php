@@ -10,12 +10,18 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Interfaces\Extractable;
 
 /**
  * Class Subscriber
  */
 class Subscriber implements EventSubscriber
 {
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
+
     /**
      * Construct the subscriber
      *
@@ -34,7 +40,13 @@ class Subscriber implements EventSubscriber
      */
     public function postPersist(LifecycleEventArgs $event)
     {
-        $this->container->get('zicht_solr.manager')->update($event->getEntity());
+        $entity = $event->getEntity();
+        if ($entity instanceof Extractable && $entity->getFile() !== null) {
+            $this->container->get('zicht_solr.manager')->extract($entity);
+            return;
+        }
+
+        $this->container->get('zicht_solr.manager')->update($entity);
     }
 
 
@@ -46,7 +58,13 @@ class Subscriber implements EventSubscriber
      */
     public function preUpdate(LifecycleEventArgs $event)
     {
-        $this->container->get('zicht_solr.manager')->update($event->getEntity());
+        $entity = $event->getEntity();
+        if ($entity instanceof Extractable && $entity->getFile() !== null) {
+            $this->container->get('zicht_solr.manager')->extract($entity);
+            return;
+        }
+
+        $this->container->get('zicht_solr.manager')->update($entity);
     }
 
     /**

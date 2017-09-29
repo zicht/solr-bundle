@@ -148,6 +148,27 @@ class SolrManager
         return false;
     }
 
+    /**
+     * Extract an entity
+     *
+     * @param mixed $entity
+     * @return bool
+     */
+    public function extract($entity)
+    {
+        if (!$this->enabled) {
+            return false;
+        }
+
+        if ($mapper = $this->getMapper($entity)) {
+            $extract = new QueryBuilder\Extract();
+            $mapper->extract($extract, $entity);
+            $this->client->extract($extract);
+            return true;
+        }
+        return false;
+    }
+
 
     /**
      * Delete an entity

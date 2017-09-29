@@ -6,6 +6,7 @@
 
 namespace Zicht\Bundle\SolrBundle\Manager;
 
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Extract;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 
 /**
@@ -13,6 +14,15 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
  */
 interface DataMapperInterface
 {
+    /**
+     * Request an extract for the specified entity
+     *
+     * @param Extract $extract
+     * @param mixed $entity
+     * @return mixed
+     */
+    public function extract(Extract $extract, $entity);
+
     /**
      * Request an update for the specified entity
      *
