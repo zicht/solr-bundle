@@ -19,7 +19,6 @@ interface DataMapperInterface
      *
      * @param Extract $extract
      * @param mixed $entity
-     * @return mixed
      */
     public function extract(Extract $extract, $entity);
 

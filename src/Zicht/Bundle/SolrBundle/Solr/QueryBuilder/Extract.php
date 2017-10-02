@@ -23,9 +23,6 @@ class Extract extends AbstractQueryBuilder
 
     /** field in solr to map document_file content */
     const DEFAULT_DOCUMENT_FILE_CONTENT_FIELD = 'document_file_content';
-    
-    /** field in solr to map document_file path */
-    const DEFAULT_DOCUMENT_FILE_PATH_FIELD = 'document_file_path';
 
     /**
      * @var array
@@ -46,19 +43,25 @@ class Extract extends AbstractQueryBuilder
      * @param string $id
      * @param array $values
      * @param array $params
-     * @param string $file
+     * @param resource $file
      *
      * @return self
      */
     public function extract($id, array $values, array $params, $file)
     {
+        var_dump($file);die;
+        if (!is_resource($file)) {
+            throw new \BadFunctionCallException(
+                sprintf('argument file must be of type resource %s given', gettype($file))
+            );
+        }
+
         $this->data = ['literal.id' => $id];
         foreach ($values as $key => $value) {
             $this->data[ sprintf('literal.%s', $key) ] = $value;
         }
 
-        $this->data['file'] = fopen(sprintf('%s%s', getcwd(), $file), 'r');
-        $this->data['literal.'. self::DEFAULT_DOCUMENT_FILE_PATH_FIELD] = $file;
+        $this->data['file'] = $file;
         $this->data['fmap.title'] = self::DEFAULT_DOCUMENT_FILE_TITLE_FIELD;
         $this->data['fmap.content'] = self::DEFAULT_DOCUMENT_FILE_CONTENT_FIELD;
 

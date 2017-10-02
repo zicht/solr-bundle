@@ -14,7 +14,7 @@ interface Extractable
      * Return the path to the file.
      * Return null when not available.
      *
-     * @return string|null
+     * @return resource|null
      */
-    public function getFile();
+    public function getFileResource();
 }

@@ -25,7 +25,6 @@ abstract class AbstractDataMapper implements DataMapperInterface
      *
      * @param Extract $extract
      * @param Extractable $entity
-     * @return void
      */
     public function extract(Extract $extract, $entity)
     {
@@ -39,7 +38,7 @@ abstract class AbstractDataMapper implements DataMapperInterface
         }
         $id = $this->generateObjectIdentity($entity);
         $doc = $this->mapDocument($entity);
-        $extract->extract($id, $doc, $params, $entity->getFile());
+        $extract->extract($id, $doc, $params, $entity->getFileResource());
     }
 
     /**

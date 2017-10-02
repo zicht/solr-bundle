@@ -40,13 +40,7 @@ class Subscriber implements EventSubscriber
      */
     public function postPersist(LifecycleEventArgs $event)
     {
-        $entity = $event->getEntity();
-        if ($entity instanceof Extractable && $entity->getFile() !== null) {
-            $this->container->get('zicht_solr.manager')->extract($entity);
-            return;
-        }
-
-        $this->container->get('zicht_solr.manager')->update($entity);
+        $this->callUpdate($event);
     }
 
 
@@ -58,13 +52,7 @@ class Subscriber implements EventSubscriber
      */
     public function preUpdate(LifecycleEventArgs $event)
     {
-        $entity = $event->getEntity();
-        if ($entity instanceof Extractable && $entity->getFile() !== null) {
-            $this->container->get('zicht_solr.manager')->extract($entity);
-            return;
-        }
-
-        $this->container->get('zicht_solr.manager')->update($entity);
+        $this->callUpdate($event);
     }
 
     /**
@@ -88,5 +76,22 @@ class Subscriber implements EventSubscriber
             Events::preUpdate,
             Events::preRemove
         );
+    }
+
+    /**
+     * Calls the proper method in the Solr Manager to update or extract the document
+     *
+     * @param LifecycleEventArgs $event
+     */
+    private function callUpdate(LifecycleEventArgs $event)
+    {
+        $entity = $event->getEntity();
+        if ($entity instanceof Extractable && is_resource($entity->getFileResource())) {
+            $this->container->get('zicht_solr.manager')->extract($entity);
+
+            return;
+        }
+
+        $this->container->get('zicht_solr.manager')->update($entity);
     }
 }
