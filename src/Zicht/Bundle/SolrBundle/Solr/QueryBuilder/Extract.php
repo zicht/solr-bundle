@@ -49,7 +49,6 @@ class Extract extends AbstractQueryBuilder
      */
     public function extract($id, array $values, array $params, $file)
     {
-        var_dump($file);die;
         if (!is_resource($file)) {
             throw new \BadFunctionCallException(
                 sprintf('argument file must be of type resource %s given', gettype($file))
