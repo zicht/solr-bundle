@@ -131,6 +131,46 @@ class SolrManager
         return [$n, $i];
     }
 
+    /**
+     * Extracts as batch.
+     *
+     * @param array $records
+     * @param callable|null $incrementCallback
+     * @param callable|null $errorCallback
+     *
+     * @return array
+     */
+    public function extractBatch($records, $incrementCallback = null, $errorCallback = null)
+    {
+        $n = $i = 0;
+        foreach ($records as $record) {
+            $mapper = $this->getMapper($record);
+            if ($mapper === null) {
+                continue;
+            }
+
+            $i++;
+            try {
+                $extract = new QueryBuilder\Extract();
+                $mapper->extract($extract, $record);
+                $this->client->extract($extract);
+            } catch (\Exception $e) {
+                if ($errorCallback) {
+                    call_user_func($errorCallback, $record, $e);
+                }
+            }
+
+            if ($incrementCallback) {
+                call_user_func($incrementCallback, $n);
+            }
+
+            $n++;
+        }
+        call_user_func($incrementCallback, $n);
+
+        return [$n, $i];
+    }
+
 
     /**
      * Update an entity
