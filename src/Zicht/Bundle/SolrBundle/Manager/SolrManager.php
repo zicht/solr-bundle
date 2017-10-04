@@ -144,21 +144,26 @@ class SolrManager
     {
         $n = $i = 0;
         foreach ($records as $record) {
-            if ($mapper = $this->getMapper($record)) {
-                $i++;
-                try {
-                    $extract = new QueryBuilder\Extract();
-                    $mapper->extract($extract, $record);
-                    $this->client->extract($extract);
-                } catch (\Exception $e) {
-                    if ($errorCallback) {
-                        call_user_func($errorCallback, $record, $e);
-                    }
-                }
-                if ($incrementCallback) {
-                    call_user_func($incrementCallback, $n);
+            $mapper = $this->getMapper($record);
+            if ($mapper === null) {
+                continue;
+            }
+
+            $i++;
+            try {
+                $extract = new QueryBuilder\Extract();
+                $mapper->extract($extract, $record);
+                $this->client->extract($extract);
+            } catch (\Exception $e) {
+                if ($errorCallback) {
+                    call_user_func($errorCallback, $record, $e);
                 }
             }
+
+            if ($incrementCallback) {
+                call_user_func($incrementCallback, $n);
+            }
+
             $n++;
         }
         call_user_func($incrementCallback, $n);
