@@ -24,6 +24,16 @@ use Zicht\Bundle\SolrBundle\Solr\Client;
 class ReindexCommand extends AbstractCommand
 {
     /**
+     * @var SolrManager
+     */
+    private $solrManager;
+
+    /**
+     * @var Registry
+     */
+    private $doctrine;
+
+    /**
      * Setup the reindex command
      *
      * @param Client $solr
@@ -101,9 +111,25 @@ class ReindexCommand extends AbstractCommand
         $output->writeln("Reindexing records ...");
         $progress = new ProgressBar($output, $total);
         $progress->display();
+        list($n, $i) = $this->updateBatch($input, $output, $records, $progress, $total);
+        $output->write("\n");
+        $output->writeln("Processed $i of $n items. Peak mem usage: " . sprintf('.%2d Mb', memory_get_peak_usage() / 1024 / 1024));
+    }
+
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @param $records
+     * @param $progress
+     * @param $total
+     *
+     * @return array
+     */
+    private function updateBatch(InputInterface $input, OutputInterface $output, $records, $progress, $total)
+    {
         list($n, $i) = $this->solrManager->updateBatch(
             $records,
-            function($n) use($progress, $total, $output) {
+            function ($n) use ($progress, $total, $output) {
                 $progress->setProgress($n);
                 if ($n == $total) {
                     $progress->finish();
@@ -111,7 +137,7 @@ class ReindexCommand extends AbstractCommand
                     $output->writeln("Flushing ...");
                 }
             },
-            function($record, $e) use($input, $output) {
+            function ($record, $e) use ($input, $output) {
                 if (!$input->getOption('debug')) {
                     $output->write(sprintf("\nError indexing record: %s (%s)\n", (string)$record, $e->getMessage()));
                 } else {
@@ -120,7 +146,9 @@ class ReindexCommand extends AbstractCommand
             },
             (bool)$input->getOption('delete-first')
         );
-        $output->write("\n");
-        $output->writeln("Processed $i of $n items. Peak mem usage: " . sprintf('.%2d Mb', memory_get_peak_usage() / 1024 / 1024));
+
+        return array($n, $i);
     }
+
+
 }
