@@ -17,6 +17,7 @@ use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
 use Zicht\Bundle\SolrBundle\Manager\Doctrine\WrappedSearchDocumentRepository;
 use Zicht\Bundle\SolrBundle\Manager\SolrManager;
 use Zicht\Bundle\SolrBundle\Solr\Client;
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Interfaces\Extractable;
 
 /**
  * Reindex a specified repository or entity in SOLR
@@ -77,7 +78,8 @@ class ReindexCommand extends AbstractCommand
 
         $em = $this->doctrine->getManager($input->getOption('em'));
 
-        $entity = $em->getClassMetadata($input->getArgument('entity'))->getReflectionClass()->name;
+        $reflection = $em->getClassMetadata($input->getArgument('entity'))->getReflectionClass();
+        $entity = $reflection->name;
 
         if (null !== ($repos = $this->solrManager->getRepository($entity))) {
             if ($repos instanceof WrappedSearchDocumentRepository) {
@@ -111,7 +113,12 @@ class ReindexCommand extends AbstractCommand
         $output->writeln("Reindexing records ...");
         $progress = new ProgressBar($output, $total);
         $progress->display();
-        list($n, $i) = $this->updateBatch($input, $output, $records, $progress, $total);
+
+        if ($reflection->implementsInterface(Extractable::class)) {
+            list($n, $i) = $this->extractBatch($input, $output, $records, $progress, $total);
+        } else {
+            list($n, $i) = $this->updateBatch($input, $output, $records, $progress, $total);
+        }
         $output->write("\n");
         $output->writeln("Processed $i of $n items. Peak mem usage: " . sprintf('.%2d Mb', memory_get_peak_usage() / 1024 / 1024));
     }
@@ -149,6 +156,38 @@ class ReindexCommand extends AbstractCommand
 
         return array($n, $i);
     }
+    /**
+     * Extracts in batches
+     *
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @param $records
+     * @param $progress
+     * @param $total
+     *
+     * @return array
+     */
+    private function extractBatch(InputInterface $input, OutputInterface $output, $records, $progress, $total)
+    {
+        list($n, $i) = $this->solrManager->extractBatch(
+            $records,
+            function ($n) use ($progress, $total, $output) {
+                $progress->setProgress($n);
+                if ($n == $total) {
+                    $progress->finish();
+                    $output->write("\n");
+                    $output->writeln("Flushing ...");
+                }
+            },
+            function ($record, $e) use ($input, $output) {
+                if (!$input->getOption('debug')) {
+                    $output->write(sprintf("\nError indexing record: %s (%s)\n", (string)$record, $e->getMessage()));
+                } else {
+                    throw $e;
+                }
+            }
+        );
 
-
+        return array($n, $i);
+    }
 }
