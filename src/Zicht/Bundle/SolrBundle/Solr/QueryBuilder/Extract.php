@@ -63,6 +63,7 @@ class Extract extends AbstractQueryBuilder
         $this->data['file'] = $file;
         $this->data['fmap.title'] = self::DEFAULT_DOCUMENT_FILE_TITLE_FIELD;
         $this->data['fmap.content'] = self::DEFAULT_DOCUMENT_FILE_CONTENT_FIELD;
+        $this->data['commit'] = 'true';
 
         $this->data = array_merge($this->data, $params);
 
