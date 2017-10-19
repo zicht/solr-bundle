@@ -7,7 +7,8 @@
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Message\Response;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 
 /**
  * Class Select
@@ -119,9 +120,9 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
     /**
      * @{inheritDoc}
      */
-    public function createRequest(Client $client)
+    public function createRequest(Client $httpClient)
     {
-        return $client->createRequest('GET', 'select?' . $this->createQueryString($this->params));
+        return new Request('GET', sprintf('%sselect?%s', $httpClient->getConfig('base_url'), $this->createQueryString($this->params)));
     }
 
     /**
@@ -129,7 +130,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      */
     public function handle(Response $response)
     {
-        $contentType = $response->getHeader('Content-Type');
+        $contentType = $response->getHeaderLine('Content-Type');
         if (preg_match('!^application/json!', $contentType) || preg_match('!^text/plain!', $contentType)) {
             $response = json_decode($response->getBody()->getContents());
         }
@@ -152,7 +153,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
         } elseif (!is_array($this->params[$name])) {
             $this->params[$name] = [$this->params[$name]];
         }
-        $this->params[$name][]= $value;
+        $this->params[$name][] = $value;
 
         return $this;
     }

@@ -5,7 +5,7 @@
  */
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
-use GuzzleHttp\Message\Response;
+use GuzzleHttp\Psr7\Response;
 
 /**
  * If the request implements this interface, it's response is filtered through the handle() method by `doRequest`
