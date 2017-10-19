@@ -5,6 +5,7 @@
  */
 namespace Zicht\Bundle\SolrBundle\Facade;
 
+use Psr\Http\Message\ResponseInterface;
 use Zicht\Bundle\FrameworkExtraBundle\Pager\Pager;
 use Zicht\Bundle\SolrBundle\Solr\Client;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Select;
@@ -507,7 +508,7 @@ abstract class SearchFacade
      * Execute the query.
      *
      * @param Select $query
-     * @return \GuzzleHttp\Message\ResponseInterface
+     * @return ResponseInterface
      */
     protected function execSearch($query)
     {

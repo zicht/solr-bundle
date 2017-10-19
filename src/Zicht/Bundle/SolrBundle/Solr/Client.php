@@ -8,8 +8,8 @@ namespace Zicht\Bundle\SolrBundle\Solr;
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Message\Request;
-use GuzzleHttp\Message\ResponseInterface;
+use GuzzleHttp\Psr7\Request;
+use Psr\Http\Message\ResponseInterface;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
 /**
@@ -82,7 +82,7 @@ class Client
                 $response = $handler->handle($response);
             }
 
-            $this->logs[] = ['response' => $response, 'requestUri' => $request->getUrl()];
+            $this->logs[] = ['response' => $response, 'requestUri' => $request->getUri()];
         } catch (BadResponseException $e) {
             $this->lastResponse = $e->getResponse();
             if ($e->getRequest()->getBody()) {

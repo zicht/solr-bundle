@@ -3,10 +3,11 @@
  * @author Gerard van Helden <gerard@zicht.nl>
  * @copyright Zicht Online <http://zicht.nl>
  */
+
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Stream\Stream;
+use GuzzleHttp\Psr7\Request;
 use Zicht\Bundle\SolrBundle\Solr\DateHelper;
 
 /**
@@ -102,7 +103,7 @@ class Update extends AbstractQueryBuilder
     {
         $instruction = ['doc' => ['id' => $id]];
         $instruction['doc'] += array_map(
-            function($v) {
+            function ($v) {
                 return ['set' => $v];
             },
             $values
@@ -134,15 +135,14 @@ class Update extends AbstractQueryBuilder
      */
     public function createRequest(Client $httpClient)
     {
-        $req = $httpClient->createRequest('POST', 'update');
-
-        $req->setHeader('Content-Type', 'application/json');
-
         fseek($this->stream, -1, SEEK_END);
         fwrite($this->stream, '}');
         fseek($this->stream, 0);
-
-        $req->setBody(Stream::factory($this->stream));
-        return $req;
+        return new Request(
+            'POST',
+            sprintf('%supdate', $httpClient->getConfig('base_url')),
+            ['Content-Type' => 'application/json'],
+            \GuzzleHttp\Psr7\stream_for($this->stream)
+        );
     }
 }
