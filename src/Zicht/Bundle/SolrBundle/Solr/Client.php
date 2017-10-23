@@ -63,8 +63,12 @@ class Client
     /**
      * Do the request and return the response.
      *
-     * Throw an exception wrapping the internal exception if an error occurs
+     * Throw an exception wrapping the internal exception if an error occurs.
      *
+     * @see https://lucene.apache.org/solr/5_0_0/solr-solrj/org/apache/solr/common/SolrException.html
+     * @see https://lucene.apache.org/solr/4_7_0/solr-solrj/org/apache/solr/common/SolrException.html
+     *
+     * @throws Exception
      * @param QueryBuilder\RequestBuilderInterface $handler
      * @return mixed
      */
@@ -83,19 +87,33 @@ class Client
             }
 
             $this->logs[] = ['response' => $response, 'requestUri' => $request->getUri()];
-        } catch (BadResponseException $e) {
-            $this->lastResponse = $e->getResponse();
-            if ($e->getRequest()->getBody()) {
-                $e->getRequest()->getBody()->seek(0);
+        } catch (BadResponseException $be) {
+            $this->lastResponse = $be->getResponse();
+            if ($be->getRequest()->getBody()) {
+                $be->getRequest()->getBody()->seek(0);
+            }
+            $content = $be->getResponse()->getBody()->getContents();
+            $contentType = $this->lastResponse->getHeaderLine('Content-Type');
+            $errorMsg = $be->getMessage();
+            if (preg_match('!^application/json!', $contentType) || preg_match('!^text/plain!', $contentType)) {
+                try {
+                    // possibly content is a json-string containing a SolrException.
+                    $solrException = \GuzzleHttp\json_decode($content);
+                    if (property_exists($solrException, 'error') && property_exists($solrException->error, 'msg')) {
+                        $errorMsg = $solrException->error->msg;
+                    }
+                } catch (\InvalidArgumentException $invalidArgumentException) {
+                    // we keep the original errorMsg. It still contains all the info we need.
+                }
             }
             if (defined('STDERR')) {
-                // fwrite(STDERR, $e->getRequest()->getBody()->getContents());
-                // fwrite(STDERR, "\n\n");
-                fwrite(STDERR, $e->getResponse()->getBody()->getContents());
+                fwrite(STDERR, PHP_EOL . $errorMsg . PHP_EOL);
+                fwrite(STDERR, PHP_EOL . $content . PHP_EOL);
             }
+            throw new Exception($errorMsg, null, $be);
+        } catch (\Exception $e) {
             throw new Exception($e->getMessage(), null, $e);
         }
-
         return $response;
     }
 
@@ -122,10 +140,9 @@ class Client
         $ret = [];
         $select = (new QueryBuilder\Select())
             ->setFieldList($fieldName)
-            ->setQuery($query)
-        ;
+            ->setQuery($query);
         foreach ($this->select($select)->response->docs as $doc) {
-            $ret[]= $doc->$fieldName;
+            $ret[] = $doc->$fieldName;
         }
         return $ret;
     }
