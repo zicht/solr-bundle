@@ -96,10 +96,14 @@ class Client
             $contentType = $this->lastResponse->getHeaderLine('Content-Type');
             $errorMsg = $be->getMessage();
             if (preg_match('!^application/json!', $contentType) || preg_match('!^text/plain!', $contentType)) {
-                // possibly content is a json-string containing a SolrException.
-                $solrException = \GuzzleHttp\json_decode($content);
-                if (property_exists($solrException, 'error') && property_exists($solrException->error, 'msg')) {
-                    $errorMsg = $solrException->error->msg;
+                try {
+                    // possibly content is a json-string containing a SolrException.
+                    $solrException = \GuzzleHttp\json_decode($content);
+                    if (property_exists($solrException, 'error') && property_exists($solrException->error, 'msg')) {
+                        $errorMsg = $solrException->error->msg;
+                    }
+                } catch (\InvalidArgumentException $invalidArgumentException) {
+                    // we keep the original errorMsg. It still contains all the info we need.
                 }
             }
             if (defined('STDERR')) {
