@@ -114,10 +114,21 @@ class ReindexCommand extends AbstractCommand
         $progress->display();
 
         if ($reflection->implementsInterface(Extractable::class)) {
-            list($n, $i) = $this->extractBatch($input, $output, $records, $progress, $total);
-        } else {
-            list($n, $i) = $this->updateBatch($input, $output, $records, $progress, $total);
+            list($extractableRecords, $updatableRecords) = $this->splitRecords($records);
+            list($n, $i) = $this->extractBatch($input, $output, $extractableRecords, $progress, $total);
+            $output->write("\n");
+            $output->writeln(sprintf('Processed (Extracted) %s of %s items.', $i, $n));
+
+            if (count($updatableRecords)) {
+                list($n, $i) = $this->extractBatch($input, $output, $updatableRecords, $progress, $total);
+                $output->writeln(sprintf('Processed (Updated) %s of %s items.', memory_get_peak_usage() / 1024 / 1024));
+            }
+
+            $output->writeln(sprintf('Peak mem usage: .%2d Mb', memory_get_peak_usage() / 1024 / 1024));
+            return;
         }
+
+        list($n, $i) = $this->updateBatch($input, $output, $records, $progress, $total);
         $output->write("\n");
         $output->writeln(sprintf('Processed %s of %s items. Peak mem usage: .%2d Mb', $i, $n, memory_get_peak_usage() / 1024 / 1024));
     }
@@ -190,5 +201,23 @@ class ReindexCommand extends AbstractCommand
         );
 
         return array($n, $i);
+    }
+
+    private function splitRecords($records)
+    {
+        $extractableRecords = array_filter($records, [$this, 'hasResource']);
+        $updatableRecords = array_filter($records, [$this, 'hasNoResource']);
+
+        return [$extractableRecords, $updatableRecords];
+    }
+
+    public function hasResource(Extractable $extractable)
+    {
+        return is_resource($extractable->getFileResource());
+    }
+
+    public function hasNoResource(Extractable $extractable)
+    {
+        return !is_resource($extractable->getFileResource());
     }
 }
