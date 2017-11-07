@@ -17,6 +17,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class Subscriber implements EventSubscriber
 {
     /**
+     * @var ContainerInterface
+     */
+    protected $container;
+    
+    /**
      * Construct the subscriber
      *
      * @param ContainerInterface $container
