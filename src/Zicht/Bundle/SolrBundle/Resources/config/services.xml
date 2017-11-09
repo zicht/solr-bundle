@@ -14,17 +14,17 @@
         </service>
         <service id="zicht_solr.doctrine.subscriber" class="%zicht_solr.doctrine.subscriber.class%">
             <argument type="service" id="service_container"/>
-            <tag name="doctrine.event_subscriber" />
+            <tag name="doctrine.event_subscriber"/>
         </service>
         <service id="zicht_solr.solr" class="Zicht\Bundle\SolrBundle\Solr\Client">
-            <argument type="service" id="_zicht_solr.http_client" />
+            <argument type="service" id="_zicht_solr.http_client"/>
         </service>
 
-        <service id="_zicht_solr.http_client" public="false" class="GuzzleHttp\Client" />
+        <service id="_zicht_solr.http_client" public="false" class="GuzzleHttp\Client"/>
 
         <service id="_zicht_solr.data_collector" class="Zicht\Bundle\SolrBundle\DataCollector\SolrDataCollector" public="false">
-            <tag name="data_collector" template="@ZichtSolr/DataCollector/data_collector.html.twig" id="zicht_solr.data_collector" />
-            <argument type="service" id="zicht_solr.solr" />
+            <tag name="data_collector" template="@ZichtSolr/DataCollector/data_collector.html.twig" id="zicht_solr.data_collector"/>
+            <argument type="service" id="zicht_solr.solr"/>
         </service>
     </services>
 </container>
