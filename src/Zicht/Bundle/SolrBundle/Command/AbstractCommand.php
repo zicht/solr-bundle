@@ -15,6 +15,11 @@ use Zicht\Bundle\SolrBundle\Solr\Client;
 class AbstractCommand extends Command
 {
     /**
+     * @var Client
+     */
+    protected $solr;
+
+    /**
      * Construct the command with the solr service
      *
      * @param Client $solr

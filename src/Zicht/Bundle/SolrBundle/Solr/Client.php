@@ -6,7 +6,7 @@
 
 namespace Zicht\Bundle\SolrBundle\Solr;
 
-use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Request;
 use Psr\Http\Message\ResponseInterface;
@@ -26,11 +26,16 @@ class Client
     public $logs = [];
 
     /**
+     * @var ClientInterface
+     */
+    protected $http;
+
+    /**
      * Setup the client
      *
-     * @param GuzzleClient $client
+     * @param ClientInterface $client
      */
-    public function __construct(GuzzleClient $client)
+    public function __construct(ClientInterface $client)
     {
         $this->http = $client;
     }

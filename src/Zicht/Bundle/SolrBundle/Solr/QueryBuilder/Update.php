@@ -6,7 +6,7 @@
 
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
-use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Request;
 use Zicht\Bundle\SolrBundle\Solr\DateHelper;
 
@@ -133,7 +133,7 @@ class Update extends AbstractQueryBuilder
     /**
      * @{inheritDoc}
      */
-    public function createRequest(Client $httpClient)
+    public function createRequest(ClientInterface $httpClient)
     {
         fseek($this->stream, -1, SEEK_END);
         fwrite($this->stream, '}');
