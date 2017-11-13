@@ -6,7 +6,7 @@
 
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
-use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 
@@ -120,7 +120,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
     /**
      * @{inheritDoc}
      */
-    public function createRequest(Client $httpClient)
+    public function createRequest(ClientInterface $httpClient)
     {
         return new Request('GET', sprintf('%sselect?%s', $httpClient->getConfig('base_url'), $this->createQueryString($this->params)));
     }

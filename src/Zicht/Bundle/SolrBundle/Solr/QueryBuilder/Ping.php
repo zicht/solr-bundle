@@ -6,7 +6,7 @@
 
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
-use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Request;
 
 /**
@@ -17,7 +17,7 @@ class Ping implements RequestBuilderInterface
     /**
      * @{inheritDoc}
      */
-    public function createRequest(Client $httpClient)
+    public function createRequest(ClientInterface $httpClient)
     {
         return new Request('GET', sprintf('%sadmin/ping', $httpClient->getConfig('base_url')));
     }
