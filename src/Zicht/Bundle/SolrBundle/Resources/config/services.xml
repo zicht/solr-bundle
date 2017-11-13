@@ -24,7 +24,7 @@
             <argument type="service" id="zicht_solr.http_client"/>
         </service>
 
-        <service id="zicht_solr.http_client" public="false" class="GuzzleHttp\Client"/>
+        <service id="zicht_solr.http_client" public="false" class="%zicht_solr.http_client.class%"/>
 
         <service id="zicht_solr.data_collector" class="%zicht_solr.data_collector.class%" public="false">
             <tag name="data_collector" template="@ZichtSolr/DataCollector/data_collector.html.twig" id="zicht_solr.data_collector"/>
