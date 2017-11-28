@@ -7,5 +7,5 @@ Provides a layer to index and search content in a SOLR instance.
 * Base class template for creating faceted search engines
 * Command line interface for accessing the solr instance
 
-# Maintainer(s)
-* Rik van der Kemp <rik@zicht.nl>
+# Maintainers
+* Philip Bergman <philip@zicht.nl>
