@@ -190,7 +190,7 @@ class SolrManager
      * @param mixed $entity
      * @return DataMapperInterface
      */
-    protected function getMapper($entity)
+    public function getMapper($entity)
     {
         foreach ($this->mappers as $mapper) {
             if ($mapper->supports($entity)) {

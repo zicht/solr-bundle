@@ -137,5 +137,5 @@ abstract class AbstractDataMapper implements DataMapperInterface
      * @param mixed $entity
      * @return mixed
      */
-    abstract protected function mapDocument($entity);
+    abstract public function mapDocument($entity);
 }
