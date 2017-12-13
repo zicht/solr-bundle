@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## 4.0.0
 ### Changed
 - Started using Guzzle 6
-- Changed the scope of `protected` to `public` for `mapDocument` and changed the scope of `protected` to `public` for `getMapper`.
+- Changed the scope of `protected` to `public` for `AbstractDataMapper::mapDocument` and changed the scope of `protected` to `public` for `SolrManager::getMapper`.
 This is a breaking change because it changes the public interface of this bundle. Changes are made to prevent duplication of logic and making it possible to re-use mappingresults on other places, not only in the Doctrine-subscriber. 
 
 ## 3.1
