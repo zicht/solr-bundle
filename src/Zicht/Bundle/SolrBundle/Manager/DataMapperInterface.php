@@ -56,4 +56,12 @@ interface DataMapperInterface
      * @return mixed
      */
     public function supports($entity);
+
+    /**
+     * Maps an entity.
+     *
+     * @param mixed $entity
+     * @return mixed
+     */
+    public function mapDocument($entity);
 }

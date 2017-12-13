@@ -1,7 +1,19 @@
-# 3.1 #
+# Change Log
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](http://keepachangelog.com/)
+and this project adheres to [Semantic Versioning](http://semver.org/).
+
+## 4.0.0
+### Changed
+- Started using Guzzle 6
+- Changed the scope of `protected` to `public` for `AbstractDataMapper::mapDocument` and changed the scope of `protected` to `public` for `SolrManager::getMapper`.
+This is a breaking change because it changes the public interface of this bundle. Changes are made to prevent duplication of logic and making it possible to re-use mappingresults on other places, not only in the Doctrine-subscriber. 
+
+## 3.1
 * Added SolrDataCollector to show request send from debug toolbar
 
-# 3.0 #
+## 3.0
 
 * Dependency on Solarium was removed
 * New Client wrapper 
