@@ -5,6 +5,8 @@
  */
 namespace Zicht\Bundle\SolrBundle\Facade;
 
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Zicht\Bundle\BruggeSiteBundle\Exception\RedirectException;
 use Zicht\Bundle\FrameworkExtraBundle\Pager\Pager;
 use Zicht\Bundle\SolrBundle\Solr\Client;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Select;
@@ -109,7 +111,6 @@ abstract class SearchFacade
         }
     }
 
-
     /**
      * @return Params
      */
@@ -126,11 +127,13 @@ abstract class SearchFacade
     public function redirectPost()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            header(sprintf('Location: %s', $this->getPostRedirect($_POST['search'])));
-            exit;
+            throw new RedirectException(
+                new RedirectResponse(
+                    $this->getPostRedirect($_POST['search'])
+                )
+            );
         }
     }
-
 
     /**
      * Returns the GET url based on a POST search.
