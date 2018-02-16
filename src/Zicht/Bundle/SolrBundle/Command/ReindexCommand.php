@@ -24,7 +24,7 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Interfaces\Extractable;
  * Reindex a specified repository or entity in SOLR
  *
  * Calls an Update Query for Entities by default.
- * If a Entity is of the type Extractable the indexer tries first to call the Extract Query.
+ * If an Entity is of the type Extractable the indexer tries first to call the Extract Query.
  * The Extractable interface has an optional resource that's why we fall back to Update in case of missing
  * a resource. The Update Query is much cheaper in that context and can be batched. The Extract is not batchable
  * but for convenience it is enabled in this command.
@@ -144,7 +144,6 @@ class ReindexCommand extends AbstractCommand
      * @param InputInterface $input
      * @param OutputInterface $output
      * @param array|Collection $records
-     *
      * @return array
      */
     private function updateBatch(InputInterface $input, OutputInterface $output, $records)
@@ -181,7 +180,6 @@ class ReindexCommand extends AbstractCommand
      * @param InputInterface $input
      * @param OutputInterface $output
      * @param array|Collection $records
-     *
      * @return array
      */
     private function extractBatch(InputInterface $input, OutputInterface $output, $records)
@@ -216,7 +214,6 @@ class ReindexCommand extends AbstractCommand
      * Split the records to being processed by an Update or Extract query
      *
      * @param $records
-     *
      * @return array
      */
     private function splitRecords($records)
@@ -229,8 +226,8 @@ class ReindexCommand extends AbstractCommand
 
     /**
      * Defines whether a Extractable has a resource.
-     * @param Extractable $extractable
      *
+     * @param Extractable $extractable
      * @return bool
      */
     public function hasResource(Extractable $extractable)
@@ -240,8 +237,8 @@ class ReindexCommand extends AbstractCommand
 
     /**
      * Defines whether a Extractable has not a resource.
-     * @param Extractable $extractable
      *
+     * @param Extractable $extractable
      * @return bool
      */
     public function hasNoResource(Extractable $extractable)
