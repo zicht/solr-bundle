@@ -12,7 +12,8 @@ use GuzzleHttp\Post\PostFile;
 /**
  * Class Extract
  *
- * Each extract query should be a standalone one. a batch update is not available at this point
+ * Each extract query should be a standalone one, a batch update is not available at this point.
+ * The endpoint can fail on some types of PDF or Word documents due to an unknown structure.
  *
  * @doc https://lucene.apache.org/solr/guide/6_6/uploading-data-with-solr-cell-using-apache-tika.html#UploadingDatawithSolrCellusingApacheTika-InputParameters
  */
@@ -55,6 +56,9 @@ class Extract extends AbstractQueryBuilder
             );
         }
 
+        // All default fields mapped in SOLR are prefixed with `literal.` to define the actual field
+        // from the schema. The prefixing is done here to help the mapper to be used in the both Update and Extract
+        // context.
         $this->data = ['literal.id' => $id];
         foreach ($values as $key => $value) {
             $this->data[ sprintf('literal.%s', $key) ] = $value;

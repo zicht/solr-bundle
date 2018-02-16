@@ -1,3 +1,6 @@
+# 3.2 #
+* Added Extract Query, uses SOLR's capability to index Document Formats as PDF, DOC, etc.
+
 # 3.1 #
 * Added SolrDataCollector to show request send from debug toolbar
 
