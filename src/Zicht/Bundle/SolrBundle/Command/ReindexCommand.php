@@ -13,6 +13,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Output\StreamOutput;
 use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepositoryAdapter;
 use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
 use Zicht\Bundle\SolrBundle\Manager\Doctrine\WrappedSearchDocumentRepository;
@@ -149,7 +150,7 @@ class ReindexCommand extends AbstractCommand
     private function updateBatch(InputInterface $input, OutputInterface $output, $records)
     {
         $total = count($records);
-        $progress = new ProgressBar($output, $total);
+        $progress = new ProgressBar($output instanceof StreamOutput ? new StreamOutput($output->getStream()) : $output, $total);
         $progress->display();
         list($n, $i) = $this->solrManager->updateBatch(
             $records,
@@ -185,7 +186,7 @@ class ReindexCommand extends AbstractCommand
     private function extractBatch(InputInterface $input, OutputInterface $output, $records)
     {
         $total = count($records);
-        $progress = new ProgressBar($output, $total);
+        $progress = new ProgressBar($output instanceof StreamOutput ? new StreamOutput($output->getStream()) : $output, $total);
         $progress->display();
         list($n, $i) = $this->solrManager->extractBatch(
             $records,
