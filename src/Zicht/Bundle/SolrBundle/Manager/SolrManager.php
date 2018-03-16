@@ -68,7 +68,7 @@ class SolrManager
      */
     public function addRepository($class, $repository)
     {
-        $this->repositories[ $class ] = $repository;
+        $this->repositories[$class] = $repository;
     }
 
 
@@ -81,11 +81,11 @@ class SolrManager
      */
     public function getRepository($entityClass)
     {
-        if (!isset($this->repositories[ $entityClass ])) {
+        if (!isset($this->repositories[$entityClass])) {
             return null;
         }
 
-        return $this->repositories[ $entityClass ];
+        return $this->repositories[$entityClass];
     }
 
 
