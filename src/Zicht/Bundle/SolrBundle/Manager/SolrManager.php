@@ -5,6 +5,7 @@
  *
  * @copyright Zicht Online <http://zicht.nl>
  */
+
 namespace Zicht\Bundle\SolrBundle\Manager;
 
 use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
@@ -29,7 +30,7 @@ class SolrManager
     /**
      * @var DataMapperInterface[]
      */
-    protected $mappers = array();
+    protected $mappers = [];
     private $repositories;
 
 
@@ -41,7 +42,7 @@ class SolrManager
     public function __construct(Client $client)
     {
         $this->client = $client;
-        $this->mappers = array();
+        $this->mappers = [];
     }
 
 
@@ -49,11 +50,12 @@ class SolrManager
      * Adds a data mapper
      *
      * @param DataMapperInterface $dataMapper
+     *
      * @return void
      */
     public function addMapper($dataMapper)
     {
-        $this->mappers[]= $dataMapper;
+        $this->mappers[] = $dataMapper;
     }
 
     /**
@@ -61,11 +63,12 @@ class SolrManager
      *
      * @param string $class
      * @param SearchDocumentRepository $repository
+     *
      * @return void
      */
     public function addRepository($class, $repository)
     {
-        $this->repositories[$class]= $repository;
+        $this->repositories[$class] = $repository;
     }
 
 
@@ -73,6 +76,7 @@ class SolrManager
      * Get a class-specific repository implementation
      *
      * @param string $entityClass
+     *
      * @return SearchDocumentRepository|null
      */
     public function getRepository($entityClass)
@@ -92,6 +96,7 @@ class SolrManager
      * @param callable|null $incrementCallback
      * @param callable|null $errorCallback
      * @param boolean $delete
+     *
      * @return array
      */
     public function updateBatch($records, $incrementCallback = null, $errorCallback = null, $delete = false)
@@ -101,7 +106,7 @@ class SolrManager
         $n = $i = 0;
         foreach ($records as $record) {
             if ($mapper = $this->getMapper($record)) {
-                $i ++;
+                $i++;
                 try {
                     if ($delete) {
                         $mapper->delete($update, $record, $update);
@@ -116,13 +121,54 @@ class SolrManager
                     call_user_func($incrementCallback, $n);
                 }
             }
-            $n ++;
+            $n++;
         }
         call_user_func($incrementCallback, $n);
 
         $update->commit();
         $this->client->update($update);
-        return array($n, $i);
+
+        return [$n, $i];
+    }
+
+    /**
+     * Extracts as batch.
+     *
+     * @param array $records
+     * @param callable|null $incrementCallback
+     * @param callable|null $errorCallback
+     *
+     * @return array
+     */
+    public function extractBatch($records, $incrementCallback = null, $errorCallback = null)
+    {
+        $n = $i = 0;
+        foreach ($records as $record) {
+            $mapper = $this->getMapper($record);
+            if ($mapper === null) {
+                continue;
+            }
+
+            $i++;
+            try {
+                $extract = new QueryBuilder\Extract();
+                $mapper->extract($extract, $record);
+                $this->client->extract($extract);
+            } catch (\Exception $e) {
+                if ($errorCallback) {
+                    call_user_func($errorCallback, $record, $e);
+                }
+            }
+
+            if ($incrementCallback) {
+                call_user_func($incrementCallback, $n);
+            }
+
+            $n++;
+        }
+        call_user_func($incrementCallback, $n);
+
+        return [$n, $i];
     }
 
 
@@ -130,6 +176,7 @@ class SolrManager
      * Update an entity
      *
      * @param mixed $entity
+     *
      * @return bool
      */
     public function update($entity)
@@ -143,8 +190,34 @@ class SolrManager
             $mapper->update($update, $entity);
             $update->commit();
             $this->client->update($update);
+
             return true;
         }
+
+        return false;
+    }
+
+    /**
+     * Extract an entity
+     *
+     * @param object $entity
+     *
+     * @return bool
+     */
+    public function extract($entity)
+    {
+        if (!$this->enabled) {
+            return false;
+        }
+
+        if ($mapper = $this->getMapper($entity)) {
+            $extract = new QueryBuilder\Extract();
+            $mapper->extract($extract, $entity);
+            $this->client->extract($extract);
+
+            return true;
+        }
+
         return false;
     }
 
@@ -153,6 +226,7 @@ class SolrManager
      * Delete an entity
      *
      * @param mixed $entity
+     *
      * @return bool
      */
     public function delete($entity)
@@ -166,8 +240,10 @@ class SolrManager
             $mapper->delete($update, $entity);
             $update->commit();
             $this->client->update($update);
+
             return true;
         }
+
         return false;
     }
 
@@ -176,6 +252,7 @@ class SolrManager
      * Enables or disabled the solr manager.
      *
      * @param boolean $enabled
+     *
      * @return void
      */
     public function setEnabled($enabled)
@@ -188,6 +265,7 @@ class SolrManager
      * Returns a mapper based on the entity's type.
      *
      * @param mixed $entity
+     *
      * @return DataMapperInterface
      */
     protected function getMapper($entity)
