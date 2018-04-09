@@ -8,11 +8,11 @@ namespace Zicht\Bundle\SolrBundle\Event;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Class PostBuildSupportedEntitiesListEvent
+ * Class PostBuildEntitiesListEvent
  *
  * @package Zicht\Bundle\SolrBundle\Event
  */
-class PostBuildSupportedEntitiesListEvent extends Event
+class PostBuildEntitiesListEvent extends Event
 {
     /** @var array */
     private $list;

@@ -3,31 +3,64 @@
  * @author    Philip Bergman <philip@zicht.nl>
  * @copyright Zicht Online <http://www.zicht.nl>
  */
-namespace Zicht\Bundle\MenuDebugBundle\EventListener;
+namespace Zicht\Bundle\SolrBundle\EventListener;
 
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Events;
-use Zicht\Bundle\MenuBundle\Entity\MenuItem;
+use Zicht\Bundle\SolrBundle\Mapper\DocumentMapperMetadataFactory;
 
 /**
  * Class LoadClassMetadataListener
  *
- * @package Zicht\Bundle\MenuDebugBundle\EventListener
+ * @package Zicht\Bundle\SolrBundle\EventListener
  */
 class LoadClassMetadataListener
 {
+    /** @var DocumentMapperMetadataFactory  */
+    private $factory;
+    /** @var array  */
+    private $events = [
+        Events::postPersist,
+        Events::preUpdate,
+        Events::preRemove
+    ];
+
+    /**
+     * LoadClassMetadataListener constructor.
+     *
+     * @param DocumentMapperMetadataFactory $factory
+     */
+    public function __construct(DocumentMapperMetadataFactory $factory)
+    {
+        $this->factory = $factory;
+    }
+
     /**
      * @param LoadClassMetadataEventArgs $args
      */
     public function loadClassMetadata(LoadClassMetadataEventArgs $args)
     {
-        /** @var \Doctrine\ORM\Mapping\ClassMetadata $cmd */
-        $cmd = $args->getClassMetadata();
-
-        if ($cmd->isRootEntity() && MenuItem::class === $cmd->getName()) {
-            $cmd->addEntityListener(Events::preRemove, MenuItemEntityListener::class, 'preRemove');
-            $cmd->addEntityListener(Events::prePersist, MenuItemEntityListener::class, 'prePersist');
-            $cmd->addEntityListener(Events::preUpdate, MenuItemEntityListener::class, 'preUpdate');
+        $metadata = $args->getClassMetadata();
+        if ($this->factory->support($metadata->getReflectionClass()->getName())) {
+            foreach ($this->events as $event) {
+                if (false === $this->hasEventListenerFor($event, $metadata)) {
+                    $metadata->addEntityListener($event, EntityListener::class, $event);
+                }
+            }
         }
+    }
+
+    /**
+     * @param string $event
+     * @param ClassMetadata $metadata
+     * @return bool
+     */
+    protected function hasEventListenerFor($event, ClassMetadata $metadata)
+    {
+        if (!isset($metadata->entityListeners[$event])) {
+            return false;
+        }
+        return in_array(EntityListener::class, array_column($metadata->entityListeners[$event], 'class'));
     }
 }

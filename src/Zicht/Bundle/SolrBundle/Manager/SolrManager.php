@@ -8,6 +8,8 @@
 namespace Zicht\Bundle\SolrBundle\Manager;
 
 use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
+use Zicht\Bundle\SolrBundle\Mapper\DocumentMapperMetadata;
+use Zicht\Bundle\SolrBundle\Mapper\DocumentMapperMetadataFactory;
 use Zicht\Bundle\SolrBundle\Solr\Client;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
@@ -16,73 +18,105 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
  */
 class SolrManager
 {
-    /**
-     * @var Client
-     */
-    protected $client = null;
+    /** @var  DocumentMapperMetadataFactory */
+    private $metadataFactory;
 
     /**
-     * @var bool
+     * @return DocumentMapperMetadataFactory
      */
-    protected $enabled = true;
-
-    /**
-     * @var DataMapperInterface[]
-     */
-    protected $mappers = array();
-    private $repositories;
-
-
-    /**
-     * Constructor
-     *
-     * @param Client $client
-     */
-    public function __construct(Client $client)
+    public function getDocumentMapperMetadataFactory()
     {
-        $this->client = $client;
-        $this->mappers = array();
-    }
-
-
-    /**
-     * Adds a data mapper
-     *
-     * @param DataMapperInterface $dataMapper
-     * @return void
-     */
-    public function addMapper($dataMapper)
-    {
-        $this->mappers[]= $dataMapper;
+        return $this->metadataFactory;
     }
 
     /**
-     * Adds a document repository responsible for querying documents when doing a reindex of multiple records
-     *
-     * @param string $class
-     * @param SearchDocumentRepository $repository
-     * @return void
+     * @param string $className
+     * @return DocumentMapperMetadata
      */
-    public function addRepository($class, $repository)
+    public function getDocumentMapperMetadata($className)
     {
-        $this->repositories[$class]= $repository;
+        return $this->metadataFactory->getDocumentMapperMetadataForClass($className);
     }
-
 
     /**
-     * Get a class-specific repository implementation
+     * SolrManager constructor.
      *
-     * @param string $entityClass
-     * @return SearchDocumentRepository|null
+     * @param DocumentMapperMetadataFactory $metadataFactory
      */
-    public function getRepository($entityClass)
+    public function __construct(DocumentMapperMetadataFactory $metadataFactory)
     {
-        if (!isset($this->repositories[$entityClass])) {
-            return null;
-        }
-
-        return $this->repositories[$entityClass];
+        $this->metadataFactory = $metadataFactory;
     }
+
+
+
+//    /**
+//     * @var Client
+//     */
+//    protected $client = null;
+//
+//    /**
+//     * @var bool
+//     */
+//    protected $enabled = true;
+//
+//    /**
+//     * @var DataMapperInterface[]
+//     */
+//    protected $mappers = array();
+//    private $repositories;
+//
+//
+//    /**
+//     * Constructor
+//     *
+//     * @param Client $client
+//     */
+//    public function __construct(Client $client = null)
+//    {
+//        $this->client = $client;
+//        $this->mappers = array();
+//    }
+//
+//
+//    /**
+//     * Adds a data mapper
+//     *
+//     * @param DataMapperInterface $dataMapper
+//     * @return void
+//     */
+//    public function addMapper($dataMapper)
+//    {
+//        $this->mappers[]= $dataMapper;
+//    }
+//
+//    /**
+//     * Adds a document repository responsible for querying documents when doing a reindex of multiple records
+//     *
+//     * @param string $class
+//     * @param SearchDocumentRepository $repository
+//     * @return void
+//     */
+//    public function addRepository($class, $repository)
+//    {
+//        $this->repositories[$class]= $repository;
+//    }
+//
+//
+//    /**
+//     * Get a class-specific repository implementation
+//     *
+//     * @param string $entityClass
+//     * @return SearchDocumentRepository|null
+//     */
+//    public function getRepository($entityClass)
+//    {
+//        if (!isset($this->repositories[$entityClass])) {
+//            return null;
+//        }
+//
+//        return $this->repositories[$entityClass];
+//    }
 
 
     /**
@@ -184,20 +218,20 @@ class SolrManager
     }
 
 
-    /**
-     * Returns a mapper based on the entity's type.
-     *
-     * @param mixed $entity
-     * @return DataMapperInterface
-     */
-    protected function getMapper($entity)
-    {
-        foreach ($this->mappers as $mapper) {
-            if ($mapper->supports($entity)) {
-                return $mapper;
-            }
-        }
-
-        return null;
-    }
+//    /**
+//     * Returns a mapper based on the entity's type.
+//     *
+//     * @param mixed $entity
+//     * @return DataMapperInterface
+//     */
+//    protected function getMapper($entity)
+//    {
+//        foreach ($this->mappers as $mapper) {
+//            if ($mapper->supports($entity)) {
+//                return $mapper;
+//            }
+//        }
+//
+//        return null;
+//    }
 }

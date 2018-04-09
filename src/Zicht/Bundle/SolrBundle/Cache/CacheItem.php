@@ -5,7 +5,7 @@
  */
 namespace Zicht\Bundle\SolrBundle\Cache;
 
-class FilesystemCacheItem
+class CacheItem
 {
     /** @var string */
     public $key;

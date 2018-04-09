@@ -11,9 +11,17 @@ use Doctrine\Common\Annotations\Annotation;
  * @Annotation
  * @Target("CLASS")
  */
-final class Indexable extends Annotation
+final class Document extends Annotation
 {
-    public $resource;
+    /**
+     * if false then a instance of comparison is done
+     * instead of a strict comparison (===). So all
+     * child classes inherit the same annotations.
+     *
+     * @var bool
+     */
+    public $strict = true;
 
-    public $resourcePlural;
+    /** @var string */
+    public $repository;
 }

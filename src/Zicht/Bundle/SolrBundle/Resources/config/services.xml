@@ -5,13 +5,17 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
+
         <service id="zicht_solr.manager" class="Zicht\Bundle\SolrBundle\Manager\SolrManager">
-            <argument type="service" id="zicht_solr.solr"/>
+            <!--<argument type="service" id="zicht_solr.solr"/>-->
+            <argument type="service" id="zicht_solr.mapper.document_metadata_factory"/>
         </service>
-        <service id="zicht_solr.doctrine.subscriber" class="Zicht\Bundle\SolrBundle\Manager\Doctrine\Subscriber">
-            <argument type="service" id="service_container"/>
-            <tag name="doctrine.event_subscriber" />
-        </service>
+
+        <!--<service id="zicht_solr.doctrine.subscriber" class="Zicht\Bundle\SolrBundle\Manager\Doctrine\Subscriber">-->
+            <!--<argument type="service" id="service_container"/>-->
+            <!--<tag name="doctrine.event_subscriber" />-->
+        <!--</service>-->
+
         <service id="zicht_solr.solr" class="Zicht\Bundle\SolrBundle\Solr\Client">
             <argument type="service" id="_zicht_solr.http_client" />
         </service>
@@ -22,5 +26,32 @@
             <tag name="data_collector" template="@ZichtSolr/DataCollector/data_collector.html.twig" id="zicht_solr.data_collector" />
             <argument type="service" id="zicht_solr.solr" />
         </service>
+
+        <service id="zicht_solr.mapper.document_metadata_factory" class="Zicht\Bundle\SolrBundle\Mapper\DocumentMapperMetadataFactory" public="false">
+            <argument/>
+            <argument/>
+            <argument type="service" id="annotations.reader"/>
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+
+
+
+        <service id="zicht_solr.event_listener.cache_warmer" class="Zicht\Bundle\SolrBundle\EventListener\CacheWarmerListener">
+            <argument type="service" id="zicht_solr.mapper.document_metadata_factory"/>
+            <tag name="kernel.cache_warmer" />
+        </service>
+
+        <service id="zicht_solr.event_listener.loadclassmetadata" class="Zicht\Bundle\SolrBundle\EventListener\LoadClassMetadataListener">
+            <argument type="service" id="zicht_solr.mapper.document_metadata_factory"/>
+            <tag name="doctrine.event_listener" event="loadClassMetadata"/>
+        </service>
+
+
+        <service id="zicht_solr.event_listener.entity_listener" class="Zicht\Bundle\SolrBundle\EventListener\EntityListener">
+            <argument type="service" id="zicht_solr.manager" />
+            <tag name="doctrine.orm.entity_listener" />
+        </service>
+
     </services>
 </container>

@@ -5,13 +5,10 @@
  */
 namespace Zicht\Bundle\SolrBundle\Cache;
 
-use Psr\SimpleCache\CacheInterface;
 use Zicht\Bundle\SolrBundle\Exception\CacheRuntimeException;
 
-class FileSystemCache implements CacheInterface
+class FilesystemCache extends AbstractCache
 {
-    use KeyTrait;
-
     /** @var string  */
     protected $base;
 
@@ -27,7 +24,7 @@ class FileSystemCache implements CacheInterface
                 throw new CacheRuntimeException(sprintf('Failed to create directory "%s", %s', $base, error_get_last()));
             }
         }
-        $this->base = ltrim($base, DIRECTORY_SEPARATOR);
+        $this->base = rtrim($base, DIRECTORY_SEPARATOR);
     }
 
 
@@ -36,18 +33,9 @@ class FileSystemCache implements CacheInterface
      */
     public function get($key, $default = null)
     {
-        $this->validateKey($key);
-
-        if (is_file($file = $this->getFilePath($key))) {
-            if (false === $contents = @file_get_contents($file)) {
-                throw new CacheRuntimeException(sprintf('Failed to read from file "%s", %s', $file, error_get_last());
-            }
-
-            if (false === $data =
-
-            list(,$value) = unserialize(file_get_contents($file));
+        if (is_file($file = $this->getFile($key))) {
+            return require $file;
         }
-
         return $default;
     }
 
@@ -56,7 +44,10 @@ class FileSystemCache implements CacheInterface
      */
     public function set($key, $value, $ttl = null)
     {
-        // TODO: Implement set() method.
+        $status = true;
+        $status &= (bool)file_put_contents($this->getFile($key), $this->export($value));
+        $status &= (bool)file_put_contents($this->getFile($key, '.meta'), $this->export(['key' => $key]));
+        return (bool)$status;
     }
 
     /**
@@ -64,7 +55,12 @@ class FileSystemCache implements CacheInterface
      */
     public function delete($key)
     {
-        // TODO: Implement delete() method.
+        if (($file = $this->getFile($key)) && is_file($file)) {
+            if (unlink($file)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -72,31 +68,11 @@ class FileSystemCache implements CacheInterface
      */
     public function clear()
     {
-        // TODO: Implement clear() method.
-    }
-
-    /**
-     * @{inheritDoc}
-     */
-    public function getMultiple($keys, $default = null)
-    {
-        // TODO: Implement getMultiple() method.
-    }
-
-    /**
-     * @{inheritDoc}
-     */
-    public function setMultiple($values, $ttl = null)
-    {
-        // TODO: Implement setMultiple() method.
-    }
-
-    /**
-     * @{inheritDoc}
-     */
-    public function deleteMultiple($keys)
-    {
-        // TODO: Implement deleteMultiple() method.
+        $result = true;
+        foreach(glob($this->base . '/*.php') as $file) {
+            $result &= unlink($file);
+        }
+        return $result;
     }
 
     /**
@@ -104,23 +80,27 @@ class FileSystemCache implements CacheInterface
      */
     public function has($key)
     {
-        return is_file($this->getFilePath($key));
+        return is_file($this->getFile($key));
     }
 
     /**
      * @param string $key
+     * @param null|string $suffix
+     * @return string
+     * @internal param string $type
+     */
+    private function getFile($key, $suffix = null)
+    {
+        $this->validateKey($key);
+        return $this->base . '/' . sha1($key) . $suffix . '.php';
+    }
+
+    /**
+     * @param mixed $item
      * @return string
      */
-    private function getFilePath($key)
+    private function export($item)
     {
-        return $this->base . '/' . sha1($key);
-    }
-
-    private function encode($data) {
-        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
-    }
-
-    private function decode($data) {
-        return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT));
+        return sprintf('<?php return unserialize(%s);', var_export(serialize($item), true));
     }
 }

@@ -5,7 +5,12 @@
  */
 namespace Zicht\Bundle\SolrBundle\Mapper;
 
-class DocumentMetadata
+/**
+ * Class DocumentMapperMetadata
+ *
+ * @package Zicht\Bundle\SolrBundle\Mapper
+ */
+class DocumentMapperMetadata
 {
     /** @var array */
     private $staticFields = [];
@@ -14,22 +19,35 @@ class DocumentMetadata
     /** @var bool */
     private $strict;
     /** @var string */
-    private $class;
+    private $className;
     /** @var string */
     private $repository;
+    /** @var bool */
+    private $active = true;
 
     /**
-     * DocumentMapper constructor.
+     * DocumentMapperMetadata constructor.
      *
-     * @param string $class
+     * @param string $className
      * @param null $repository
      * @param bool $strict
      */
-    public function __construct($class, $repository = null, $strict = false)
+    public function __construct($className, $repository = null, $strict = false)
     {
-        $this->class = $class;
+        $this->className = $className;
         $this->repository = $repository;
         $this->strict = $strict;
+    }
+
+    /**
+     * @param string $className
+     * @return DocumentMapperMetadata
+     */
+    public function newWith($className)
+    {
+        $instance = clone $this;
+        $instance->className = $className;
+        return $instance;
     }
 
     /**
@@ -68,7 +86,7 @@ class DocumentMetadata
     /**
      * @param string $name
      * @param string $property
-     * @return $this
+     * @return DocumentMapperMetadata
      */
     public function addMapping($name, $property)
     {
@@ -87,9 +105,9 @@ class DocumentMetadata
     /**
      * @return string
      */
-    public function getClass()
+    public function getClassName()
     {
-        return $this->class;
+        return $this->className;
     }
 
     /**
@@ -106,5 +124,23 @@ class DocumentMetadata
     public function isStrict()
     {
         return $this->strict;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isActive()
+    {
+        return $this->active;
+    }
+
+    /**
+     * @param bool $active
+     * @return DocumentMapperMetadata
+     */
+    public function setActive($active)
+    {
+        $this->active = $active;
+        return $this;
     }
 }

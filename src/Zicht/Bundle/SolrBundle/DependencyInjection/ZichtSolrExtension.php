@@ -7,6 +7,7 @@ namespace Zicht\Bundle\SolrBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
 
@@ -26,11 +27,52 @@ class ZichtSolrExtension extends Extension
         $config        = $this->processConfiguration($configuration, $configs);
 
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader->load('cache.xml');
         $loader->load('services.xml');
         $loader->load('commands.xml');
 
-        $container->getDefinition('_zicht_solr.http_client')->setArguments([
-            ['base_url' => sprintf('http://%s:%d%s/%s/', $config['host'], $config['port'], $config['path'], $config['core'])]
-        ]);
+
+// array (size=5)
+//  'port' => int 8983
+//  'host' => string 'solr.zicht.intern' (length=17)
+//  'path' => string '/solr' (length=5)
+//  'core' => string 'amst001_testing' (length=15)
+//  'mapper' =>
+//    array (size=2)
+//      'cache' => string 'zicht_solr.cache.filesystem' (length=27)
+//      'naming_strategy' => string 'doctrine.orm.naming_strategy.underscore' (length=39)
+
+        $container
+            ->getDefinition('zicht_solr.mapper.document_metadata_factory')
+            ->replaceArgument(0 , new Reference($config['mapper']['naming_strategy']))
+            ->replaceArgument(1 , new Reference($config['mapper']['cache']));
+
+//        $container->getDefinition('_zicht_solr.http_client')->setArguments([
+//            ['base_url' => sprintf('http://%s:%d%s/%s/', $config['host'], $config['port'], $config['path'], $config['core'])]
+//        ]);
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param string $cacheId
+     */
+    protected function setMetaFactoryArguments(ContainerBuilder $container, $cacheId)
+    {
+        $args = [new Reference($cacheId), new Reference('annotations.reader')];
+
+        foreach ($container->getParameter('doctrine.entity_managers') as $manager) {
+            /** each entity manager has 2 argument, connection and config */
+            $definitionName = (string)$container->getDefinition($manager)->getArgument(1);
+            foreach ($container->getDefinition($definitionName )->getMethodCalls() as list($name, $arguments)) {
+                if ('setMetadataDriverImpl' === $name) {
+                    $args[] = $arguments[0];
+                }
+            }
+        }
+
+        $container
+            ->getDefinition('zicht_solr.metadata.factory')
+            ->setArguments($args);
+
     }
 }

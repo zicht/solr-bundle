@@ -5,6 +5,7 @@
  */
 namespace Zicht\Bundle\SolrBundle;
 
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -22,5 +23,6 @@ class ZichtSolrBundle extends Bundle
 
         $container->addCompilerPass(new DependencyInjection\CompilerPass\AddMapperPass());
         $container->addCompilerPass(new DependencyInjection\CompilerPass\AddRepositoryPass());
+        $container->addCompilerPass(new DependencyInjection\CompilerPass\AddMappingDrivers());
     }
 }
