@@ -93,6 +93,10 @@ class Extract extends AbstractQueryBuilder
                 continue;
             }
 
+            if (is_array($value)) {
+                $value = implode(',', $value);
+            }
+
             $body->setField($key, $value);
         }
 
