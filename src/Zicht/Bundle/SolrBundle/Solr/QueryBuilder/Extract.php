@@ -61,6 +61,17 @@ class Extract extends AbstractQueryBuilder
         // context.
         $this->data = ['literal.id' => $id];
         foreach ($values as $key => $value) {
+            // after hours of research and looking into different documentation the problem with arrays in a post
+            // with [0] [1] etc where not recognized as valid fields by solr.
+            // So the fix is to post arrays as single elements
+            if (is_array($value)) {
+                foreach ($value as $k => $v) {
+                    //
+                    $this->data[ sprintf('literal.%s%d', $key, $k) ] = $v;
+                    $this->data[ sprintf('fmap.%s%d', $key, $k) ] = sprintf('%s', $key);
+                }
+                continue;
+            }
             $this->data[ sprintf('literal.%s', $key) ] = $value;
         }
 
@@ -91,10 +102,6 @@ class Extract extends AbstractQueryBuilder
             if (is_resource($value)) {
                 $body->addFile(new PostFile($key, $value));
                 continue;
-            }
-
-            if (is_array($value)) {
-                $value = implode(',', $value);
             }
 
             $body->setField($key, $value);
