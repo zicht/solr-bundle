@@ -6,7 +6,7 @@
 namespace Zicht\Bundle\SolrBundle\EventListener;
 
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
-use Zicht\Bundle\SolrBundle\Mapper\DocumentMapperMetadataFactory;
+use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadataFactory;
 
 class CacheWarmerListener implements CacheWarmerInterface
 {

@@ -5,7 +5,8 @@
  */
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
-use GuzzleHttp\Client;
+use Psr\Http\Message\RequestInterface;
+use Zicht\Http\RequestFactoryInterface;
 
 /**
  * Interface RequestBuilderInterface
@@ -15,8 +16,8 @@ interface RequestBuilderInterface
     /**
      * Create an HTTP request that needs to be sent to SOLR.
      *
-     * @param Client $httpClient
-     * @return mixed
+     * @param RequestFactoryInterface $factory
+     * @return RequestInterface
      */
-    public function createRequest(Client $httpClient);
+    public function createRequest(RequestFactoryInterface $factory);
 }

@@ -4,15 +4,22 @@
     {% set icon %}
         <a href="{{ path('_profiler', { 'token': token, 'panel': name }) }}">
             <span>
-                <span class="icon">{{ include('@ZichtSolrBundle/Resources/public/images/solr_icon.svg') }}</span>
-                <span class="sf-toolbar-status">{{ collector.requests|length }}</span>
+                <span class="icon">
+                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 23.999999 24.005691" height="28" width="24">
+                        <path d="M20.743 3.8L8.925 16.577l14.853-6.852A11.99 11.99 0 0 0 20.743 3.8M11.975 0c-1.638 0-3.198.328-4.62.921L5.769 14.284 13.693.124A12.086 12.086 0 0 0 11.975 0m11.92 10.461L9.822 18.337l13.204-1.567a11.982 11.982 0 0 0 .87-6.309M18.707 21.99a12.086 12.086 0 0 0 3.8-4.16l-12.376 2.458 8.576 1.703zM14.418.249L7.528 15.18l12.78-11.82a11.994 11.994 0 0 0-5.89-3.112M12.98 24.006a11.95 11.95 0 0 0 3.774-.945l-6.932-.823 3.158 1.768zM1.013 7.082A11.949 11.949 0 0 0 0 10.947l1.868 3.337-.855-7.202zm5.3-5.667A12.082 12.082 0 0 0 2.075 5.2l1.743 8.775 2.495-12.56z" fill="#000"/>
+                    </svg>
+                </span>
+                <span class="sf-toolbar-status">{{ collector.countRequests }}</span>
             </span>
         </a>
     {% endset %}
 
     {% set text %}
         <div class="sf-toolbar-info-piece">
-            <b>Requests</b><span class="sf-toolbar-status">{{ collector.requests|length }}</span>
+            <b>Requests</b><span class="sf-toolbar-status">{{ collector.countRequests }}</span>
+        </div>
+        <div class="sf-toolbar-info-piece">
+            <b>Total time</b><span class="sf-toolbar-status">{{ collector.getTimeRequests|number_format(3) }} ms</span>
         </div>
     {% endset %}
 
@@ -27,24 +34,56 @@
     {# This left-hand menu appears when using the full-screen profiler. #}
     <span class="label">
         <span class="icon">
-            {{ include('@ZichtSolrBundle/Resources/public/images/solr_icon.svg') }}
+           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 23.999999 24.005691" height="28" width="24">
+                <path d="M20.743 3.8L8.925 16.577l14.853-6.852A11.99 11.99 0 0 0 20.743 3.8M11.975 0c-1.638 0-3.198.328-4.62.921L5.769 14.284 13.693.124A12.086 12.086 0 0 0 11.975 0m11.92 10.461L9.822 18.337l13.204-1.567a11.982 11.982 0 0 0 .87-6.309M18.707 21.99a12.086 12.086 0 0 0 3.8-4.16l-12.376 2.458 8.576 1.703zM14.418.249L7.528 15.18l12.78-11.82a11.994 11.994 0 0 0-5.89-3.112M12.98 24.006a11.95 11.95 0 0 0 3.774-.945l-6.932-.823 3.158 1.768zM1.013 7.082A11.949 11.949 0 0 0 0 10.947l1.868 3.337-.855-7.202zm5.3-5.667A12.082 12.082 0 0 0 2.075 5.2l1.743 8.775 2.495-12.56z" fill="#000"/>
+           </svg>
         </span>
-        <strong>Solr Requests</strong><span class="count">{{ collector.requests|length }}</span>
+
+        <strong>Solr Requests</strong><span class="count"><span>{{ collector.countRequests }}</span></span>
     </span>
 {% endblock %}
 
 {% block panel %}
-    {# Optional, for showing the most details. #}
     <h2>Executed queries</h2>
-
+    {% for i in collector.requests %}
     <table>
-        {% for i in collector.requests %}
+        <thead>
+            <tr><th colspan="2"><pre>{{ i.header }}</pre></th></tr>
+        </thead>
+        <tbody>
+            <tr><td>time</td><td><pre>{{ (i.time * 1000 )|number_format(2) }} ms</pre></td></tr>
             <tr>
-                <td><a href="{{ i.requestUri }}" target="_blank">{{ i.requestUri }}</a></td>
+                <td>request</td>
+                <td>
+                    <div>
+                        <pre style="overflow:auto;word-wrap:normal;height:60px;resize:both;margin-bottom:15px;">{{ i.request }}</pre>
+                    </div>
+                    <div style="margin-bottom:10px">
+                        {{ dump(i.request_vars) }}
+                    </div>
+                </td>
             </tr>
             <tr>
-                <td>{{ dump(i.response) }}</td>
+                <td>response</td>
+                <td>
+                    <div>
+                        <pre style="overflow:auto;word-wrap:normal;height:100px;resize:both;margin-bottom:15px;">{{ i.response }}</pre>
+                    </div>
+                    <div style="margin-bottom:10px">
+                        {{ dump(i.response_vars) }}
+                    </div>
+                </td>
             </tr>
-        {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr><th colspan="2"><pre>{{ i.footer }}</pre></th></tr>
+        </tfoot>
     </table>
+    {% endfor %}
+    <script type="text/javascript">
+        var toggles = document.querySelectorAll('.sf-dump-toggle');
+        for (var i = 0, c = toggles.length; i < c; i++) {
+            toggles[i].click();
+        }
+    </script>
 {% endblock %}

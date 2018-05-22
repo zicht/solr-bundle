@@ -8,8 +8,9 @@
 namespace Zicht\Bundle\SolrBundle\Manager;
 
 use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
-use Zicht\Bundle\SolrBundle\Mapper\DocumentMapperMetadata;
-use Zicht\Bundle\SolrBundle\Mapper\DocumentMapperMetadataFactory;
+use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadata;
+use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadataFactory;
+use Zicht\Bundle\SolrBundle\Net\ClientInterface;
 use Zicht\Bundle\SolrBundle\Solr\Client;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
@@ -20,6 +21,17 @@ class SolrManager
 {
     /** @var  DocumentMapperMetadataFactory */
     private $metadataFactory;
+
+    /**
+     * SolrManager constructor.
+     *
+     * @param DocumentMapperMetadataFactory $metadataFactory
+     */
+    public function __construct(DocumentMapperMetadataFactory $metadataFactory, ClientInterface $client)
+    {
+        $this->metadataFactory = $metadataFactory;
+        $this->client = $client;
+    }
 
     /**
      * @return DocumentMapperMetadataFactory
@@ -38,15 +50,7 @@ class SolrManager
         return $this->metadataFactory->getDocumentMapperMetadataForClass($className);
     }
 
-    /**
-     * SolrManager constructor.
-     *
-     * @param DocumentMapperMetadataFactory $metadataFactory
-     */
-    public function __construct(DocumentMapperMetadataFactory $metadataFactory)
-    {
-        $this->metadataFactory = $metadataFactory;
-    }
+
 
 
 
@@ -103,20 +107,24 @@ class SolrManager
 //    }
 //
 //
-//    /**
-//     * Get a class-specific repository implementation
-//     *
-//     * @param string $entityClass
-//     * @return SearchDocumentRepository|null
-//     */
-//    public function getRepository($entityClass)
-//    {
-//        if (!isset($this->repositories[$entityClass])) {
-//            return null;
-//        }
-//
-//        return $this->repositories[$entityClass];
-//    }
+    /**
+     * Get a class-specific repository implementation
+     *
+     * @param string $entityClass
+     * @return SearchDocumentRepository|null
+     */
+    public function getRepository($entityClass)
+    {
+        static $instances;
+        if (null !== $meta = $this->getDocumentMapperMetadata($entityClass)) {
+            $class = $meta->getRepository();
+            if (!isset($instances[$class])) {
+                $instances[$class] = new $class;
+            }
+            return $instances[$class];
+        }
+        return null;
+    }
 
 
     /**
@@ -130,33 +138,33 @@ class SolrManager
      */
     public function updateBatch($records, $incrementCallback = null, $errorCallback = null, $delete = false)
     {
-        $update = new QueryBuilder\Update();
-
-        $n = $i = 0;
-        foreach ($records as $record) {
-            if ($mapper = $this->getMapper($record)) {
-                $i ++;
-                try {
-                    if ($delete) {
-                        $mapper->delete($update, $record, $update);
-                    }
-                    $mapper->update($update, $record, $update);
-                } catch (\Exception $e) {
-                    if ($errorCallback) {
-                        call_user_func($errorCallback, $record, $e);
-                    }
-                }
-                if ($incrementCallback) {
-                    call_user_func($incrementCallback, $n);
-                }
-            }
-            $n ++;
-        }
-        call_user_func($incrementCallback, $n);
-
-        $update->commit();
-        $this->client->update($update);
-        return array($n, $i);
+//        $update = new QueryBuilder\Update();
+//
+//        $n = $i = 0;
+//        foreach ($records as $record) {
+//            if ($mapper = $this->getMapper($record)) {
+//                $i ++;
+//                try {
+//                    if ($delete) {
+//                        $mapper->delete($update, $record, $update);
+//                    }
+//                    $mapper->update($update, $record, $update);
+//                } catch (\Exception $e) {
+//                    if ($errorCallback) {
+//                        call_user_func($errorCallback, $record, $e);
+//                    }
+//                }
+//                if ($incrementCallback) {
+//                    call_user_func($incrementCallback, $n);
+//                }
+//            }
+//            $n ++;
+//        }
+//        call_user_func($incrementCallback, $n);
+//
+//        $update->commit();
+//        $this->client->update($update);
+//        return array($n, $i);
     }
 
 
@@ -168,18 +176,18 @@ class SolrManager
      */
     public function update($entity)
     {
-        if (!$this->enabled) {
-            return false;
-        }
-
-        if ($mapper = $this->getMapper($entity)) {
-            $update = new QueryBuilder\Update();
-            $mapper->update($update, $entity);
-            $update->commit();
-            $this->client->update($update);
-            return true;
-        }
-        return false;
+//        if (!$this->enabled) {
+//            return false;
+//        }
+//
+//        if ($mapper = $this->getMapper($entity)) {
+//            $update = new QueryBuilder\Update();
+//            $mapper->update($update, $entity);
+//            $update->commit();
+//            $this->client->update($update);
+//            return true;
+//        }
+//        return false;
     }
 
 
@@ -191,18 +199,18 @@ class SolrManager
      */
     public function delete($entity)
     {
-        if (!$this->enabled) {
-            return false;
-        }
-
-        if ($mapper = $this->getMapper($entity)) {
-            $update = new QueryBuilder\Update();
-            $mapper->delete($update, $entity);
-            $update->commit();
-            $this->client->update($update);
-            return true;
-        }
-        return false;
+//        if (!$this->enabled) {
+//            return false;
+//        }
+//
+//        if ($mapper = $this->getMapper($entity)) {
+//            $update = new QueryBuilder\Update();
+//            $mapper->delete($update, $entity);
+//            $update->commit();
+//            $this->client->update($update);
+//            return true;
+//        }
+//        return false;
     }
 
 

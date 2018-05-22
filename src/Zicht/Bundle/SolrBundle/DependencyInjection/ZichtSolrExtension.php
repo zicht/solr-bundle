@@ -7,9 +7,15 @@ namespace Zicht\Bundle\SolrBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Zicht\Http\Handler\HandlerDebugInterface;
+use Zicht\Http\Message\Uri;
+use Zicht\Http\Stream\TempStream;
 
 /**
  * This is the class that loads and manages your bundle configuration
@@ -28,6 +34,7 @@ class ZichtSolrExtension extends Extension
 
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('cache.xml');
+        $loader->load('net.xml');
         $loader->load('services.xml');
         $loader->load('commands.xml');
 
@@ -46,6 +53,35 @@ class ZichtSolrExtension extends Extension
             ->getDefinition('zicht_solr.mapper.document_metadata_factory')
             ->replaceArgument(0 , new Reference($config['mapper']['naming_strategy']))
             ->replaceArgument(1 , new Reference($config['mapper']['cache']));
+
+
+        $definition = new Definition(Uri::class);
+        $definition->setArguments([sprintf('http://%s:%d%s/%s/', $config['host'], $config['port'], $config['path'], $config['core'])]);
+        $definition->setPublic(false);
+
+        $container->setDefinition('zicht_solr.uri', $definition);
+        $container->getDefinition('zicht_solr.net.handler.socket')->replaceArgument(0, new Reference('zicht_solr.uri'));
+
+        if ($container->getParameter('kernel.debug')) {
+
+            $socketDefinition = $container->getDefinition('zicht_solr.net.handler.socket');
+
+            if (is_a($socketDefinition->getClass(), HandlerDebugInterface::class, true)) {
+
+                $container->setDefinition(
+                    'zicht_solr.debug.request.logger',
+                    (new Definition(TempStream::class))->setPublic(false)
+                );
+
+                $socketDefinition->addMethodCall('setDebug', [new Reference('zicht_solr.debug.request.logger')]);
+
+                $container
+                    ->getDefinition('_zicht_solr.data_collector')
+                    ->addMethodCall('addDebugger', ['requests', new Reference('zicht_solr.debug.request.logger')]);
+            }
+        }
+
+//        if ($container->getParameter('kernel.debug'))
 
 //        $container->getDefinition('_zicht_solr.http_client')->setArguments([
 //            ['base_url' => sprintf('http://%s:%d%s/%s/', $config['host'], $config['port'], $config['path'], $config['core'])]

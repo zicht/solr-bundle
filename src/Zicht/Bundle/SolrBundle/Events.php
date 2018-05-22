@@ -16,15 +16,25 @@ final class Events
      * This event will be called when a document mapper metadata is build
      * and can be used to add or alter mapping fields.
      *
-     * @param \Zicht\Bundle\SolrBundle\Event\DocumentMapperMetadataEvent $event.
+     * @param \Zicht\Bundle\SolrBundle\Event\MetadataLoadDocumentMapperEvent $event.
      */
-    const LOAD_DOCUMENT_MAPPER_METADATA = 'solr.load_document_mapper_metadata';
+    const METADATA_LOAD_DOCUMENT_MAPPER = 'solr.metadata_load_document_mapper';
 
     /**
      * this event will be called when the factory class has build a list
      * of supported entities and can be used to alter the support list.
      *
-     * @param \Zicht\Bundle\SolrBundle\Event\PostBuildEntitiesListEvent $event.
+     * @param \Zicht\Bundle\SolrBundle\Event\MetadataPostBuildEntitiesListEvent $event.
      */
-    const POST_BUILD_ENTITIES_LIST = 'solr.post_build_entities_list';
+    const METADATA_POST_BUILD_ENTITIES_LIST = 'solr.metadata_post_build_entities_list';
+
+    /**
+     * @param \Zicht\Bundle\SolrBundle\Event\MetadataPostBuildEntitiesListEvent $event.
+     */
+    const NET_CLIENT_PRE_SEND_REQUEST = 'net.client_pre_send_request';
+
+    /**
+     * @param \Zicht\Bundle\SolrBundle\Event\MetadataPostBuildEntitiesListEvent $event.
+     */
+    const NET_CLIENT_POST_SEND_REQUEST = 'net.client_post_send_request';
 }

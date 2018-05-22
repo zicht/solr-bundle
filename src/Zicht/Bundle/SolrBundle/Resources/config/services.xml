@@ -6,36 +6,48 @@
 
     <services>
 
-        <service id="zicht_solr.manager" class="Zicht\Bundle\SolrBundle\Manager\SolrManager">
-            <!--<argument type="service" id="zicht_solr.solr"/>-->
+        <service id="zicht_solr.manager" class="Zicht\Bundle\SolrBundle\Solr\SolrManager">
+            <argument type="service" id="zicht_solr.client"/>
             <argument type="service" id="zicht_solr.mapper.document_metadata_factory"/>
+            <argument type="service" id="zicht_solr.object_storage"/>
         </service>
+
+        <!--<service id="zicht_solr.manager" class="Zicht\Bundle\SolrBundle\Manager\SolrManager">-->
+            <!--&lt;!&ndash;<argument type="service" id="zicht_solr.solr"/>&ndash;&gt;-->
+            <!--<argument type="service" id="zicht_solr.mapper.document_metadata_factory"/>-->
+            <!--<argument type="service" id="zicht_solr.net.client"/>-->
+
+        <!--</service>-->
 
         <!--<service id="zicht_solr.doctrine.subscriber" class="Zicht\Bundle\SolrBundle\Manager\Doctrine\Subscriber">-->
             <!--<argument type="service" id="service_container"/>-->
             <!--<tag name="doctrine.event_subscriber" />-->
         <!--</service>-->
 
-        <service id="zicht_solr.solr" class="Zicht\Bundle\SolrBundle\Solr\Client">
-            <argument type="service" id="_zicht_solr.http_client" />
+        <service id="zicht_solr.client" class="Zicht\Bundle\SolrBundle\Solr\Client">
+            <argument type="service" id="zicht_solr.net.client" />
+            <argument type="service" id="debug.stopwatch" on-invalid="null" />
         </service>
 
         <service id="_zicht_solr.http_client" public="false" class="GuzzleHttp\Client" />
 
         <service id="_zicht_solr.data_collector" class="Zicht\Bundle\SolrBundle\DataCollector\SolrDataCollector" public="false">
             <tag name="data_collector" template="@ZichtSolr/DataCollector/data_collector.html.twig" id="zicht_solr.data_collector" />
-            <argument type="service" id="zicht_solr.solr" />
         </service>
 
-        <service id="zicht_solr.mapper.document_metadata_factory" class="Zicht\Bundle\SolrBundle\Mapper\DocumentMapperMetadataFactory" public="false">
+        <service id="zicht_solr.mapper.document_metadata_factory" class="Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadataFactory" public="false">
             <argument/>
             <argument/>
             <argument type="service" id="annotations.reader"/>
             <argument type="service" id="event_dispatcher"/>
         </service>
 
+        <service id="zicht_solr.default_document_id_generator" class="Zicht\Bundle\SolrBundle\Mapping\IdGeneratorDefault" public="false">
+            <argument type="service" id="zicht_solr.mapper.document_metadata_factory"/>
+            <tag name="zicht_solr.document.id_generator"/>
+        </service>
 
-
+        <service id="zicht_solr.object_storage" class="Zicht\Bundle\SolrBundle\Solr\ObjectStorage" public="false" />
 
         <service id="zicht_solr.event_listener.cache_warmer" class="Zicht\Bundle\SolrBundle\EventListener\CacheWarmerListener">
             <argument type="service" id="zicht_solr.mapper.document_metadata_factory"/>
@@ -48,10 +60,10 @@
         </service>
 
 
-        <service id="zicht_solr.event_listener.entity_listener" class="Zicht\Bundle\SolrBundle\EventListener\EntityListener">
-            <argument type="service" id="zicht_solr.manager" />
-            <tag name="doctrine.orm.entity_listener" />
-        </service>
+        <!--<service id="zicht_solr.event_listener.entity_listener" class="Zicht\Bundle\SolrBundle\EventListener\EntityListener">-->
+            <!--<argument type="service" id="zicht_solr.manager" />-->
+            <!--<tag name="doctrine.orm.entity_listener" />-->
+        <!--</service>-->
 
     </services>
 </container>

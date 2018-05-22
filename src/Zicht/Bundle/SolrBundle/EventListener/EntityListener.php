@@ -7,7 +7,7 @@ namespace Zicht\Bundle\SolrBundle\EventListener;
 
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
-use Zicht\Bundle\SolrBundle\Manager\SolrManager;
+use Zicht\Bundle\SolrBundle\Solr\SolrManager;
 
 /**
  * Class EntityListener
@@ -44,7 +44,7 @@ class EntityListener
      */
     public function preUpdate($entity, PreUpdateEventArgs $event)
     {
-        $this->manager->update($entity);
+        $this->manager->updateFromChangeSet($entity, $event->getEntityChangeSet());
     }
 
     /**
@@ -53,6 +53,6 @@ class EntityListener
      */
     public function preRemove($entity, LifecycleEventArgs $event)
     {
-        $this->manager->delete($entity);
+//        $this->manager->delete($entity);
     }
 }

@@ -21,8 +21,9 @@ class ZichtSolrBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new DependencyInjection\CompilerPass\AddMapperPass());
+//        $container->addCompilerPass(new DependencyInjection\CompilerPass\AddMapperPass());
+        $container->addCompilerPass(new DependencyInjection\CompilerPass\AddMappingDriversPass());
         $container->addCompilerPass(new DependencyInjection\CompilerPass\AddRepositoryPass());
-        $container->addCompilerPass(new DependencyInjection\CompilerPass\AddMappingDrivers());
+        $container->addCompilerPass(new DependencyInjection\CompilerPass\SolrManagerObjectStoragePass());
     }
 }

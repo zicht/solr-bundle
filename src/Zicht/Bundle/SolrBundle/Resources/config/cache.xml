@@ -6,11 +6,11 @@
 
     <services>
 
-        <service id="zicht_solr.cache.filesystem" class="Zicht\Bundle\SolrBundle\Cache\FilesystemCache" public="false">
+        <service id="zicht_solr.cache.filesystem" class="Zicht\SimpleCache\FilesystemCache" public="false">
             <argument>%kernel.cache_dir%/solr/</argument>
         </service>
 
-        <service id="zicht_solr.cache.array" class="Zicht\Bundle\SolrBundle\Cache\ArrayCache"  public="false"/>
+        <service id="zicht_solr.cache.array" class="Zicht\SimpleCache\ArrayCache"  public="false"/>
 
     </services>
 </container>

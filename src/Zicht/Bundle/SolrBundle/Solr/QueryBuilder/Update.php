@@ -5,9 +5,9 @@
  */
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Stream\Stream;
 use Zicht\Bundle\SolrBundle\Solr\DateHelper;
+use Zicht\Http\RequestFactoryInterface;
+use Zicht\Http\Stream\ResourceStream;
 
 /**
  * Class Update
@@ -132,17 +132,22 @@ class Update extends AbstractQueryBuilder
     /**
      * @{inheritDoc}
      */
-    public function createRequest(Client $httpClient)
+    public function createRequest(RequestFactoryInterface $factory)
     {
-        $req = $httpClient->createRequest('POST', 'update');
-
-        $req->setHeader('Content-Type', 'application/json');
 
         fseek($this->stream, -1, SEEK_END);
         fwrite($this->stream, '}');
         fseek($this->stream, 0);
 
-        $req->setBody(Stream::factory($this->stream));
-        return $req;
+        return $factory->createRequest(
+            'POST',
+            'update',
+            [
+                'content-type' => 'application/json'
+            ],
+            new ResourceStream(
+                $this->stream
+            )
+        );
     }
 }

@@ -5,80 +5,55 @@
  */
 namespace Zicht\Bundle\SolrBundle\Facade;
 
+use Symfony\Component\HttpFoundation\RequestStack;
 use Zicht\Bundle\FrameworkExtraBundle\Pager\Pager;
 use Zicht\Bundle\SolrBundle\Solr\Client;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Select;
 use Zicht\Bundle\UrlBundle\Url\Params\Params;
-use Zicht\Bundle\SolrBundle\Pager\SolrPageable;
 
 /**
- * Class SearchFacade
+ * Class AbstractSearchFacade
  *
  * @package Zicht\Bundle\SolrBundle\Facade
  */
-abstract class SearchFacade
+abstract class AbstractSearchFacade
 {
+    /** @var array  */
     protected static $defaultParameterWhitelist = array('keywords', 'page', 'type', 'perpage');
-
-    /**
-     * @var Client
-     */
+    /** @var Client */
     protected $client = null;
-
-    /**
-     * @var Params
-     */
+    /** @var Params */
     protected $searchParams = null;
-
-    /**
-     * SOLR result document
-     *
-     * @var array
-     */
+    /** @var array */
     protected $response = null;
-
-    /**
-     * GET Url mapping
-     *
-     * @var null|string
-     */
+    /** @var null|string */
     protected $urlTemplate = null;
-
-    /**
-     * @var Pager
-     */
+    /** @var Pager */
     protected $pager;
-
-    /**
-     * @var int
-     */
+    /** @var int */
     protected $facetMinimumCount = 1;
-
-    /**
-     * @var int
-     */
+    /** @var int */
     protected $facetResultLimit = -1;
-
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $facetSort = 'count';
-
-    /**
-     * @var int
-     */
+    /** @var int */
     protected $defaultLimit;
+    /** @var $requestStack  */
+    protected $requestStack;
+
 
     /**
      * Construct the facade.
      *
      * @param Client $client
+     * @param RequestStack $requestStack
      * @param int $defaultLimit
      */
-    public function __construct(Client $client, $defaultLimit = 30)
+    public function __construct(Client $client, RequestStack $requestStack, $defaultLimit = 30)
     {
         $this->client       = $client;
         $this->defaultLimit = $defaultLimit;
+        $this->requestStack = $requestStack;
     }
 
 
@@ -125,8 +100,8 @@ abstract class SearchFacade
      */
     public function redirectPost()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            header(sprintf('Location: %s', $this->getPostRedirect($_POST['search'])));
+        if ($this->getRequest()->isMethod('POST')) {
+            header(sprintf('Location: %s', $this->getPostRedirect($this->getRequest()->request->get('search', []))));
             exit;
         }
     }
@@ -181,8 +156,8 @@ abstract class SearchFacade
             throw new \LogicException("You need to call setParams() first");
         }
 
-        if (!empty($_POST['search'])) {
-            $this->redirectPost($_POST['search']);
+        if (null !== $this->getRequest()->request->get('search')) {
+            $this->redirectPost();
             return null;
         }
 
@@ -545,5 +520,13 @@ abstract class SearchFacade
         }
 
         return null;
+    }
+
+    /**
+     * @return null|\Symfony\Component\HttpFoundation\Request
+     */
+    protected function getRequest()
+    {
+        return $this->requestStack->getMasterRequest();
     }
 }

@@ -13,15 +13,21 @@
         "php": ">=5.3",
         "symfony/symfony": ">=2.1",
         "psr/simple-cache": "^1",
-        "guzzlehttp/guzzle": "5.3.*@stable"
+        "psr/http-message": "^1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4",
+        "symfony/symfony": "^2.7"
     },
     "autoload": {
         "psr-0": {
             "": [
-                "src/",
-                "tests/"
+                "src/"
             ]
-        }
+        },
+        "exclude-from-classmap": [
+            "/tests/"
+        ]
     },
     "minimum-stability": "dev",
     "license": "MIT"

@@ -6,25 +6,43 @@
 
     <services>
         <service abstract="true" id="zicht_solr.command.abstract" class="Zicht\Bundle\SolrBundle\Command\AbstractCommand">
-            <argument type="service" id="zicht_solr.solr" />
+            <argument type="service" id="zicht_solr.client" />
         </service>
+
         <service id="zicht_solr.command.ping" class="Zicht\Bundle\SolrBundle\Command\PingCommand" parent="zicht_solr.command.abstract">
             <tag name="console.command"/>
         </service>
+
         <service id="zicht_solr.command.select" class="Zicht\Bundle\SolrBundle\Command\SelectCommand" parent="zicht_solr.command.abstract">
             <tag name="console.command"/>
         </service>
+
         <service id="zicht_solr.command.delete" class="Zicht\Bundle\SolrBundle\Command\DeleteCommand" parent="zicht_solr.command.abstract">
             <tag name="console.command"/>
         </service>
+
         <service id="zicht_solr.command.update" class="Zicht\Bundle\SolrBundle\Command\UpdateCommand" parent="zicht_solr.command.abstract">
             <tag name="console.command"/>
         </service>
 
-        <service id="zicht_solr.command.reindex" class="Zicht\Bundle\SolrBundle\Command\ReindexCommand" parent="zicht_solr.command.abstract">
+        <service id="zicht_solr.command.list_entities" class="Zicht\Bundle\SolrBundle\Command\ListEntitiesCommand">
+            <argument type="service" id="zicht_solr.manager" />
+            <tag name="console.command"/>
+        </service>
+
+        <service id="zicht_solr.command.inspect_entity" class="Zicht\Bundle\SolrBundle\Command\EntityInspectCommand">
+            <argument type="service" id="zicht_solr.manager" />
+            <argument type="service" id="event_dispatcher" />
+            <tag name="console.command"/>
+        </service>
+
+
+
+        <service id="zicht_solr.command.reindex" class="Zicht\Bundle\SolrBundle\Command\ReindexCommand">
             <argument type="service" id="zicht_solr.manager" />
             <argument type="service" id="doctrine" />
             <tag name="console.command"/>
         </service>
+
     </services>
 </container>

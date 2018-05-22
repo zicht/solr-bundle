@@ -3,36 +3,43 @@
  * @author Gerard van Helden <gerard@zicht.nl>
  * @copyright Zicht Online <http://zicht.nl>
  */
-
 namespace Zicht\Bundle\SolrBundle\Solr;
 
-use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Message\Request;
-use GuzzleHttp\Message\ResponseInterface;
+use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\Stopwatch\Stopwatch;
+use Zicht\Bundle\SolrBundle\Exception\BadResponseException;
+use Zicht\Bundle\SolrBundle\Exception\RuntimeException;
+use Zicht\Http\ClientInterface;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
+use Zicht\Http\RequestFactoryInterface;
 
 /**
  * Class Client
  */
 class Client
 {
-    private $lastRequest = null;
-    private $lastResponse = null;
+    /** @var ClientInterface|RequestFactoryInterface */
+    private $client;
+    /** @var RequestFactoryInterface */
+    private $requestFactory;
+    /** @var Stopwatch */
+    private $stopWatch;
 
     /**
-     * @var array
-     */
-    public $logs = [];
-
-    /**
-     * Setup the client
+     * Client constructor.
      *
-     * @param GuzzleClient $client
+     * @param ClientInterface $client
+     * @param Stopwatch|null $stopWatch
      */
-    public function __construct(GuzzleClient $client)
+    public function __construct(ClientInterface $client, StopWatch $stopWatch = null, RequestFactoryInterface $requestFactory = null)
     {
-        $this->http = $client;
+        $this->client = $client;
+        $this->stopWatch = $stopWatch;
+        $this->requestFactory = $requestFactory;
+
+        if (!$client instanceof RequestFactoryInterface && null === $requestFactory) {
+            throw new RuntimeException('Client should implement a RequestFactoryInterface or a separated RequestFactoryInterface should be provided.');
+        }
     }
 
 
@@ -70,33 +77,63 @@ class Client
      */
     protected function doRequest(QueryBuilder\RequestBuilderInterface $handler)
     {
-        /** @var Request $request */
-        $request = $handler->createRequest($this->http);
-
-        $this->lastRequest = $request;
-        try {
-            $response = $this->http->send($request);
-            $this->lastResponse = $response;
-
-            if ($handler instanceof QueryBuilder\ResponseHandlerInterface) {
-                $response = $handler->handle($response);
-            }
-
-            $this->logs[] = ['response' => $response, 'requestUri' => $request->getUrl()];
-        } catch (BadResponseException $e) {
-            $this->lastResponse = $e->getResponse();
-            if ($e->getRequest()->getBody()) {
-                $e->getRequest()->getBody()->seek(0);
-            }
-            if (defined('STDERR')) {
-                // fwrite(STDERR, $e->getRequest()->getBody()->getContents());
-                // fwrite(STDERR, "\n\n");
-                fwrite(STDERR, $e->getResponse()->getBody()->getContents());
-            }
-            throw new Exception($e->getMessage(), null, $e);
+        if (null !== $this->stopWatch) {
+            $this->stopWatch->start('solr.request');
         }
 
-        return $response;
+        try {
+
+            $request = $handler->createRequest($this->getRequestFactory());
+            $response = $this->client->sendRequest($request);
+
+            if (!($status = $response->getStatusCode()) || ($status < 200 || $status >= 300)) {
+                throw new BadResponseException($this->getErrMessageFromResponse($response), $response);
+            }
+
+            if ($handler instanceof QueryBuilder\ResponseHandlerInterface) {
+                return $handler->handle($response);
+            }
+
+            return $response;
+
+        } finally {
+            if (null !== $this->stopWatch) {
+                $this->stopWatch->stop('solr.request');
+            }
+        }
+    }
+
+    /**
+     * @return RequestFactoryInterface
+     */
+    protected function getRequestFactory()
+    {
+        if (null !== $this->requestFactory) {
+            return $this->requestFactory;
+        }
+
+        return $this->client;
+    }
+
+    /**
+     * @param ResponseInterface $response
+     * @return string
+     */
+    private function getErrMessageFromResponse(ResponseInterface $response)
+    {
+        if (($body = (string)$response->getBody()) && !empty($body)) {
+            if (null !== $respBody = \json_decode($body, true)) {
+                if (isset($message['error']['msg'])) {
+                    return $respBody['error']['msg'];
+                } else {
+                    return \json_encode($respBody, JSON_PRETTY_PRINT);
+                }
+            } else {
+                return $body;
+            }
+        } else {
+            return sprintf("Request failed with status code %s (%s)", $response->getStatusCode(), $response->getReasonPhrase());
+        }
     }
 
     /**
@@ -108,7 +145,6 @@ class Client
     {
         return $this->doRequest(new QueryBuilder\Ping());
     }
-
 
     /**
      * Get all document ids for the specified query.
@@ -128,26 +164,5 @@ class Client
             $ret[]= $doc->$fieldName;
         }
         return $ret;
-    }
-
-
-    /**
-     * Returns the last request issued to SOLR. This is typically for debugging purposes.
-     *
-     * @return mixed
-     */
-    public function getLastRequest()
-    {
-        return $this->lastRequest;
-    }
-
-    /**
-     * Returns the last response issued by SOLR. This is typically for debugging purposes.
-     *
-     * @return ResponseInterface
-     */
-    public function getLastResponse()
-    {
-        return $this->lastResponse;
     }
 }

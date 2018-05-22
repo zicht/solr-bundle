@@ -5,6 +5,7 @@
  */
 namespace Zicht\Bundle\SolrBundle\Manager\Doctrine;
 
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -14,6 +15,9 @@ use Doctrine\ORM\EntityRepository;
  */
 class SearchDocumentRepositoryAdapter implements SearchDocumentRepository
 {
+    /** @var EntityRepository  */
+    private $repository;
+
     /**
      * Create the SearchDocumentRepository
      *
@@ -24,6 +28,23 @@ class SearchDocumentRepositoryAdapter implements SearchDocumentRepository
         $this->repository = $repository;
     }
 
+
+    /**
+     * @{inheritDoc}
+     */
+    public function getCountIndexableDocuments($where = null)
+    {
+        $qb = $this->repository->createQueryBuilder('d');
+        $qb->select('COUNT(d)');
+
+        foreach ((array)$where as $w) {
+            $qb->andWhere($w);
+        }
+
+        return (int)$qb->getQuery()->execute(null, AbstractQuery::HYDRATE_SINGLE_SCALAR);
+    }
+
+
     /**
      * @{inheritDoc}
      */
@@ -31,17 +52,20 @@ class SearchDocumentRepositoryAdapter implements SearchDocumentRepository
     {
         $qb = $this->repository->createQueryBuilder('d');
 
-        if ($where) {
-            foreach ((array)$where as $w) {
-                $qb->andWhere($w);
-            }
+        foreach ((array)$where as $w) {
+            $qb->andWhere($w);
         }
+
         if ('' !== $limit && null !== $limit) {
             $qb->setMaxResults((int)$limit);
         }
+
         if ('' !== $offset && null !== $offset) {
             $qb->setFirstResult((int)$offset);
         }
-        return $qb->getQuery()->execute();
+
+        foreach ($qb->getQuery()->iterate() as $row) {
+            yield current($row);
+        }
     }
 }

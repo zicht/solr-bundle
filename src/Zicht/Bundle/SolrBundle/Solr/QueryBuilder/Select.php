@@ -6,8 +6,8 @@
 
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Message\Response;
+use Psr\Http\Message\ResponseInterface;
+use Zicht\Http\RequestFactoryInterface;
 
 /**
  * Class Select
@@ -119,20 +119,23 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
     /**
      * @{inheritDoc}
      */
-    public function createRequest(Client $client)
+    public function createRequest(RequestFactoryInterface $factory)
     {
-        return $client->createRequest('GET', 'select?' . $this->createQueryString($this->params));
+        return $factory->createRequest('GET', 'select?' . $this->createQueryString($this->params));
     }
 
     /**
      * @{inheritDoc}
      */
-    public function handle(Response $response)
+    public function handle(ResponseInterface $response)
     {
-        $contentType = $response->getHeader('Content-Type');
+        $contentType = $response->getHeaderLine('content-type');
+
         if (preg_match('!^application/json!', $contentType) || preg_match('!^text/plain!', $contentType)) {
             $response = json_decode($response->getBody()->getContents());
+
         }
+
         return $response;
     }
 

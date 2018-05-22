@@ -8,7 +8,7 @@ namespace Zicht\Bundle\SolrBundle\EventListener;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Events;
-use Zicht\Bundle\SolrBundle\Mapper\DocumentMapperMetadataFactory;
+use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadataFactory;
 
 /**
  * Class LoadClassMetadataListener
