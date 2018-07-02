@@ -23,20 +23,31 @@ class StatusController extends Controller
      */
     public function statusAction()
     {
-        $response = new Response('', 200, array('Content-Type' => 'text/plain'));
-
+        $resp = new Response('', Response::HTTP_INTERNAL_SERVER_ERROR, $this->getTexTypetHeaders());
         $client = $this->get('zicht_solr.solr');
+
         try {
             $client->ping();
-
-            $response->setContent('ping succeeded');
+            $resp
+                ->setStatusCode($resp::HTTP_OK)
+                ->setContent('ping succeeded');
         } catch (\Exception $e) {
-            $response
-                ->setStatusCode(503)
-                ->setContent((string)$e->getMessage())
-            ;
+            $resp
+                ->setStatusCode($resp::HTTP_SERVICE_UNAVAILABLE)
+                ->setContent((string)$e->getMessage());
+        } finally {
+            return $resp;
         }
+    }
 
-        return $response;
+    /**
+     * @return array
+     */
+    private function getTexTypetHeaders()
+    {
+        return [
+            'Content-Type' => 'text/plain;charset=utf-8',
+            'X-Content-Type-Options' => 'nosniff'
+        ];
     }
 }

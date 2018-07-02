@@ -6,14 +6,23 @@
 namespace Zicht\Bundle\SolrBundle\Event;
 
 use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\EventDispatcher\Event;
 
-class ClientPreSendRequest extends Event
+/**
+ * Class HttpClientRequestEvent
+ *
+ * @package Zicht\Bundle\SolrBundle\Event
+ */
+class HttpClientRequestEvent extends Event
 {
     /** @var RequestInterface  */
     private $request;
 
+    /**
+     * HttpClientRequestEvent constructor.
+     *
+     * @param RequestInterface $request
+     */
     public function __construct(RequestInterface $request)
     {
         $this->request = $request;

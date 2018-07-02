@@ -1,38 +1,29 @@
 <?php
 /**
- * @author Rik van der Kemp <rik@zicht.nl>
+ * @author    Philip Bergman <philip@zicht.nl>
  * @copyright Zicht Online <http://www.zicht.nl>
  */
-
 namespace Zicht\Bundle\SolrBundle\DataCollector;
 
 use Psr\Http\Message\StreamInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
-use Zicht\Bundle\SolrBundle\Solr\Client;
 
+/**
+ * Class SolrDataCollector
+ *
+ * @package Zicht\Bundle\SolrBundle\DataCollector
+ */
 class SolrDataCollector extends DataCollector
 {
-//    /**
-//     * @var Client
-//     */
-//    private $client;
-//
-//    /**
-//     * SolrDataCollector constructor.
-//     *
-//     * @param Client $client
-//     */
-//    public function __construct(Client $client)
-//    {
-//        $this->client = $client;
-//    }
-
     /** @var StreamInterface[]  */
     private $stack = [];
 
-
+    /**
+     * @param $name
+     * @param StreamInterface $stack
+     */
     public function addDebugger($name, StreamInterface $stack)
     {
         $this->stack[$name] = $stack;
@@ -69,7 +60,7 @@ class SolrDataCollector extends DataCollector
     {
         $ret = [];
 
-        foreach (explode('* EOT *', $s) as $req) {
+        foreach (explode('* EOT', $s) as $req) {
 
             if (empty(trim($req))) {
                 continue;
@@ -176,11 +167,9 @@ class SolrDataCollector extends DataCollector
         return (float)0;
     }
 
-//    public function pushRequest(array $data)
-//    {
-//        $this->data[] = $data;
-//    }
-//
+    /**
+     * @return \Generator
+     */
     public function getRequests()
     {
 
@@ -191,19 +180,29 @@ class SolrDataCollector extends DataCollector
         }
     }
 
+    /**
+     * @return int
+     */
     public function getCountRequests()
     {
         return (isset($this->data['requests'])) ? count($this->data['requests']) : 0;
     }
 
+    /**
+     * @return float|int
+     */
     public function getTimeRequests()
     {
         if (!isset($this->data['requests'])) {
             return 0;
         }
+
         return array_sum(array_column($this->data['requests'], 'time')) * 1000;
     }
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return 'zicht_solr.data_collector';

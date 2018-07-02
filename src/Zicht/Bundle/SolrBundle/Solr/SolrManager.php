@@ -5,6 +5,8 @@
  */
 namespace Zicht\Bundle\SolrBundle\Solr;
 
+use Zicht\Bundle\SolrBundle\Exception\BadMethodCallException;
+use Zicht\Bundle\SolrBundle\Exception\RuntimeException;
 use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadata;
 use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadataFactory;
 use Zicht\Bundle\SolrBundle\Mapping\IdGeneratorDefault;
@@ -14,6 +16,10 @@ use Zicht\Bundle\SolrBundle\Mapping\PropertyValueTrait;
 class SolrManager
 {
     use PropertyValueTrait;
+
+    const SCOPE_MAPPING_MARSHALLER = 'mapping.marshaller';
+    const SCOPE_MAPPING_REPOSITORY = 'mapping.repository';
+    const SCOPE_DOCUMENT_ID_GENERATOR = 'document.id_generator';
 
     /** @var bool */
     private $enabled = true;
@@ -63,7 +69,7 @@ class SolrManager
         $meta = $this->getDocumentMapperMetadata($entity);
 
         if (null !== $repo = $meta->getRepository()) {
-            return $this->objectStorage->get($repo, 'mapping.repository');
+            return $this->objectStorage->get($repo, self::SCOPE_MAPPING_REPOSITORY);
         }
 
         return null;
@@ -135,37 +141,41 @@ class SolrManager
     {
         $data = ['id' => $this->getDocumentId($meta, $entity)];
 
-        foreach ($meta->getMapping() as $name => list($type, $scope, $ref, $ctx)) {
-            switch (true) {
-                case $meta->isMapping($meta::MAPPING_STATIC, $type):
-                    if ($meta->isMapping($meta::MAPPING_METHOD, $type)) {
-                        $data[$name] = $this->getMarshaller($scope)->{$ref}($entity);
-                    } else {
-                        $data[$name] = $ref;
-                    }
-                    break;
-                case $meta->isMapping($meta::MAPPING_PROPERTY, $type):
-                    $data[$name] = $this->resolveProperty($entity, $scope, $ref);
-                    break;
-                case $meta->isMapping($meta::MAPPING_METHOD, $type):
-                    $data[$name] = $this->getMarshaller($ctx[0])->{$ctx[1]}($this->resolveProperty($entity, $scope, $ref));
-                    break;
-            }
-
+        foreach ($meta->getMapping() as $mapping) {
+            $mapping->append($this->objectStorage, $entity, $data);
         }
+
+//        foreach ($meta->getMapping() as $name => list($type, $scope, $ref, $ctx)) {
+//            switch (true) {
+//                case $meta->isMapping($meta::MAPPING_STATIC, $type):
+//                    if ($meta->isMapping($meta::MAPPING_METHOD, $type)) {
+//                        $data[$name] = $this->getMarshaller($scope)->{$ref}($entity);
+//                    } else {
+//                        $data[$name] = $ref;
+//                    }
+//                    break;
+//                case $meta->isMapping($meta::MAPPING_PROPERTY, $type):
+//                    $data[$name] = $this->resolveProperty($entity, $scope, $ref);
+//                    break;
+//                case $meta->isMapping($meta::MAPPING_METHOD, $type):
+//                    $data[$name] = $this->getMarshaller($ctx[0])->{$ctx[1]}($this->resolveProperty($entity, $scope, $ref));
+//                    break;
+//            }
+//
+//        }
 
         return $data;
     }
 
-
-    /**
-     * @param string $className
-     * @return object
-     */
-    private function getMarshaller($className)
-    {
-        return $this->objectStorage->get($className, 'mapping.marshaller');
-    }
+//
+//    /**
+//     * @param string $className
+//     * @return object
+//     */
+//    private function getMarshaller($className)
+//    {
+//        return $this->objectStorage->get($className, self::SCOPE_MAPPING_MARSHALLER);
+//    }
 
     /**
      * @param DocumentMapperMetadata $meta
@@ -179,17 +189,23 @@ class SolrManager
 
     /**
      * @param DocumentMapperMetadata $meta
-     * @return IdGeneratorInterface|object
+     * @return IdGeneratorInterface
      */
     private function getIdGenerator(DocumentMapperMetadata $meta)
     {
         $className = $meta->getIdGenerator();
 
-        if (empty($className) || !is_a($className, IdGeneratorInterface::class, true)) {
+        if (empty($className)) {
             $className = IdGeneratorDefault::class;
         }
 
-        return $this->objectStorage->get($className, 'document.id_generator');
+        $generator = $this->objectStorage->get($className, self::SCOPE_DOCUMENT_ID_GENERATOR);
+
+        if (!$generator instanceof IdGeneratorInterface) {
+            throw new BadMethodCallException('Class "%s" is not a instance of "%s"', get_class($generator), IdGeneratorInterface::class);
+        }
+
+        return $generator;
     }
 
     /**

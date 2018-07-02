@@ -7,6 +7,7 @@ namespace Zicht\Bundle\SolrBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 /**
  * This is the class that validates and merges configuration from your app/config files
@@ -38,11 +39,34 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
-                ->scalarNode('port')->end()
+                // BC configuration
+                ->scalarNode('scheme')->defaultValue('http')->end()
+                ->scalarNode('port')->defaultValue(8983)->end()
                 ->scalarNode('host')->end()
                 ->scalarNode('path')->defaultValue('/solr')->end()
                 ->scalarNode('core')->end()
+                // new configuration
+                ->scalarNode('uri')->defaultNull()->end()
+
             ->end()
+
+            ->validate()
+                ->always(function($v) {
+                    if (is_null($v['uri'])) {
+                        foreach (['host', 'core'] as $required) {
+                            if (empty($v[$required])) {
+                                throw new InvalidConfigurationException(sprintf('The child node "%s" at path "zicht_solr" must be configured.', $required));
+                            }
+                        }
+                        if (!in_array($v['scheme'], ['http', 'https'])) {
+                            throw new InvalidConfigurationException('Unsupported scheme provided for child node "host" at path "zicht_solr", got "%s" while expected "http" or "https"', $v['scheme']);
+                        }
+                        $v['uri'] = sprintf('%s://%s:%d%s/%s/', $v['scheme'], $v['host'], $v['port'], $v['path'], $v['core']);
+                    }
+                    unset($v['scheme'], $v['host'], $v['port'], $v['path'], $v['core']);
+                    return $v;
+                })
+            ->end();
         ;
 
         return $treeBuilder;

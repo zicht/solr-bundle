@@ -9,13 +9,24 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\EventDispatcher\Event;
 
-class ClientPostSendRequest extends Event
+/**
+ * Class HttpClientResponseEvent
+ *
+ * @package Zicht\Bundle\SolrBundle\Event
+ */
+class HttpClientResponseEvent extends Event
 {
     /** @var RequestInterface  */
     private $request;
     /** @var ResponseInterface  */
     private $response;
 
+    /**
+     * HttpClientResponseEvent constructor.
+     *
+     * @param RequestInterface $request
+     * @param ResponseInterface $response
+     */
     public function __construct(RequestInterface $request, ResponseInterface $response)
     {
         $this->request = $request;
@@ -40,7 +51,7 @@ class ClientPostSendRequest extends Event
 
     /**
      * @param ResponseInterface $response
-     * @return ClientPostSendRequest
+     * @return HttpClientResponseEvent
      */
     public function setResponse($response)
     {

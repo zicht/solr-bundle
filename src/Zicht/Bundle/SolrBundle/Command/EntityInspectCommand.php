@@ -16,6 +16,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadata;
+use Zicht\Bundle\SolrBundle\Mapping\MethodMergeMapper;
 use Zicht\Bundle\SolrBundle\Solr\SolrManager;
 
 class EntityInspectCommand extends Command
@@ -78,11 +79,8 @@ class EntityInspectCommand extends Command
         $table->addRow(new TableSeparator());
         $table->addRow([new TableCell("<fg=cyan;options=bold>Id Field</>", ['colspan' => 2])]);
         $table->addRow(new TableSeparator());
-
         $table->addRow([new TableCell(sprintf('%s::$%s', ...$meta->getIdField()), ['colspan' => 2])]);
         $table->addRow(new TableSeparator());
-
-//        $this->objectStorage->get($className, 'document.id.generator')->generate($entity)
 
         $property = new \ReflectionMethod($this->manager, 'getIdGenerator');
         $property->setAccessible(true);
@@ -90,21 +88,15 @@ class EntityInspectCommand extends Command
         $table->addRow(new TableSeparator());
         $table->addRow([new TableCell(get_class($property->invoke($this->manager, $meta)), ['colspan' => 2])]);
 
-        if (!$meta->isStrict()) {
-            if (!empty($meta->getExclude())) {
-                $table->addRow(new TableSeparator());
-                $table->addRow([new TableCell("<fg=cyan;options=bold>Excluded Entities</>", ['colspan' => 2])]);
-                $table->addRow(new TableSeparator());
-                foreach ($meta->getExclude() as $name) {
-                    $table->addRow([new TableCell($name, ['colspan' => 2])]);
-                }
-            }
-            $children = $this->manager->getDocumentMapperMetadataFactory()->getEntities()[$meta->getClassName()];
-            if (count($children) > 0) {
+        if (!$meta->getOption('strict')) {
+
+            $entities = $this->manager->getDocumentMapperMetadataFactory()->getEntities();
+
+            if (isset($entities[$meta->getClassName()]) && count($entities[$meta->getClassName()]) > 0) {
                 $table->addRow(new TableSeparator());
                 $table->addRow([new TableCell("<fg=cyan;options=bold>Child Entities</>", ['colspan' => 2])]);
                 $table->addRow(new TableSeparator());
-                foreach ($children as $name) {
+                foreach ($entities[$meta->getClassName()] as $name) {
                     $table->addRow([new TableCell($name, ['colspan' => 2])]);
                 }
             }
@@ -127,24 +119,31 @@ class EntityInspectCommand extends Command
         $table->addRow([new TableCell("<fg=cyan;options=bold>Field mapping</>", ['colspan' => 2])]);
         $table->addRow(new TableSeparator());
 
-        foreach ($meta->getMapping() as $name => list($type, $className, $ref, $ctx)) {
-            switch (true) {
-                case $meta->isStaticMapping($name):
-                    if ($meta->isMethodMapping($name)) {
-                        $table->addRow([$name, sprintf('%s::%s(<object>)', $className, $ref)]);
-                    } else {
-                        $table->addRow([$name, $ref]);
-                    }
-                    break;
-                case $meta->isPropertyMapping($name):
-                    $table->addRow([$name, sprintf('%s::$%s', $className, $ref)]);
-                    break;
-                case $meta->isMethodMapping($name):
-                    $table->addRow([$name, sprintf('%s::%s($%s)', $ctx[0], $ctx[1], $ref)]);
-                    break;
+        foreach ($meta->getMapping() as $mapper) {
+
+            if ($mapper instanceof MethodMergeMapper) {
+                $table->addRow(['...', (string)$mapper]);
+            } else {
+                $table->addRow([$mapper->getName(), (string)$mapper]);
             }
         }
 
+        $transformers = array_keys(iterator_to_array($meta->getTransformers()));
+
+        if (count($transformers) > 0) {
+
+            $table->addRow(new TableSeparator());
+            $table->addRow([new TableCell("<fg=cyan;options=bold>Field Transformers</>", ['colspan' => 2])]);
+            $table->addRow(new TableSeparator());
+
+            foreach($transformers as $name) {
+                foreach ($meta->getTransformers($name) as $list) {
+                    foreach ($list as $transformer) {
+                        $table->addRow([$name, $transformer]);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -157,7 +156,13 @@ class EntityInspectCommand extends Command
         $table->addRow([new TableCell("<fg=cyan;options=bold>Options</>", ['colspan' => 2])]);
         $table->addRow(new TableSeparator());
         $table->addRow(['active', ($meta->isActive()) ? 'yes' : 'no']);
-        $table->addRow(['strict', ($meta->isStrict()) ? 'yes' : 'no']);
+        foreach ($meta->getOptions() as $name => $option) {
+            switch ($name) {
+                case 'strict':
+                    $table->addRow(['strict', ($option) ? 'yes' : 'no']);
+                    break;
+            }
+        }
 
         if (count($meta->getParams()) > 0) {
             $table->addRow(new TableSeparator());

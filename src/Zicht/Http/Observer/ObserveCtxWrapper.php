@@ -56,7 +56,7 @@ class ObserveCtxWrapper implements \SplSubject
     }
 
     /**
-     * @return ObserverContext
+     * @return mixed
      */
     public function getContext()
     {

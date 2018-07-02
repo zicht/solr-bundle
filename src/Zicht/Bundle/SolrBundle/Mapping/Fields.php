@@ -8,7 +8,7 @@ namespace Zicht\Bundle\SolrBundle\Mapping;
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Annotation\Attribute;
 use Doctrine\Common\Annotations\Annotation\Attributes;
-//use Doctrine\Common\Annotations\Annotation\Target;
+use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * This hold the information of extra fields that are not
@@ -19,7 +19,7 @@ use Doctrine\Common\Annotations\Annotation\Attributes;
  * @Attributes({
  *    @Attribute("value", required=true,  type="array")
  * })
- * @Target("CLASS")
+ * @Target({"CLASS", "METHOD"})
  */
 final class Fields implements AnnotationInterface
 {

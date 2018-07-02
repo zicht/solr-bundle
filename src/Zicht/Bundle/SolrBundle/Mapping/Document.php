@@ -9,24 +9,57 @@ use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Annotation\Attribute;
 use Doctrine\Common\Annotations\Annotation\Attributes;
 use Doctrine\Common\Annotations\Annotation\Target;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Zicht\Bundle\SolrBundle\Doctrine\Repository\SearchDocumentRepositoryInterface;
+use Zicht\Bundle\SolrBundle\Exception\BadMethodCallException;
 
 /**
  * @Annotation
  * @Attributes({
- *    @Attribute("strict", required=false,  type="bool"),
- *    @Attribute("exclude", required=false, type="array"),
- *    @Attribute("repository", required=false, type="string")
+ *    @Attribute("repository", required=false, type="string"),
+ *    @Attribute("strict", required=false, type="boolean"),
+ *    @Attribute("transformers", required=false, type="array")
  * })
  * @Target("CLASS")
  */
 final class Document implements AnnotationInterface
 {
+
+    /**
+     * a repository class that implements SearchDocumentRepository
+     *
+     * @var string
+     */
+    public $repository;
+
+    /**
+     * if false then a instance of comparison is done instead of a
+     * strict comparison (===). So all child classes inherit the
+     * same annotations (except entities with the NoDocument)
+     *
+     * @var bool
+     */
+    public $strict = true;
+
+    /**
+     * automatic transformers based on type, the array should
+     * be a transformer class as key and type match for value.
+     *
+     * @var array
+     */
+    public $transformers;
+
+    /**
+     * Document constructor.
+     *
+     * @param array $value
+     */
     public function __construct(array $value)
     {
         if (!empty($value['repository'])) {
+
             if (is_a($value['repository'], SearchDocumentRepositoryInterface::class, true)) {
-                throw new \InvalidArgumentException(sprintf('@Document expected a "%s" instance for a repository but "%s" was given.', SearchDocumentRepositoryInterface::class, $value['repository']));
+                throw new BadMethodCallException(sprintf('@Zicht\Bundle\SolrBundle\Mapping\Document::repository should be an instance of "%s" but "%s" was given.', SearchDocumentRepositoryInterface::class, $value['repository']));
             }
 
             $this->repository = $value['repository'];
@@ -36,33 +69,12 @@ final class Document implements AnnotationInterface
             $this->strict = $value['strict'];
         }
 
-        if (isset($value['exclude'])) {
-            $this->exclude = $value['exclude'];
+        if (!array_key_exists('transformers', $value)) {
+            $this->transformers = [
+                DateTransformer::class => '/^(?:date(?:time(?:z)?)?|time)(?:_immutable)?$/',
+            ];
+        } else {
+            $this->transformers = (array)$value['transformers'];
         }
     }
-
-
-    /**
-     * if false then a instance of comparison is done
-     * instead of a strict comparison (===). So all
-     * child classes inherit the same annotations.
-     *
-     * @var bool
-     */
-    public $strict = true;
-
-    /**
-     * exclusion list of classes for when not running in
-     * strict modes that will not inhered this mapping
-     *
-     * @var array
-     */
-    public $exclude = [];
-
-    /**
-     * a repository class that implements SearchDocumentRepository
-     *
-     * @var string
-     */
-    public $repository;
 }

@@ -6,7 +6,7 @@
 
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
-use GuzzleHttp\Client;
+use Zicht\Http\RequestFactoryInterface;
 
 /**
  * Simple request implementing a 'ping'. The ping throws an exception if it is not available.
@@ -16,8 +16,8 @@ class Ping implements RequestBuilderInterface
     /**
      * @{inheritDoc}
      */
-    public function createRequest(Client $httpClient)
+    public function createRequest(RequestFactoryInterface $factory)
     {
-        return $httpClient->createRequest('GET', 'admin/ping');
+        return $factory->createRequest('GET', 'admin/ping');
     }
 }

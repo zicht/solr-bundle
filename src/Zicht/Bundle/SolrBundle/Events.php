@@ -31,10 +31,10 @@ final class Events
     /**
      * @param \Zicht\Bundle\SolrBundle\Event\MetadataPostBuildEntitiesListEvent $event.
      */
-    const NET_CLIENT_PRE_SEND_REQUEST = 'net.client_pre_send_request';
+    const HTTP_CLIENT_REQUEST = 'http.client_request';
 
     /**
      * @param \Zicht\Bundle\SolrBundle\Event\MetadataPostBuildEntitiesListEvent $event.
      */
-    const NET_CLIENT_POST_SEND_REQUEST = 'net.client_post_send_request';
+    const HTTP_CLIENT_RESPONSE = 'net.client_response';
 }

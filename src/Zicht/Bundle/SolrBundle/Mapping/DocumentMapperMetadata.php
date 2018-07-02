@@ -16,10 +16,10 @@ class DocumentMapperMetadata
     const MAPPING_METHOD = 0x02;
     const MAPPING_STATIC = 0x04;
 
-    /** @var array */
+    /** @var array|MapperInterface[] */
     private $mapping = [];
-    /** @var bool */
-    private $strict;
+    /** @var array */
+    private $options;
     /** @var string */
     private $className;
     /** @var string */
@@ -27,9 +27,9 @@ class DocumentMapperMetadata
     /** @var bool */
     private $active = true;
     /** @var array */
-    private $exclude;
-    /** @var array */
     private $params = [];
+    /** @var string[][] */
+    private $transformers = [];
     /** @var array */
     private $idField;
     /** @var string|null */
@@ -40,13 +40,13 @@ class DocumentMapperMetadata
      *
      * @param string $className
      * @param null $repository
-     * @param bool $strict
+     * @param array $options
      */
-    public function __construct($className, $repository = null, $strict = false)
+    public function __construct($className, $repository = null, array $options = [])
     {
         $this->className = $className;
         $this->repository = $repository;
-        $this->strict = $strict;
+        $this->options = $options;
     }
 
     /**
@@ -61,7 +61,7 @@ class DocumentMapperMetadata
     }
 
     /**
-     * @return array
+     * @return array|MapperInterface[]
      */
     public function getMapping()
     {
@@ -69,71 +69,37 @@ class DocumentMapperMetadata
     }
 
     /**
-     * @param int $type
-     * @param string $name
-     * @param string $ref
-     * @param string|null $scope
+     * @param MapperInterface $mapping
      * @return $this
      */
-    public function addMapping($type, $name, $ref, $scope = null, array $ctx = [])
+    public function addMapping(MapperInterface $mapping)
     {
-        $this->mapping[$name] = [$type, $scope, $ref, $ctx];
+        $this->mapping[] = $mapping;
         return $this;
     }
 
     /**
-     * @param array $mapping
-     */
-    public function setMapping(array $mapping)
-    {
-        foreach ($mapping as $name => $data) {
-            $this->addMapping($name, ...$data);
-        }
-    }
-
-    public function isMapping($expected, $got)
-    {
-        return $expected === ($expected & $got);
-
-    }
-
-    /**
      * @param string $name
-     * @return bool
+     * @return boolean
      */
-    public function isMethodMapping($name)
+    public function hasMapping($name)
     {
-        if (isset($this->mapping[$name])) {
-            return $this->isMapping(self::MAPPING_METHOD, $this->mapping[$name][0]);
+        foreach ($this->mapping as $mapping) {
+            if ($name === $mapping->getName()) {
+                return true;
+            }
         }
-
         return false;
     }
 
     /**
-     * @param string $name
-     * @return bool
+     * @param array|MapperInterface[] $mappings
      */
-    public function isPropertyMapping($name)
+    public function setMapping(array $mappings)
     {
-        if (isset($this->mapping[$name])) {
-            return $this->isMapping(self::MAPPING_PROPERTY, $this->mapping[$name][0]);
+        foreach ($mappings as $mapping) {
+            $this->addMapping($mapping);
         }
-
-        return false;
-    }
-
-    /**
-     * @param string $name
-     * @return bool
-     */
-    public function isStaticMapping($name)
-    {
-        if (isset($this->mapping[$name])) {
-            return $this->isMapping(self::MAPPING_STATIC, $this->mapping[$name][0]);
-        }
-
-        return false;
     }
 
     /**
@@ -153,11 +119,21 @@ class DocumentMapperMetadata
     }
 
     /**
-     * @return bool
+     * @return array
      */
-    public function isStrict()
+    public function getOptions()
     {
-        return $this->strict;
+        return $this->options;
+    }
+
+    /**
+     * @param string $name
+     * @param null $default
+     * @return mixed
+     */
+    public function getOption($name, $default = null)
+    {
+        return isset($this->options[$name]) ? $this->options[$name] : $default;
     }
 
     /**
@@ -175,24 +151,6 @@ class DocumentMapperMetadata
     public function setActive($active)
     {
         $this->active = $active;
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getExclude()
-    {
-        return $this->exclude;
-    }
-
-    /**
-     * @param array $exclude
-     * @return DocumentMapperMetadata
-     */
-    public function setExclude($exclude)
-    {
-        $this->exclude = $exclude;
         return $this;
     }
 
@@ -258,5 +216,46 @@ class DocumentMapperMetadata
     public function setIdGenerator($idGenerator)
     {
         $this->idGenerator = $idGenerator;
+    }
+
+    /**
+     * @param null|string $name
+     * @return \Generator
+     */
+    public function getTransformers($name = null)
+    {
+        krsort($this->transformers);
+
+        foreach ($this->transformers as $group) {
+            foreach ($group as $property => $className) {
+                if (is_null($name) || $name === $property) {
+                    yield $property => $className;
+                }
+            }
+        }
+    }
+
+    /**
+     * @param string[] $transformers
+     */
+    public function setTransformers($transformers)
+    {
+        $this->transformers = [];
+
+        foreach ($transformers as $name => $transformer) {
+            foreach ((array)$transformer as $c) {
+                $this->addTransformer($name, $c);
+            }
+        }
+    }
+
+    /**
+     * @param string $name
+     * @param string $transformer
+     * @param int $weight
+     */
+    public function addTransformer($name, $transformer, $weight = 0)
+    {
+        $this->transformers[$weight][$name][] = $transformer;
     }
 }

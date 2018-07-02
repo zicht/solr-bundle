@@ -6,13 +6,20 @@
 
     <services>
 
-        <service id="zicht_solr.net.handler.socket" class="Zicht\Http\Handler\SocketHandler" public="false">
+        <service id="zicht_solr.http.client_observer" class="Zicht\Bundle\SolrBundle\Http\ObserverBridge" public="false">
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+
+        <service id="zicht_solr.http.handler.socket" class="Zicht\Http\Handler\SocketHandler" public="false">
             <argument/>
             <argument type="collection"/>
         </service>
 
-        <service id="zicht_solr.net.client" class="Zicht\Http\Client" public="false">
-            <argument type="service" id="zicht_solr.net.handler.socket" />
+        <service id="zicht_solr.http.client" class="Zicht\Http\Client" public="false">
+            <argument type="service" id="zicht_solr.http.handler.socket" />
+            <call method="attachObserver">
+                <argument type="service" id="zicht_solr.http.client_observer"/>
+            </call>
         </service>
 
     </services>

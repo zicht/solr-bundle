@@ -15,7 +15,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
  * @Attributes({
  *    @Attribute("name", required=false,  type="string"),
  * })
- * @Target("PROPERTY")
+ * @Target({"PROPERTY", "METHOD"})
  */
 final class Field
 {
