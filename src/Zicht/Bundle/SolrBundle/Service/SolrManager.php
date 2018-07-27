@@ -145,25 +145,6 @@ class SolrManager
             $mapping->append($this->objectStorage, $entity, $data);
         }
 
-//        foreach ($meta->getMapping() as $name => list($type, $scope, $ref, $ctx)) {
-//            switch (true) {
-//                case $meta->isMapping($meta::MAPPING_STATIC, $type):
-//                    if ($meta->isMapping($meta::MAPPING_METHOD, $type)) {
-//                        $data[$name] = $this->getMarshaller($scope)->{$ref}($entity);
-//                    } else {
-//                        $data[$name] = $ref;
-//                    }
-//                    break;
-//                case $meta->isMapping($meta::MAPPING_PROPERTY, $type):
-//                    $data[$name] = $this->resolveProperty($entity, $scope, $ref);
-//                    break;
-//                case $meta->isMapping($meta::MAPPING_METHOD, $type):
-//                    $data[$name] = $this->getMarshaller($ctx[0])->{$ctx[1]}($this->resolveProperty($entity, $scope, $ref));
-//                    break;
-//            }
-//
-//        }
-
         return $data;
     }
 
