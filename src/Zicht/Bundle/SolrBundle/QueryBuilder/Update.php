@@ -3,11 +3,12 @@
  * @author Gerard van Helden <gerard@zicht.nl>
  * @copyright Zicht Online <http://zicht.nl>
  */
-namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
+namespace Zicht\Bundle\SolrBundle\QueryBuilder;
 
 use Zicht\Bundle\SolrBundle\Solr\DateHelper;
 use Zicht\Http\RequestFactoryInterface;
 use Zicht\Http\Stream\ResourceStream;
+use Zicht\Http\Stream\TempStream;
 
 /**
  * Class Update
@@ -22,7 +23,7 @@ class Update extends AbstractQueryBuilder
     public function __construct()
     {
         $this->stream = fopen('php://temp', 'rw');
-        fwrite($this->stream, '{');
+        $this->reset();
     }
 
     /**
@@ -36,16 +37,7 @@ class Update extends AbstractQueryBuilder
     {
         $this->addInstruction(
             'add',
-            ['doc' => array_map(
-                function ($v) {
-                    if ($v instanceof \DateTime) {
-                        $v = DateHelper::formatDate($v);
-                    }
-
-                    return $v;
-                },
-                $document
-            )] + $params
+            ['doc' => $document] + $params
         );
 
         return $this;
@@ -130,24 +122,23 @@ class Update extends AbstractQueryBuilder
 
 
     /**
+     * reset the internal stream
+     */
+    public function reset()
+    {
+        ftruncate($this->stream, 0);
+        rewind($this->stream);
+        fwrite($this->stream, '{');
+    }
+
+    /**
      * @{inheritDoc}
      */
     public function createRequest(RequestFactoryInterface $factory)
     {
-
         fseek($this->stream, -1, SEEK_END);
         fwrite($this->stream, '}');
         fseek($this->stream, 0);
-
-        return $factory->createRequest(
-            'POST',
-            'update',
-            [
-                'content-type' => 'application/json'
-            ],
-            new ResourceStream(
-                $this->stream
-            )
-        );
+        return $factory->createRequest('POST', 'update', ['content-type' => 'application/json'], TempStream::from($this->stream));
     }
 }

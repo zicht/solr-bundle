@@ -12,7 +12,6 @@ use Zicht\Http\Handler\HandlerInterface;
 use Zicht\Http\Message\Request;
 use Zicht\Http\Observer\ObserveNotifier;
 use Zicht\Http\Observer\ObserveNotifierInterface;
-use Zicht\Http\Observer\ObserverContext;
 use Zicht\Http\Observer\ObserveRequestContext;
 use Zicht\Http\Observer\ObserveResponseContext;
 
@@ -21,7 +20,7 @@ use Zicht\Http\Observer\ObserveResponseContext;
  *
  * @package Zicht\Http
  */
-class Client implements ClientInterface, ObservableClientInterface, RequestFactoryInterface
+class Client implements ClientInterface, ObservableClientInterface
 {
     /** @var HandlerInterface */
     private $handler;
@@ -95,5 +94,22 @@ class Client implements ClientInterface, ObservableClientInterface, RequestFacto
         $ctx = new ObserveResponseContext($request, $response);
         $this->notifier->notifyWithCtx($ctx);
         return $ctx->getResponse();
+    }
+
+    /**
+     * @return HandlerInterface
+     */
+    public function getHandler()
+    {
+        return $this->handler;
+    }
+
+    /**
+     * @param HandlerInterface $handler
+     * @return void
+     */
+    public function setHandler(HandlerInterface $handler)
+    {
+        $this->handler = $handler;
     }
 }

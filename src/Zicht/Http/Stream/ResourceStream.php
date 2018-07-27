@@ -240,8 +240,9 @@ class ResourceStream implements StreamInterface
         }
 
         $this->clear();
+        $this->rewind();
 
-        return stream_get_contents($this->resource);
+        return stream_get_contents($this->resource, $this->getSize(), 0);
     }
 
     private function clear()

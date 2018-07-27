@@ -6,8 +6,8 @@
 namespace Zicht\Bundle\SolrBundle\Pager;
 
 use Zicht\Bundle\FrameworkExtraBundle\Pager\Pageable;
-use Zicht\Bundle\SolrBundle\Solr\Client;
-use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Select;
+use Zicht\Bundle\SolrBundle\Service\SolrClient;
+use Zicht\Bundle\SolrBundle\QueryBuilder\Select;
 
 /**
  * Implements 'pageable' for a solr query. Assumes that the `numFound` will be in the response, and the query's
@@ -15,15 +15,20 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Select;
  */
 class SolrPageable implements Pageable
 {
+    /** @var null|int  */
     protected $total = null;
+    /** @var SolrClient  */
+    protected $client;
+    /** @var Select  */
+    protected $query;
 
     /**
      * Construct the pager.
      *
-     * @param Client $client
+     * @param SolrClient $client
      * @param Select $selectQuery
      */
-    public function __construct(Client $client, Select $selectQuery)
+    public function __construct(SolrClient $client, Select $selectQuery)
     {
         $this->client = $client;
         $this->query = $selectQuery;

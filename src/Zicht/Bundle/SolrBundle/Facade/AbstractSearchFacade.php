@@ -5,10 +5,12 @@
  */
 namespace Zicht\Bundle\SolrBundle\Facade;
 
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Zicht\Bundle\FrameworkExtraBundle\Pager\Pager;
-use Zicht\Bundle\SolrBundle\Solr\Client;
-use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Select;
+use Zicht\Bundle\SolrBundle\Exception\HttpResponseException;
+use Zicht\Bundle\SolrBundle\Service\SolrClient;
+use Zicht\Bundle\SolrBundle\QueryBuilder\Select;
 use Zicht\Bundle\UrlBundle\Url\Params\Params;
 
 /**
@@ -20,7 +22,7 @@ abstract class AbstractSearchFacade
 {
     /** @var array  */
     protected static $defaultParameterWhitelist = array('keywords', 'page', 'type', 'perpage');
-    /** @var Client */
+    /** @var SolrClient */
     protected $client = null;
     /** @var Params */
     protected $searchParams = null;
@@ -45,11 +47,11 @@ abstract class AbstractSearchFacade
     /**
      * Construct the facade.
      *
-     * @param Client $client
+     * @param SolrClient $client
      * @param RequestStack $requestStack
      * @param int $defaultLimit
      */
-    public function __construct(Client $client, RequestStack $requestStack, $defaultLimit = 30)
+    public function __construct(SolrClient $client, RequestStack $requestStack, $defaultLimit = 30)
     {
         $this->client       = $client;
         $this->defaultLimit = $defaultLimit;
@@ -96,13 +98,12 @@ abstract class AbstractSearchFacade
     /**
      * When POST is detected, redirect to GET params
      *
-     * @return void
+     * @throws HttpResponseException
      */
     public function redirectPost()
     {
         if ($this->getRequest()->isMethod('POST')) {
-            header(sprintf('Location: %s', $this->getPostRedirect($this->getRequest()->request->get('search', []))));
-            exit;
+            throw new HttpResponseException(new RedirectResponse($this->getPostRedirect($this->getRequest()->request->get('search', []))));
         }
     }
 
@@ -328,7 +329,7 @@ abstract class AbstractSearchFacade
      * @param string $label
      * @return array
      */
-    public function getFacetMetaData($facetName, $value, $count, $label = null)
+    public function getFacetMetaData($facetName, $value, $count = 0, $label = null)
     {
         return array(
             'value'         => $value,

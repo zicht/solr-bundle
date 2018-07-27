@@ -29,6 +29,11 @@ class PingCommand extends AbstractCommand
      */
     protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {
-        $this->solr->ping();
+        try {
+            $this->solr->ping();
+            $output->writeln('<info>ping succeeded</info>');
+        } catch (\Exception $e) {
+            $output->writeln(sprintf('<error>%s</error>', $e->getMessage()));
+        }
     }
 }

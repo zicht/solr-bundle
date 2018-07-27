@@ -5,14 +5,28 @@
  */
 namespace Zicht\Bundle\SolrBundle\Command;
 
+use Psr\Http\Message\StreamInterface;
 use Symfony\Component\Console;
-use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Zicht\Bundle\SolrBundle\Console\Output\StreamableOutputWrapper;
+use Zicht\Bundle\SolrBundle\Event\HttpClientResponseEvent;
+use Zicht\Bundle\SolrBundle\QueryBuilder;
+use Zicht\Http\Handler\HandlerDebugInterface;
+use Zicht\Http\Stream\ResourceStream;
 
 /**
  * Reindex a specified repository or entity in SOLR
  */
 class SelectCommand extends AbstractCommand
 {
+    /** @var bool  */
+    private $isVerbose = false;
+    /** @var OutputInterface  */
+    private $output;
+    /** @var StreamInterface|null  */
+    private $stream;
+
     /**
      * @{inheritDoc}
      */
@@ -67,12 +81,57 @@ class SelectCommand extends AbstractCommand
     }
 
     /**
+     * @return array
+     */
+    private function getStreamFmt()
+    {
+        return [
+            '/^\*\s.*$/' => '<comment>\0</comment>',
+            '/^>>.*$/' => '<info>\0</info>',
+        ];
+    }
+
+    /**
+     * @{inheritDoc}
+     */
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
+        parent::initialize($input, $output);
+
+        if (false !== $this->isVerbose = $output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
+            $this->output = $output;
+            $handler = $this->solr->getClient()->getHandler();
+            if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE && $handler instanceof HandlerDebugInterface) {
+                $this->stream = new ResourceStream(StreamableOutputWrapper::getResource($output, $this->getStreamFmt()));
+                $handler->setDebug($this->stream);
+            }
+        }
+    }
+
+    /**
+     * @param HttpClientResponseEvent $event
+     */
+    public function onResponse(HttpClientResponseEvent $event)
+    {
+        if ($this->isVerbose) {
+            if (!$this->stream instanceof StreamInterface) {
+                $this->output->writeln('request uri: ' . (string)$event->getRequest()->getUri());
+            }
+        }
+    }
+
+    /**
      * @{inheritDoc}
      */
     protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {
         $select = new QueryBuilder\Select();
         $select->setQuery($input->getArgument('query'));
+
+        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
+            $select->addParam('indent', 'true');
+        }
+
         if ($input->getOption('deftype')) {
             $select
                 ->setDefType($input->getOption('deftype'))
@@ -91,12 +150,13 @@ class SelectCommand extends AbstractCommand
         if ($start = $input->getOption('start')) {
             $select->setStart($start);
         }
-        $results = $this->solr->select($select)->response->docs;
-        if ($output->getVerbosity() > 0) {
-            $output->writeln($this->solr->getLastResponse()->getEffectiveUrl() . PHP_EOL. PHP_EOL);
-        }
-        foreach ($results as $doc) {
-            $output->writeln(json_encode($doc, JSON_PRETTY_PRINT));
+
+        $response = $this->solr->select($select);
+
+        if ($output->getVerbosity() <= OutputInterface::VERBOSITY_VERY_VERBOSE || !$this->stream instanceof StreamInterface) {
+            foreach ($response->response->docs as $doc) {
+                $output->writeln(json_encode($doc, JSON_PRETTY_PRINT));
+            }
         }
     }
 }

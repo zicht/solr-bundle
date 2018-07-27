@@ -48,7 +48,7 @@ class DocumentMapperMetadataFactory
      * @param EventDispatcherInterface $dispatcher
      * @param MappingDriver[] $mappings
      */
-    public function __construct(NamingStrategy $namingStrategy, CacheInterface $cache, Reader $reader, EventDispatcherInterface $dispatcher, ...$mappings)
+    public function __construct(NamingStrategy $namingStrategy, CacheInterface $cache, Reader $reader, EventDispatcherInterface $dispatcher, MappingDriver ...$mappings)
     {
         if (null === $entities = $cache->get($this->getCacheKey())) {
             $entities = $this->getEntityInheritanceList($dispatcher, $reader, ...$mappings);
@@ -378,5 +378,13 @@ class DocumentMapperMetadataFactory
         }
 
         return 'from' . ucfirst(str_replace(['-', '_', '.'], '', ucwords($name, '-_.')));
+    }
+
+    /**
+     * @return CacheInterface
+     */
+    public function getCacheImpl()
+    {
+        return $this->cache;
     }
 }

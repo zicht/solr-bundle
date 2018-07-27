@@ -6,7 +6,7 @@
 
     <services>
 
-        <service id="zicht_solr.manager" class="Zicht\Bundle\SolrBundle\Solr\SolrManager">
+        <service id="zicht_solr.manager" class="Zicht\Bundle\SolrBundle\Service\SolrManager">
             <argument type="service" id="zicht_solr.client"/>
             <argument type="service" id="zicht_solr.mapper.document_metadata_factory"/>
             <argument type="service" id="zicht_solr.object_storage"/>
@@ -24,7 +24,7 @@
             <!--<tag name="doctrine.event_subscriber" />-->
         <!--</service>-->
 
-        <service id="zicht_solr.client" class="Zicht\Bundle\SolrBundle\Solr\Client">
+        <service id="zicht_solr.client" class="Zicht\Bundle\SolrBundle\Service\SolrClient">
             <argument type="service" id="zicht_solr.http.client" />
             <argument type="service" id="debug.stopwatch" on-invalid="null" />
         </service>
@@ -47,7 +47,7 @@
             <tag name="zicht_solr.document.id_generator"/>
         </service>
 
-        <service id="zicht_solr.object_storage" class="Zicht\Bundle\SolrBundle\Solr\ObjectStorage" public="false" />
+        <service id="zicht_solr.object_storage" class="Zicht\Bundle\SolrBundle\Service\ObjectStorage" public="false" />
 
         <service id="zicht_solr.event_listener.cache_warmer" class="Zicht\Bundle\SolrBundle\EventListener\CacheWarmerListener">
             <argument type="service" id="zicht_solr.mapper.document_metadata_factory"/>
@@ -59,6 +59,9 @@
             <tag name="doctrine.event_listener" event="loadClassMetadata"/>
         </service>
 
+        <service id="zicht_solr.event_listener.response_exception" class="Zicht\Bundle\SolrBundle\EventListener\ResponseExceptionListener">
+            <tag name="kernel.event_listener" event="kernel.exception" priority="255" />
+        </service>
 
         <!--<service id="zicht_solr.event_listener.entity_listener" class="Zicht\Bundle\SolrBundle\EventListener\EntityListener">-->
             <!--<argument type="service" id="zicht_solr.manager" />-->

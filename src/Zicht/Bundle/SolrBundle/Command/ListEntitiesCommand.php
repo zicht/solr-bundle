@@ -8,8 +8,7 @@ namespace Zicht\Bundle\SolrBundle\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Zicht\Bundle\SolrBundle\Solr\SolrManager;
-
+use Zicht\Bundle\SolrBundle\Service\SolrManager;
 
 class ListEntitiesCommand extends Command
 {
@@ -44,20 +43,15 @@ class ListEntitiesCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $output->writeln("");
-
-
         foreach($this->manager->getDocumentMapperMetadataFactory()->getEntities() as $parent => $children) {
             $output->writeln("<info>●</info> " . $parent);
-
             foreach ($children as $index => $child) {
                 if ($index === count($children) - 1) {
                     $output->writeln("<info>└── </info>" . $child);
                 } else {
                     $output->writeln("<info>├── </info>" . $child);
                 }
-
             }
-
             $output->writeln("");
         }
     }

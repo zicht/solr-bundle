@@ -1,8 +1,26 @@
 <?php
-/**
- * @author    Philip Bergman <philip@zicht.nl>
- * @copyright Zicht Online <http://www.zicht.nl>
- */
 namespace Zicht\Bundle\SolrBundle\Exception;
 
-class ResponseException extends \HttpException
+use Symfony\Component\HttpFoundation\Response;
+
+class HttpResponseException extends \HttpResponseException implements SolrExceptionInterface
+{
+    /** @var Response */
+    private $response;
+
+    /**
+     * @param Response $response
+     */
+    public function __construct(Response $response)
+    {
+        $this->response = $response;
+    }
+
+    /**
+     * @return Response
+     */
+    public function getResponse()
+    {
+        return $this->response;
+    }
+}

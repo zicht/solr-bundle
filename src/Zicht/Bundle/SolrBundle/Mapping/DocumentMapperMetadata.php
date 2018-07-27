@@ -207,7 +207,7 @@ class DocumentMapperMetadata
      */
     public function getIdGenerator()
     {
-        return $this->idGenerator;
+        return empty($this->idGenerator) ? null : $this->idGenerator;
     }
 
     /**

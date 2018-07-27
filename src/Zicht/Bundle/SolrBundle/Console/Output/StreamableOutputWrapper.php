@@ -3,34 +3,55 @@
  * @author    Philip Bergman <philip@zicht.nl>
  * @copyright Zicht Online <http://www.zicht.nl>
  */
-namespace Zicht\Bundle\SolrBundle\Http;
+namespace Zicht\Bundle\SolrBundle\Console\Output;
 
 use Symfony\Component\Console\Output\OutputInterface;
-use Zicht\Http\Stream\ResourceStream;
 
-class ConsoleStream
+/**
+ * This act as an streamable wrapper around the symfony OutputInterface
+ * so it can be used as an (writable) resource and redirects all write
+ * calls to the OutputInterface::write method.
+ *
+ * To use this wrapper:
+ *
+ * StreamableOutputWrapper::init();     // will register the output protocol
+ * $resource = fopen('output://', 'w', false, stream_context_create(['output'=>['writer' => $output]]));
+ * fwrite($resource, 'foo');
+ *
+ * This wrapper also supports some post formatting, and that can be registered
+ * by using the fmt context option. This should be an array with the pattern
+ * as key and replacements as values. So for example to wrap everything in the
+ * `info` color style:
+ *
+ * $ctx = tream_context_create(['output'=>['writer' => $output, 'fmt' => ['/^.+$/' => '<info>\0</info>']]])
+ * $resource = fopen('output://', 'w', false, $ctx);
+ * fwrite($resource, 'foo') // should print foo in green text
+ *
+ */
+class StreamableOutputWrapper
 {
     /** @var OutputInterface */
     private $output;
     /** @var resource */
     public $context;
-    /** @var string  */
-    private $tmpl;
+    /** @var array  */
+    private $fmt = [];
+
+    /**
+     * @param OutputInterface $output
+     * @param array $fmt
+     * @return bool|resource
+     */
+    public static function getResource(OutputInterface $output, array $fmt = [])
+    {
+        self::init();
+        return fopen('output://', 'w', false, stream_context_create(['output'=>['writer' => $output, 'fmt' => $fmt]]));
+    }
 
     public static function init()
     {
         if (!in_array('output', stream_get_wrappers())) {
             stream_wrapper_register('output', self::class);
-            stream_context_set_default(
-                [
-                    'output' => [
-                        'tmpl' => [
-                            '* ' => '<comment>%s</comment>',
-                            '>>' => '<info>%s</info>',
-                        ]
-                    ]
-                ]
-            );
         }
     }
 
@@ -51,7 +72,9 @@ class ConsoleStream
             ));
         }
         $this->output = $options['output']['writer'];
-        $this->tmpl = $options['output']['tmpl'];;
+        if (isset($options['output']['fmt'])) {
+            $this->fmt = $options['output']['fmt'];
+        }
         return true;
     }
 
@@ -76,10 +99,8 @@ class ConsoleStream
      */
     public function stream_write($data)
     {
-        $prefix = @substr($data, 0, 2);
-
-        if (isset($this->tmpl[$prefix])) {
-            $data = sprintf($this->tmpl[$prefix], $data);
+        if (!empty($this->fmt)) {
+            $data = preg_replace(array_keys($this->fmt), array_values($this->fmt), $data);
         }
 
         $this->output->write($data);

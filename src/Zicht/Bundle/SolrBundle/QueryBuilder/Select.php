@@ -4,7 +4,7 @@
  * @copyright Zicht Online <http://zicht.nl>
  */
 
-namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
+namespace Zicht\Bundle\SolrBundle\QueryBuilder;
 
 use Psr\Http\Message\ResponseInterface;
 use Zicht\Http\RequestFactoryInterface;

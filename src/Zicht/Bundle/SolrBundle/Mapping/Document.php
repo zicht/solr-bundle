@@ -24,7 +24,6 @@ use Zicht\Bundle\SolrBundle\Exception\BadMethodCallException;
  */
 final class Document implements AnnotationInterface
 {
-
     /**
      * a repository class that implements SearchDocumentRepository
      *

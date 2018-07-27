@@ -3,27 +3,24 @@
  * @author    Philip Bergman <philip@zicht.nl>
  * @copyright Zicht Online <http://www.zicht.nl>
  */
-namespace Zicht\Bundle\SolrBundle\Solr;
+namespace Zicht\Bundle\SolrBundle\Service;
 
 use Zicht\Bundle\SolrBundle\Exception\BadMethodCallException;
-use Zicht\Bundle\SolrBundle\Exception\RuntimeException;
 use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadata;
 use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadataFactory;
 use Zicht\Bundle\SolrBundle\Mapping\IdGeneratorDefault;
 use Zicht\Bundle\SolrBundle\Mapping\IdGeneratorInterface;
 use Zicht\Bundle\SolrBundle\Mapping\PropertyValueTrait;
+use Zicht\Bundle\SolrBundle\QueryBuilder\Update;
+
 
 class SolrManager
 {
     use PropertyValueTrait;
 
-    const SCOPE_MAPPING_MARSHALLER = 'mapping.marshaller';
-    const SCOPE_MAPPING_REPOSITORY = 'mapping.repository';
-    const SCOPE_DOCUMENT_ID_GENERATOR = 'document.id_generator';
-
     /** @var bool */
     private $enabled = true;
-    /** @var Client  */
+    /** @var SolrClient  */
     private $client;
     /** @var  DocumentMapperMetadataFactory */
     private $documentMetadataFactory;
@@ -31,12 +28,11 @@ class SolrManager
     private $objectStorage;
 
     /**
-     * SolrManager constructor.
-     * @param Client $client
+     * @param SolrClient $client
      * @param DocumentMapperMetadataFactory $documentMetadataFactory
      * @param ObjectStorage|null $objectStorage
      */
-    public function __construct(Client $client, DocumentMapperMetadataFactory $documentMetadataFactory, ObjectStorage $objectStorage = null)
+    public function __construct(SolrClient $client, DocumentMapperMetadataFactory $documentMetadataFactory, ObjectStorage $objectStorage = null)
     {
         $this->client = $client;
         $this->objectStorage = $objectStorage ?: new ObjectStorage();
@@ -69,65 +65,63 @@ class SolrManager
         $meta = $this->getDocumentMapperMetadata($entity);
 
         if (null !== $repo = $meta->getRepository()) {
-            return $this->objectStorage->get($repo, self::SCOPE_MAPPING_REPOSITORY);
+            return $this->objectStorage->get($repo, ObjectStorageScopes::SCOPE_MAPPING_REPOSITORY);
         }
 
         return null;
     }
 
-    /**
-     * Update an entity from a doctrine change set
-     *
-     * @param object $entity
-     * @param array $changes
-     * @return bool
-     */
-    public function updateFromChangeSet($entity, array $changes)
-    {
-//        if (!$this->enabled) {
-//            return false;
-//        }
+//    /**
+//     * Update an entity from a doctrine change set
+//     *
+//     * @param object $entity
+//     * @param array $changes
+//     * @return bool
+//     */
+//    public function updateFromChangeSet($entity, array $changes)
+//    {
+////        if (!$this->enabled) {
+////            return false;
+////        }
+////
+////        $data = ['id' => $this->documentIdGenerator->generate($entity)];
+////        $meta = $this->getDocumentMapperMetadata($entity);
+////
+////        foreach ($meta->getMapping() as $id => $field) {
+////            if (isset($changes[$field->getName()])) {
+////                $data[$id] = $changes[$field->getName()][1];
+////            }
+////        }
+////
+////        $update = new QueryBuilder\Update();
+////        $update->add($data, $meta->getParams());
+////        $update->commit();
+////
+////        $this->client->update($update);
 //
-//        $data = ['id' => $this->documentIdGenerator->generate($entity)];
-//        $meta = $this->getDocumentMapperMetadata($entity);
-//
-//        foreach ($meta->getMapping() as $id => $field) {
-//            if (isset($changes[$field->getName()])) {
-//                $data[$id] = $changes[$field->getName()][1];
-//            }
-//        }
-//
-//        $update = new QueryBuilder\Update();
-//        $update->add($data, $meta->getParams());
-//        $update->commit();
-//
-//        $this->client->update($update);
-
-        return true;
-    }
+//        return true;
+//    }
 
     /**
      * Update an entity
      *
-     * @param mixed $entity
+     * @param mixed... $entities
      * @return bool
      */
-    public function update($entity)
+    public function update(...$entities)
     {
         if (!$this->enabled) {
             return false;
         }
-
-        $meta = $this->getDocumentMapperMetadata($entity);
-
-        if (!$meta->isActive()) {
-            return false;
+        $update = new Update();
+        foreach ($entities as $entity) {
+            $meta = $this->getDocumentMapperMetadata($entity);
+            if (!$meta->isActive()) {
+                continue;
+            }
+            $update->add($this->map($meta, $entity), $meta->getParams());
         }
-
-        $update = new QueryBuilder\Update();
-        $update->add($this->map($meta, $entity), $meta->getParams());
         $update->commit();
-
         $this->client->update($update);
         return true;
     }
@@ -148,16 +142,6 @@ class SolrManager
         return $data;
     }
 
-//
-//    /**
-//     * @param string $className
-//     * @return object
-//     */
-//    private function getMarshaller($className)
-//    {
-//        return $this->objectStorage->get($className, self::SCOPE_MAPPING_MARSHALLER);
-//    }
-
     /**
      * @param DocumentMapperMetadata $meta
      * @param object $entity
@@ -165,29 +149,13 @@ class SolrManager
      */
     private function getDocumentId(DocumentMapperMetadata $meta, $entity)
     {
-        return $this->getIdGenerator($meta)->generate($entity);
-    }
-
-    /**
-     * @param DocumentMapperMetadata $meta
-     * @return IdGeneratorInterface
-     */
-    private function getIdGenerator(DocumentMapperMetadata $meta)
-    {
-        $className = $meta->getIdGenerator();
-
-        if (empty($className)) {
-            $className = IdGeneratorDefault::class;
+        if (null === $generator = $meta->getIdGenerator()) {
+            $generator = IdGeneratorDefault::class;
         }
 
-        $generator = $this->objectStorage->get($className, self::SCOPE_DOCUMENT_ID_GENERATOR);
-
-        if (!$generator instanceof IdGeneratorInterface) {
-            throw new BadMethodCallException('Class "%s" is not a instance of "%s"', get_class($generator), IdGeneratorInterface::class);
-        }
-
-        return $generator;
+        return $this->objectStorage->get($generator, ObjectStorageScopes::SCOPE_DOCUMENT_ID_GENERATOR)->generate($entity);
     }
+
 
     /**
      * @return bool
@@ -206,7 +174,7 @@ class SolrManager
     }
 
     /**
-     * @return Client
+     * @return SolrClient
      */
     public function getClient()
     {

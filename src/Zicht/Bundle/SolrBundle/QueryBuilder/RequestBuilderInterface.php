@@ -3,7 +3,7 @@
  * @author Gerard van Helden <gerard@zicht.nl>
  * @copyright Zicht Online <http://zicht.nl>
  */
-namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
+namespace Zicht\Bundle\SolrBundle\QueryBuilder;
 
 use Psr\Http\Message\RequestInterface;
 use Zicht\Http\RequestFactoryInterface;

@@ -12,7 +12,9 @@
 
         <service id="zicht_solr.http.handler.socket" class="Zicht\Http\Handler\SocketHandler" public="false">
             <argument/>
-            <argument type="collection"/>
+            <argument type="collection">
+                <argument type="string" key="timeout">2</argument>
+            </argument>
         </service>
 
         <service id="zicht_solr.http.client" class="Zicht\Http\Client" public="false">

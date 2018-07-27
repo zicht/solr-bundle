@@ -5,8 +5,8 @@
  */
 namespace Zicht\Bundle\SolrBundle\Mapping;
 
-use Zicht\Bundle\SolrBundle\Solr\ObjectStorage;
-use Zicht\Bundle\SolrBundle\Solr\SolrManager;
+use Zicht\Bundle\SolrBundle\Service\ObjectStorage;
+use Zicht\Bundle\SolrBundle\Service\ObjectStorageScopes;
 
 class PropertyMethodMapper extends PropertyValueMapper
 {
@@ -34,7 +34,7 @@ class PropertyMethodMapper extends PropertyValueMapper
      */
     public function append(ObjectStorage $container, $entity, array &$data)
     {
-        $data[$this->name] = $container->get($this->class, SolrManager::SCOPE_MAPPING_MARSHALLER)->{$this->method}($this->resolve($entity));
+        $data[$this->name] = $container->get($this->class, ObjectStorageScopes::SCOPE_MAPPING_MARSHALLER)->{$this->method}($this->resolve($entity));
     }
 
     /**

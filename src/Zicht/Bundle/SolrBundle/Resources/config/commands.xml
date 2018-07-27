@@ -15,6 +15,7 @@
 
         <service id="zicht_solr.command.select" class="Zicht\Bundle\SolrBundle\Command\SelectCommand" parent="zicht_solr.command.abstract">
             <tag name="console.command"/>
+            <tag name="kernel.event_listener" event="net.client_response" method="onResponse"/>
         </service>
 
         <service id="zicht_solr.command.delete" class="Zicht\Bundle\SolrBundle\Command\DeleteCommand" parent="zicht_solr.command.abstract">
@@ -36,11 +37,14 @@
             <tag name="console.command"/>
         </service>
 
-
-
         <service id="zicht_solr.command.reindex" class="Zicht\Bundle\SolrBundle\Command\ReindexCommand">
             <argument type="service" id="zicht_solr.manager" />
             <argument type="service" id="doctrine" />
+            <tag name="console.command"/>
+        </service>
+
+        <service id="zicht_solr.command.cache_clear" class="Zicht\Bundle\SolrBundle\Command\CacheClearCommand">
+            <argument type="service" id="zicht_solr.manager" />
             <tag name="console.command"/>
         </service>
 

@@ -7,25 +7,24 @@
 namespace Zicht\Bundle\SolrBundle\Command;
 
 use Symfony\Component\Console\Command\Command;
-use Zicht\Bundle\SolrBundle\Solr\Client;
+use Zicht\Bundle\SolrBundle\Service\SolrClient;
 
 /**
  * Base class for commands interacting with the solr implementation
  */
 class AbstractCommand extends Command
 {
-    /** @var Client  */
+    /** @var SolrClient  */
     protected $solr;
 
     /**
      * Construct the command with the solr service
      *
-     * @param Client $solr
+     * @param SolrClient $solr
      */
-    public function __construct(Client $solr)
+    public function __construct(SolrClient $solr)
     {
         parent::__construct();
-
         $this->solr = $solr;
     }
 }

@@ -8,7 +8,7 @@ namespace Zicht\Bundle\SolrBundle\DependencyInjection\CompilerPass;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
-use Zicht\Bundle\SolrBundle\Solr\SolrManager;
+use Zicht\Bundle\SolrBundle\Service\ObjectStorageScopes;
 
 /**
  * Class SolrManagerObjectStoragePass
@@ -32,25 +32,13 @@ use Zicht\Bundle\SolrBundle\Solr\SolrManager;
 class SolrManagerObjectStoragePass implements CompilerPassInterface
 {
     /**
-     * @return array|string[]
-     */
-    protected function getScopes()
-    {
-        return [
-            SolrManager::SCOPE_DOCUMENT_ID_GENERATOR,
-            SolrManager::SCOPE_MAPPING_MARSHALLER,
-            SolrManager::SCOPE_MAPPING_REPOSITORY
-        ];
-    }
-
-    /**
      * @{inheritDoc}
      */
     public function process(ContainerBuilder $container)
     {
         $definition = $container->getDefinition('zicht_solr.object_storage');
 
-        foreach ($this->getScopes() as $name) {
+        foreach (ObjectStorageScopes::getAllScopes() as $name) {
             foreach (array_keys($container->findTaggedServiceIds('zicht_solr.' . $name)) as $service) {
                 $definition->addMethodCall('add', [new Reference($service),  $name]);
             }

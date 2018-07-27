@@ -16,26 +16,24 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadata;
+use Zicht\Bundle\SolrBundle\Mapping\IdGeneratorDefault;
 use Zicht\Bundle\SolrBundle\Mapping\MethodMergeMapper;
-use Zicht\Bundle\SolrBundle\Solr\SolrManager;
+use Zicht\Bundle\SolrBundle\Service\SolrManager;
 
 class EntityInspectCommand extends Command
 {
     /** @var SolrManager */
     private $manager;
-    /** @var */
-    private $dispatcher;
 
     /**
      * EntityInspectCommand constructor.
      *
      * @param SolrManager $manager
      */
-    public function __construct(SolrManager $manager, EventDispatcherInterface $dispatcher)
+    public function __construct(SolrManager $manager)
     {
         parent::__construct();
         $this->manager = $manager;
-        $this->dispatcher = $dispatcher;
     }
 
 
@@ -82,11 +80,13 @@ class EntityInspectCommand extends Command
         $table->addRow([new TableCell(sprintf('%s::$%s', ...$meta->getIdField()), ['colspan' => 2])]);
         $table->addRow(new TableSeparator());
 
-        $property = new \ReflectionMethod($this->manager, 'getIdGenerator');
-        $property->setAccessible(true);
+        if (null === $generator = $meta->getIdGenerator()) {
+            $generator = IdGeneratorDefault::class;
+        }
+
         $table->addRow([new TableCell("<fg=cyan;options=bold>Id Generator</>", ['colspan' => 2])]);
         $table->addRow(new TableSeparator());
-        $table->addRow([new TableCell(get_class($property->invoke($this->manager, $meta)), ['colspan' => 2])]);
+        $table->addRow([new TableCell($generator, ['colspan' => 2])]);
 
         if (!$meta->getOption('strict')) {
 

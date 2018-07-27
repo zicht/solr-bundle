@@ -15,4 +15,20 @@ class TempStream extends ResourceStream
         parent::__construct(fopen('php://temp', 'r+'));
     }
 
+    /**
+     * @param $resource
+     * @return self
+     */
+    public static function from($resource)
+    {
+        $self = new static();
+        $pos = ftell($resource);
+        while (!feof($resource)) {
+            $self->write(fread($resource, 1024));
+        }
+        $self->rewind();
+        fseek($resource, $pos);
+        return $self;
+    }
+
 }

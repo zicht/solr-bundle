@@ -3,11 +3,11 @@
  * @author    Philip Bergman <philip@zicht.nl>
  * @copyright Zicht Online <http://www.zicht.nl>
  */
-namespace Zicht\Bundle\SolrBundle\Solr;
+namespace Zicht\Bundle\SolrBundle\Service;
 
 final class ObjectStorage
 {
-    /** @var \SplObjectStorage  */
+    /** @var \SplObjectStorage */
     private $storage;
 
     /**
@@ -31,10 +31,8 @@ final class ObjectStorage
                 return $object;
             }
         }
-
         $instance = new $className();
         $this->add($instance, $scope);
-
         return $instance;
     }
 
@@ -46,11 +44,9 @@ final class ObjectStorage
     {
         if ($this->storage->contains($object)) {
             list($className, $scopes) = $this->storage[$object];
-
             if (!in_array($scope, $scopes)) {
                 $scopes[] = $scope;
             }
-
             $this->storage[$object] = [$className, $scopes];
         } else {
             $this->storage->attach($object, [get_class($object), (array)$scope]);
@@ -66,16 +62,13 @@ final class ObjectStorage
         if (!$this->storage->contains($object)) {
             return;
         }
-
         if (null === $scope) {
             $this->storage->detach($object);
         } else {
             list($className, $scopes) = $this->storage[$object];
-
             if (false !== $index = array_search($scope, $scopes)) {
                 unset($scopes[$index]);
             }
-
             $this->storage[$object] = [$className, $scopes];
         }
     }

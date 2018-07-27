@@ -7,8 +7,9 @@ namespace Zicht\Http;
 
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Zicht\Http\Handler\HandlerInterface;
 
-interface ClientInterface
+interface ClientInterface extends RequestFactoryInterface
 {
     /**
      * PSR-18 is still in draft, but for the future we implement
@@ -18,4 +19,15 @@ interface ClientInterface
      * @return ResponseInterface
      */
     public function sendRequest(RequestInterface $request);
+
+
+    /**
+     * @return HandlerInterface
+     */
+    public function getHandler();
+
+    /**
+     * @return HandlerInterface
+     */
+    public function setHandler(HandlerInterface $handler);
 }
