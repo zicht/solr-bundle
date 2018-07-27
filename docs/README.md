@@ -4,6 +4,8 @@
 2. [Config](#config)
 3. [Mapping](#mapping)
 4. [Caching](#caching)
+5. [Http](#http)
+6. [Annotations](#annotations)
 
 ## Installing
 
@@ -80,16 +82,17 @@ This also make it possible to define https or user/password for when solr is beh
 
 ## Mapping
 
-The [DocumentMapperMetadataFactory](../src/Zicht/Bundle/SolrBundle/Mapping/DocumentMapperMetadataFactory.php) uses the doctrine [MappingDriver](https://www.doctrine-project.org/api/orm/latest/Doctrine/ORM/Mapping/Driver/MappingDriver.html) to get all registered entities and checks for the existence of an [Document](../src/Zicht/Bundle/SolrBundle/Mapping/DocumentMapperMetadataFactory.php) class annotation. Those classes will be checked for annotations that will be used to create an [DocumentMapperMetadata](../src/Zicht/Bundle/SolrBundle/Mapping/DocumentMapperMetadata.php) which can be used to map an entity.
+The [DocumentMapperMetadataFactory](../src/Zicht/Bundle/SolrBundle/Mapping/DocumentMapperMetadataFactory.php) uses the doctrine [MappingDriver](https://www.doctrine-project.org/api/orm/latest/Doctrine/ORM/Mapping/Driver/MappingDriver.html) to get all registered entities and checks for the existence of an [Document](../src/Zicht/Bundle/SolrBundle/Mapping/DocumentMapperMetadataFactory.php) class annotation. Those classes will be checked for annotations that will be used to create an [DocumentMapperMetadata](../src/Zicht/Bundle/SolrBundle/Mapping/DocumentMapperMetadata.php) which will be used to map an entity to an solr document. So you don`t need to register you entities as long the are managed by doctrine the will be picked up automatically.
+
+To check all registered entities you van use the `zicht:solr:list-entities` command and to debug the mapping of an specific entity you can use the `zicht:solr:inspect-entity` which will disply all mappings and config. 
 
 So to demonstrate we have an page entity:
 
 ```
-use Zicht\Bundle\SolrBundle\Mapping as Solr;
-
 /**
-* @Solr\Document
-*/
+ * @Solr\Document
+ * @ORM\Entity
+ */
 class Page {
 
     /**
@@ -139,15 +142,15 @@ var_dump($data);
 
 ```
 
-To map classes not managed by doctrine you could use the `solr.metadata_post_build_entities_list` event to register classes and `solr.metadata_load_document_mapper` to dynamically add mappings.  
+To map classes not managed by doctrine you could use the `solr.metadata_post_build_entities_list` event to append classes and the `solr.metadata_load_document_mapper` event to dynamically add or alter mappings.
 
 ## Caching
 
 This bundle has some cache implementations in the `Zicht/SimpleCache` namespace and could be replaced (when available) with the [symfony cache](https://symfony.com/doc/current/components/cache.html) as it both implements the [PSR-16](https://www.php-fig.org/psr/psr-16/).
 
-Currently this bundle support [array cache](../src/Zicht/SimpleCache/ArrayCache.php) and [filesystem cache](../src/Zicht/SimpleCache/ArrayCache.php) where the filesystem cache is default for the DocumentMapperMetadataFactory.   
 
-This bundle uses caching for the DocumentMapperMetadataFactory with building the entity lists when no cache entry exists for the entity list. Then process all entities for the DocumentMapperMetadata and create cache items for those metadata classes. By default it will use the file system cache and defined as:
+Currently this bundle support [array cache](../src/Zicht/SimpleCache/ArrayCache.php) and [filesystem cache](../src/Zicht/SimpleCache/ArrayCache.php) where the filesystem cache is default for the DocumentMapperMetadataFactory.   
+This bundle uses caching for the DocumentMapperMetadataFactory for caching the build entity lists and the entity mapper metadata. By default it will use the file system cache and defined as:
 
 ```
     <service id="zicht_solr.cache.filesystem" class="Zicht\SimpleCache\FilesystemCache" public="false">
@@ -155,7 +158,7 @@ This bundle uses caching for the DocumentMapperMetadataFactory with building the
     </service>
 ```
 
-To use the array cache you can set in the config cache to `zicht_solr.cache.array`
+To use the array cache (for development) you can set in the config cache to `zicht_solr.cache.array`
 
 ```
 zicht_solr:
@@ -163,3 +166,21 @@ zicht_solr:
         cache: zicht_solr.cache.array
             
 ```
+
+## Http
+
+This bundle comes with an light http client (with no hard dependencies) what is build around the [PSR-7](https://www.php-fig.org/psr/psr-7) and uses the [fsockopen](http://php.net/manual/en/function.fsockopen.php) as transport layer but you could easily create handlers for curl etc.
+
+At the moment there is no client/request-factory psr so whe using the [Zicht\Http\ClientInterface](../src/Zicht/Http/ClientInterface.php) and that is for now an hard dependency in the solr bundle and should be easly bridged to for example to guzzle. 
+
+## Annotations
+
+1. [Document](./annotations/Document.md)
+2. [NoDocument](./annotations/NoDocument.md)
+3. [Field](./annotations/Field.md) 
+4. [Fields](./annotations/Fields.md) 
+5. [IdGenerator](./annotations/IdGenerator.md) 
+6. [Marshaller](./annotations/Marshaller.md) 
+7. [Params](./annotations/Params.md) 
+
+ 
