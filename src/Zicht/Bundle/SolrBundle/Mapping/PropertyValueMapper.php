@@ -52,4 +52,12 @@ class PropertyValueMapper extends AbstractMapper
     {
         return sprintf('%s::$%s', $this->scope, $this->property);
     }
+
+    /**
+     * @return string
+     */
+    public function getProperty()
+    {
+        return $this->property;
+    }
 }

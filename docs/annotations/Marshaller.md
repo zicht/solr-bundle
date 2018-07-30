@@ -8,8 +8,10 @@ You can tag your marshaller (with `zicht_solr.mapping.marshaller`) and they will
 
 | Name | Default | Required | Description
 --- | --- | --- | ---
-className | null | true | The callback class
-method | null | false | the method name, when none is given it will prefix the field name with `from` and create and create an camecase string from the property name. So for example when the field name is `an_field_name` it will try to call `fromAnFieldName`.
+value | null | true | The callback class or an array with the class and method
+
+
+When no method name is given it will prefix the field name with `from` and create and create an camecase string from the property name. So for example when the field name is `an_field_name` it will try to call `fromAnFieldName`.
 
 #### Example
 
@@ -33,7 +35,7 @@ class Page {
     ...
     /**
      * @Solr\Field
-     * @Solr\Marshaller(className="ReverseMarshaller")
+     * @Solr\Marshaller("ReverseMarshaller")
      * @ORM\Column(type="string", nullable=true)
      */
     private $title;
@@ -64,7 +66,7 @@ use Zicht\Bundle\SolrBundle\Mapping as Solr;
 /**
  * @Solr\Document
  * @Solr\Fields({
- *      "reverse_title": @Solr\Marshaller(className="ReverseMarshaller", method="reversePage")   
+ *      "reverse_title": @Solr\Marshaller({"ReverseMarshaller", "reversePage"})   
  * })
  * @ORM\Entity
  */
