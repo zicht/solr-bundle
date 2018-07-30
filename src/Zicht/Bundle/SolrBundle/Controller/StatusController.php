@@ -24,7 +24,7 @@ class StatusController extends Controller
     public function statusAction()
     {
         try {
-            $this->get('zicht_solr.solr')->ping();
+            $this->get('zicht_solr.client')->ping();
             return new Response('ping succeeded', Response::HTTP_OK, $this->getTexTypetHeaders());
         } catch (\Exception $e) {
             return new Response((string)$e->getMessage(), Response::HTTP_SERVICE_UNAVAILABLE, $this->getTexTypetHeaders());

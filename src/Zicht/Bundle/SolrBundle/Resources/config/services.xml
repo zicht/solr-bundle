@@ -12,24 +12,10 @@
             <argument type="service" id="zicht_solr.object_storage"/>
         </service>
 
-        <!--<service id="zicht_solr.manager" class="Zicht\Bundle\SolrBundle\Manager\SolrManager">-->
-            <!--&lt;!&ndash;<argument type="service" id="zicht_solr.solr"/>&ndash;&gt;-->
-            <!--<argument type="service" id="zicht_solr.mapper.document_metadata_factory"/>-->
-            <!--<argument type="service" id="zicht_solr.net.client"/>-->
-
-        <!--</service>-->
-
-        <!--<service id="zicht_solr.doctrine.subscriber" class="Zicht\Bundle\SolrBundle\Manager\Doctrine\Subscriber">-->
-            <!--<argument type="service" id="service_container"/>-->
-            <!--<tag name="doctrine.event_subscriber" />-->
-        <!--</service>-->
-
         <service id="zicht_solr.client" class="Zicht\Bundle\SolrBundle\Service\SolrClient">
             <argument type="service" id="zicht_solr.http.client" />
             <argument type="service" id="debug.stopwatch" on-invalid="null" />
         </service>
-
-        <!--<service id="_zicht_solr.http_client" public="false" class="GuzzleHttp\Client" />-->
 
         <service id="zicht_solr.data_collector" class="Zicht\Bundle\SolrBundle\DataCollector\SolrDataCollector" public="false">
             <tag name="data_collector" template="@ZichtSolr/DataCollector/data_collector.html.twig" id="zicht_solr.data_collector" />
@@ -62,11 +48,6 @@
         <service id="zicht_solr.event_listener.response_exception" class="Zicht\Bundle\SolrBundle\EventListener\ResponseExceptionListener">
             <tag name="kernel.event_listener" event="kernel.exception" priority="255" />
         </service>
-
-        <!--<service id="zicht_solr.event_listener.entity_listener" class="Zicht\Bundle\SolrBundle\EventListener\EntityListener">-->
-            <!--<argument type="service" id="zicht_solr.manager" />-->
-            <!--<tag name="doctrine.orm.entity_listener" />-->
-        <!--</service>-->
 
     </services>
 </container>

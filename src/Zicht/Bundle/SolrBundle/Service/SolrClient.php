@@ -89,18 +89,6 @@ class SolrClient
             }
         }
     }
-//
-//    /**
-//     * @return RequestFactoryInterface
-//     */
-//    protected function getRequestFactory()
-//    {
-//        if (null !== $this->requestFactory) {
-//            return $this->requestFactory;
-//        }
-//
-//        return $this->client;
-//    }
 
     /**
      * @param ResponseInterface $response
