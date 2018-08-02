@@ -127,7 +127,7 @@ class SolrManager
         $data = ['id' => $this->getDocumentId($meta, $entity)];
 
         foreach ($meta->getMapping() as $mapping) {
-            $mapping->append($this->objectStorage, $entity, $data);
+            $mapping->append($entity, $data, $this->objectStorage);
         }
 
         return $data;

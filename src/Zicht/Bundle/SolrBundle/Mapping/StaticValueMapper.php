@@ -26,7 +26,7 @@ class StaticValueMapper extends AbstractMapper
     /**
      * @inheritdoc
      */
-    public function append(ObjectStorage $storage, $entity, array &$data)
+    public function append($object, array &$data, ObjectStorage $container = null)
     {
         $data[$this->name] = $this->value;
     }

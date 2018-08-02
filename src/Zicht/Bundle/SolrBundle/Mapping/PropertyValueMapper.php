@@ -31,9 +31,9 @@ class PropertyValueMapper extends AbstractMapper
     /**
      * @inheritdoc
      */
-    public function append(ObjectStorage $container, $entity, array &$data)
+    public function append($object, array &$data, ObjectStorage $container = null)
     {
-        $data[$this->name] = $this->resolve($entity);
+        $data[$this->name] = $this->resolve($object);
     }
 
     /**

@@ -128,7 +128,7 @@ $data = [];
 $manager = $this->getContainer()->get('zicht_solr.manager');
 
 foreach ($manager->getDocumentMapperMetadata($page)->getMapping() as $mapping) {
-    $mapping->append(null, $entity, $data);
+    $mapping->append($entity, $data);
 }
 
 var_dump($data);

@@ -314,7 +314,6 @@ class DocumentMapperMetadataFactory
             }
             if (null !== $annotation = $this->reader->getMethodAnnotation($method, Fields::class)) {
                 $mapper->addMapping(new MethodMergeMapper(
-                    $this->namingStrategy->propertyToColumnName($method->name),
                     $method->class,
                     $method->name
                 ));

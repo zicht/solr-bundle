@@ -15,12 +15,12 @@ interface MapperInterface
     public function getName();
 
     /**
-     * @param ObjectStorage $container
-     * @param object $entity
+     * @param object $object
      * @param array $data
+     * @param ObjectStorage $container
      * @return void
      */
-    public function append(ObjectStorage $container, $entity, array &$data);
+    public function append($object, array &$data, ObjectStorage $container = null);
 
     /**
      * @inheritdoc

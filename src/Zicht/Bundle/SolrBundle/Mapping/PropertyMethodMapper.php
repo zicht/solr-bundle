@@ -32,9 +32,16 @@ class PropertyMethodMapper extends PropertyValueMapper
     /**
      * @inheritdoc
      */
-    public function append(ObjectStorage $container, $entity, array &$data)
+    public function append($object, array &$data, ObjectStorage $container = null)
     {
-        $data[$this->name] = $container->get($this->class, ObjectStorageScopes::SCOPE_MAPPING_MARSHALLER)->{$this->method}($this->resolve($entity));
+
+        if (is_null($container)) {
+            $class = new $this->class();
+        } else {
+            $class = $container->get($this->class, ObjectStorageScopes::SCOPE_MAPPING_MARSHALLER);
+        }
+
+        $data[$this->name] = $class->{$this->method}($this->resolve($object));
     }
 
     /**

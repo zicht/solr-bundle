@@ -37,13 +37,15 @@ final class Marshaller implements AnnotationInterface
             case 'array':
                 if (2 === count($value['value'])) {
                     list($this->className, $this->method) = $value['value'];
+                } else {
+                    throw new BadMethodCallException('@Zicht\Bundle\SolrBundle\Mapping\Marshaller should be an class name or class name and method');
                 }
-                throw new BadMethodCallException('@Zicht\Bundle\SolrBundle\Mapping\Marshaller should be an class name or class name and method');
                 break;
             case 'string':
                 $this->className = $value['value'];
                 break;
             default:
+
                 throw new BadMethodCallException(sprintf('@Zicht\Bundle\SolrBundle\Mapping\Marshaller should be an array or string, %s given', $type));
         }
     }

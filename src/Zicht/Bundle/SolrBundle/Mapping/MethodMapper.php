@@ -9,10 +9,7 @@ use Zicht\Bundle\SolrBundle\Service\ObjectStorage;
 
 class MethodMapper extends AbstractMapper
 {
-    /** @var string  */
-    protected $class;
-    /** @var string  */
-    protected $method;
+    use MethodMapperTrait;
 
     /**
      * @param string $name
@@ -30,16 +27,8 @@ class MethodMapper extends AbstractMapper
     /**
      * @inheritdoc
      */
-    public function append(ObjectStorage $container, $entity, array &$data)
+    public function append($object, array &$data, ObjectStorage $container = null)
     {
-        $data[$this->name] = $entity->{$this->method};
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function __toString()
-    {
-        return sprintf('%s::%s()', $this->class, $this->method);
+        $data[$this->name] = $object->{$this->method}();
     }
 }

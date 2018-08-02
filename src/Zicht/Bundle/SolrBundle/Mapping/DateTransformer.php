@@ -14,25 +14,22 @@ use Doctrine\Common\Annotations\Annotation\Target;
  */
 class DateTransformer implements TransformInterface
 {
-
     /** SOLR date format */
     const DATE_FORMAT = 'Y-m-d\TH:i:s\Z';
 
     /**
-     * @param mixed $data
+     * @param \DateTimeInterface $data
      * @return mixed
      */
     public function __invoke($data)
     {
-        // both DateTime and DateTimeImmutable support the setTimezone method
-        // (even the DateTimeImmutable) and the \DateTimeInterface not.
-        if (!$data instanceof \DateTime && !$data instanceof \DateTimeImmutable) {
+        if (!$data instanceof \DateTimeInterface) {
             return $data;
         }
 
-        /** @var \DateTime|\DateTimeImmutable $cloned */
-        $cloned = clone $data;
-        $cloned->setTimezone(new \DateTimeZone('UTC'));
-        return $cloned->format(self::DATE_FORMAT);
+        $date = \DateTime::createFromFormat(\DateTime::ISO8601, $data->format(\DateTime::ISO8601));
+        $date->setTimezone(new \DateTimeZone('UTC'));
+
+        return $date->format(self::DATE_FORMAT);
     }
 }

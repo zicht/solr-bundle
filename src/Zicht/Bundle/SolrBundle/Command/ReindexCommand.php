@@ -15,9 +15,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepositoryAdapter;
-use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
-use Zicht\Bundle\SolrBundle\Manager\Doctrine\WrappedSearchDocumentRepository;
+use Zicht\Bundle\SolrBundle\Doctrine\Repository\SearchDocumentRepositoryAdapter;
+use Zicht\Bundle\SolrBundle\Doctrine\Repository\SearchDocumentRepositoryInterface;
+use Zicht\Bundle\SolrBundle\Doctrine\Repository\WrappedSearchDocumentRepositoryInterface;
 use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadata;
 use Zicht\Bundle\SolrBundle\QueryBuilder\Update;
 use Zicht\Bundle\SolrBundle\Service\SolrManager;
@@ -99,7 +99,7 @@ class ReindexCommand extends Command
     {
         if (null !== $repos = $this->solrManager->getRepository($meta->getClassName())) {
 
-            if ($repos instanceof WrappedSearchDocumentRepository) {
+            if ($repos instanceof WrappedSearchDocumentRepositoryInterface) {
                 $repos->setSourceRepository($manager->getRepository($meta->getClassName()));
             }
 
@@ -107,7 +107,7 @@ class ReindexCommand extends Command
             /** @var EntityRepository $repos */
             $repos = $manager->getRepository($meta->getClassName());
 
-            if (!$repos instanceof SearchDocumentRepository) {
+            if (!$repos instanceof SearchDocumentRepositoryInterface) {
                 $repos = new SearchDocumentRepositoryAdapter($repos);
             }
         }
