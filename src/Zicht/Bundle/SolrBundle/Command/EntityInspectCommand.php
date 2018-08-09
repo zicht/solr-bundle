@@ -88,19 +88,17 @@ class EntityInspectCommand extends Command
         $table->addRow(new TableSeparator());
         $table->addRow([new TableCell($generator, ['colspan' => 2])]);
 
-        if (!$meta->getOption('strict')) {
-
-            $entities = $this->manager->getDocumentMapperMetadataFactory()->getEntities();
-
-            if (isset($entities[$meta->getClassName()]) && count($entities[$meta->getClassName()]) > 0) {
+        if ($meta->getOption('child_inheritance')) {
+            if (null !== $children = $this->manager->getDocumentMapperMetadataFactory()->getChildrenOf($meta->getClassName())) {
                 $table->addRow(new TableSeparator());
                 $table->addRow([new TableCell("<fg=cyan;options=bold>Child Entities</>", ['colspan' => 2])]);
                 $table->addRow(new TableSeparator());
-                foreach ($entities[$meta->getClassName()] as $name) {
+                foreach ($children as $name) {
                     $table->addRow([new TableCell($name, ['colspan' => 2])]);
                 }
             }
         }
+
         if (null !== $repository = $meta->getRepository()) {
             $table->addRow(new TableSeparator());
             $table->addRow([new TableCell("<fg=cyan;options=bold>Repository</>", ['colspan' => 2])]);
@@ -158,8 +156,8 @@ class EntityInspectCommand extends Command
         $table->addRow(['active', ($meta->isActive()) ? 'yes' : 'no']);
         foreach ($meta->getOptions() as $name => $option) {
             switch ($name) {
-                case 'strict':
-                    $table->addRow(['strict', ($option) ? 'yes' : 'no']);
+                case 'child_inheritance':
+                    $table->addRow(['child_inheritance', ($option) ? 'yes' : 'no']);
                     break;
             }
         }

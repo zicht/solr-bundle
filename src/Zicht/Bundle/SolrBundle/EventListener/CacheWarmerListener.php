@@ -36,9 +36,9 @@ class CacheWarmerListener implements CacheWarmerInterface
      */
     public function warmUp($cacheDir)
     {
+        // load all entities mapping cache so caching is build
         foreach ($this->factory->getEntities() as $entity => $children) {
             $this->factory->getDocumentMapperMetadataForClass($entity);
-
             foreach ($children as $child) {
                 $this->factory->getDocumentMapperMetadataForClass($child);
             }

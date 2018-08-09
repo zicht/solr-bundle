@@ -4,6 +4,7 @@
  * @copyright Zicht Online <http://www.zicht.nl>
  */
 namespace Zicht\Bundle\SolrBundle\Mapping;
+use Zicht\Bundle\SolrBundle\Exception\InvalidArgumentException;
 
 /**
  * Class DocumentMapperMetadata
@@ -39,14 +40,14 @@ class DocumentMapperMetadata
      * DocumentMapperMetadata constructor.
      *
      * @param string $className
-     * @param null $repository
+     * @param null|string $repository
      * @param array $options
      */
     public function __construct($className, $repository = null, array $options = [])
     {
         $this->className = $className;
-        $this->repository = $repository;
         $this->options = $options;
+        $this->setRepository($repository);
     }
 
     /**
@@ -116,6 +117,18 @@ class DocumentMapperMetadata
     public function getRepository()
     {
         return $this->repository;
+    }
+
+    /**
+     * @param $repository
+     */
+    public function setRepository($repository)
+    {
+        if (is_a($repository,DocumentRepositoryInterface::class, true)) {
+            throw new InvalidArgumentException(sprintf('Expected "%s" to implement "%s"', $repository, DocumentRepositoryInterface::class));
+        }
+
+        $this->repository = $repository;
     }
 
     /**
@@ -215,6 +228,10 @@ class DocumentMapperMetadata
      */
     public function setIdGenerator($idGenerator)
     {
+        if (!is_a($idGenerator, IdGeneratorInterface::class)) {
+            throw new InvalidArgumentException(sprintf('Expected "%s" to implement "%s"', $idGenerator, IdGeneratorInterface::class));
+        }
+
         $this->idGenerator = $idGenerator;
     }
 
@@ -224,8 +241,6 @@ class DocumentMapperMetadata
      */
     public function getTransformers($name = null)
     {
-        krsort($this->transformers);
-
         foreach ($this->transformers as $group) {
             foreach ($group as $property => $className) {
                 if (is_null($name) || $name === $property) {
@@ -256,6 +271,16 @@ class DocumentMapperMetadata
      */
     public function addTransformer($name, $transformer, $weight = 0)
     {
+        if (!is_a($transformer, TransformInterface::class)) {
+            throw new InvalidArgumentException(sprintf('Expected "%s" to implement "%s"', $transformer, TransformInterface::class));
+        }
+
+        $dirty = !isset($this->transformers[$weight]);
+
         $this->transformers[$weight][$name][] = $transformer;
+
+        if ($dirty) {
+            krsort($this->transformers);
+        }
     }
 }

@@ -42,14 +42,17 @@ class ListEntitiesCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $factory = $this->manager->getDocumentMapperMetadataFactory();
         $output->writeln("");
-        foreach($this->manager->getDocumentMapperMetadataFactory()->getEntities() as $parent => $children) {
-            $output->writeln("<info>●</info> " . $parent);
-            foreach ($children as $index => $child) {
-                if ($index === count($children) - 1) {
-                    $output->writeln("<info>└── </info>" . $child);
-                } else {
-                    $output->writeln("<info>├── </info>" . $child);
+        foreach($factory->getEntities(true) as $name) {
+            $output->writeln("<info>●</info> " . $name);
+            if (null !== $children = $factory->getChildrenOf($name)) {
+                foreach ($children as $index => $child) {
+                    if ($index === count($children)-1) {
+                        $output->writeln("<info>└── </info>" . $child);
+                    } else {
+                        $output->writeln("<info>├── </info>" . $child);
+                    }
                 }
             }
             $output->writeln("");

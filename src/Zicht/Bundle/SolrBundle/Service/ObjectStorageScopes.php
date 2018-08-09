@@ -20,7 +20,7 @@ final class ObjectStorageScopes
 
     /**
      * used for injecting marshaller instances (with dependencies) that are used for
-     * marshalling mapped data (see @Zicht\Bundle\SolrBundle\Mapping\Marshaller)
+     * marshalling mapped data (see @Zicht\Bundle\SolrBundle\Mapping\Document)
      */
     const SCOPE_MAPPING_REPOSITORY = 'mapping.repository';
 

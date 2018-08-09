@@ -7,6 +7,7 @@ namespace Zicht\Bundle\SolrBundle\Service;
 
 use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadata;
 use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadataFactory;
+use Zicht\Bundle\SolrBundle\Mapping\DocumentRepositoryInterface;
 use Zicht\Bundle\SolrBundle\Mapping\IdGeneratorDefault;
 use Zicht\Bundle\SolrBundle\Mapping\PropertyValueTrait;
 use Zicht\Bundle\SolrBundle\QueryBuilder\Update;
@@ -56,7 +57,7 @@ class SolrManager
 
     /**
      * @param object|string $entity
-     * @return null|object
+     * @return null|DocumentRepositoryInterface
      */
     public function getRepository($entity)
     {

@@ -42,4 +42,9 @@ class MetadataPostBuildEntitiesListEvent extends Event
     {
         $this->list = $list;
     }
+
+    public function add($className, array $inheritance = [])
+    {
+        $this->list[]  = ['className' => $className, 'children' => $inheritance];
+    }
 }

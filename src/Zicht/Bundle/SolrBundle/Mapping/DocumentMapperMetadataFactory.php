@@ -77,7 +77,7 @@ class DocumentMapperMetadataFactory
     /**
      * this will build a array of supported entities with the parent
      * as key and a list of children (that are a instance of the parent
-     * class) when the strict annotation is set to false.
+     * class) when the child_inheritance annotation is set to false.
      *
      *
      * @param EventDispatcherInterface $dispatcher
@@ -89,62 +89,99 @@ class DocumentMapperMetadataFactory
     {
         $allEntities = $this->getAllEntities(...$mappings);
         $entities = [];
+
         foreach ($allEntities as $entity) {
             /** @var Document $annotation */
             if (null !== $annotation = $reader->getClassAnnotation(new \ReflectionClass($entity), Document::class)) {
-                $entities[$entity] = [];
-                // search for any sub classes where this class is the parent
-                if (false === $annotation->strict) {
+                $entry = [
+                    'className' => $entity,
+                    'children' => []
+                ];
+                // search for any child classes where this class is the parent of
+                if ($annotation->child_inheritance) {
                     foreach ($allEntities as $className) {
                         if ($className === $entity) {
                             continue;
                         }
                         if (is_a($className, $entity, true)) {
                             if (null === $reader->getClassAnnotation(new \ReflectionClass($className), NoDocument::class)) {
-                                $entities[$entity][] = $className;
+                                $entry['children'][] = $className;
                             }
                         }
+
                     }
                 }
-            }
-        }
-        // remove inherited children that have document annotation
-        foreach (array_keys($entities) as $entity) {
-            foreach ($entities as $parent => $children) {
-                if ($parent === $entity) {
-                    continue;
-                }
-                if (false !== $index = array_search($entity, $children)) {
-                    // remove from child list because it is managed by it self and by inheritance
-                    unset($entities[$parent][$index]);
-                    foreach ($entities[$entity] as $index => $name) {
-                        // remove because is managed by parent class
-                        if (in_array($name, $children)) {
-                            unset($entities[$parent][$index]);
-                        }
-                    }
-                }
+                $entities[] = $entry;
             }
         }
 
-        // fix indexes
-        foreach ($entities as $parent => $children) {
-            $entities[$parent] = array_values($children);
+        // remove inherited children that have document annotation
+        foreach (array_column($entities, 'className') as $entityIndex => $entity) {
+
+            foreach ($entities as $entityMapIndex => $entityMap) {
+
+                if ($entityMap['className'] === $entity) {
+                    continue;
+                }
+
+                if (false !== $index = array_search($entity, $entityMap['children'])) {
+
+                    // remove from child list because it is managed by it self
+                    unset($entities[$entityMapIndex]['children'][$index]);
+
+                    // remove children of the $entityMap that ar also instance of and
+                    // managed by $entity. So in other words remove children that are
+                    // also instance of parent because the extend the child.
+                    foreach ($entities[$entityIndex]['children'] as $index => $name) {
+                        if (in_array($name, $entityMap['children'])) {
+                            unset($entities[$entityMapIndex]['children'][$index]);
+                        }
+                    }
+                }
+            }
         }
 
         if ($dispatcher->hasListeners(Events::METADATA_POST_BUILD_ENTITIES_LIST)) {
             $entities = $dispatcher->dispatch(Events::METADATA_POST_BUILD_ENTITIES_LIST, new MetadataPostBuildEntitiesListEvent($entities))->getList();
         }
 
+        // fix indexes
+        $entities = array_values($entities);
+
+        foreach ($entities as $index => $map) {
+            $entities[$index]['children'] = array_values($map['children']);
+        }
+
         return $entities;
     }
 
     /**
-     * @return array|string[]
+     * @param bool $noChildren
+     * @return \Generator|string[]
      */
-    public function getEntities()
+    public function getEntities($noChildren = false)
     {
-        return $this->entities;
+        foreach ($this->entities as $map) {
+            yield $map['className'];
+
+            if (!$noChildren) {
+                foreach ($map['children'] as $child) {
+                    yield $child;
+                }
+            }
+        }
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getChildrenOf($className)
+    {
+        if (false !== $index = array_search($className, array_column($this->entities, 'className'))) {
+            return !empty($this->entities[$index]['children']) ? $this->entities[$index]['children'] : null;
+        }
+
+        return null;
     }
 
     /**
@@ -156,14 +193,13 @@ class DocumentMapperMetadataFactory
         if (is_object($className)) {
             $className = get_class($className);
         }
-        if (isset($this->entities[$className])) {
-            return true;
-        }
-        foreach ($this->entities as $children) {
-            if (in_array($className, $children)) {
+
+        foreach ($this->entities as $map) {
+            if ($map['className'] === $className || in_array($className, $map['children'])) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -198,13 +234,14 @@ class DocumentMapperMetadataFactory
         $cacheKey = $this->getCacheKeyForClassName($className);
         if (null === $metadata = $this->cache->get($cacheKey)) {
             $reflection = new \ReflectionClass($className);
-            if (isset($this->entities[$className])) {
+
+            if (false !== array_search($className, array_column($this->entities, 'className'))) {
                 $metadata = $this->newDocumentMetadata($reflection);
             } else {
                 // resolve from parent
-                foreach ($this->entities as $entity => $children) {
-                    if (in_array($className, $children)) {
-                        $metadata = $this->getDocumentMapperMetadataForClass($entity)->newWith($className);
+                foreach ($this->entities as $map) {
+                    if (in_array($className, $map['children'])) {
+                        $metadata = $this->getDocumentMapperMetadataForClass($map['className'])->newWith($className);
                     }
                 }
             }
@@ -248,9 +285,23 @@ class DocumentMapperMetadataFactory
      */
     private function newDocumentMetadata(\ReflectionClass $reflection)
     {
+        $args = [$reflection->name];
+
         /** @var Document $annotation */
-        $annotation = $this->reader->getClassAnnotation($reflection, Document::class);
-        return new DocumentMapperMetadata($reflection->getName(), $annotation->repository, ['strict' => $annotation->strict, 'transformers' => $annotation->transformers]);
+        if (null !== $annotation = $this->reader->getClassAnnotation($reflection, Document::class)) {
+            $args[] = $annotation->repository;
+            $args[] =  [
+                'child_inheritance' => $annotation->child_inheritance,
+                'transformers' => array_map(
+                    function ($value) {
+                        return (is_array($value)) ? $value : [0, $value];
+                    },
+                    $annotation->transformers
+                )
+            ];
+        }
+
+        return new DocumentMapperMetadata(...$args);
     }
 
     /**
@@ -305,18 +356,13 @@ class DocumentMapperMetadataFactory
     protected function readMethods(\ReflectionClass $reflectionClass, DocumentMapperMetadata $mapper)
     {
         foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+
             if (null !== $annotation = $this->reader->getMethodAnnotation($method, Field::class)) {
-                $mapper->addMapping(new MethodMapper(
-                    $annotation->name ?: $this->namingStrategy->propertyToColumnName($method->name),
-                    $method->class,
-                    $method->name
-                ));
+                $mapper->addMapping(new MethodMapper($this->getName($annotation->name, $method->name), $method->class, $method->name));
             }
+
             if (null !== $annotation = $this->reader->getMethodAnnotation($method, Fields::class)) {
-                $mapper->addMapping(new MethodMergeMapper(
-                    $method->class,
-                    $method->name
-                ));
+                $mapper->addMapping(new MethodMergeMapper($method->class, $method->name));
             }
         }
     }
@@ -328,15 +374,25 @@ class DocumentMapperMetadataFactory
     protected function readProperties(\ReflectionClass $reflectionClass, DocumentMapperMetadata $mapper)
     {
         foreach ($reflectionClass->getProperties() as $property) {
+
+            // check for the doctrine id field, which will be used for generating an document id
             if (null !== $this->reader->getPropertyAnnotation($property, Id::class)) {
                 $mapper->setIdField($property->class, $property->name);
             }
+
             /** @var Field $annotation */
             if (null !== $annotation = $this->reader->getPropertyAnnotation($property, Field::class)) {
 
-                $name = $annotation->name ?: $this->namingStrategy->propertyToColumnName($property->name);
+                $name = $this->getName($annotation->name, $property->name);
 
-                /** @var Marshaller $marshaller  */
+                /**
+                 * properties with the field annotation can also have an Marshaller
+                 * annotation to define and property value marshaller. Similar as
+                 * on the fields annotation except this will only get the property
+                 * value as argument.
+                 *
+                 * @var Marshaller $marshaller
+                 */
                 if (null !== $marshaller = $this->reader->getPropertyAnnotation($property, Marshaller::class)) {
                     $mapper->addMapping(new PropertyMethodMapper(
                         $name,
@@ -349,14 +405,25 @@ class DocumentMapperMetadataFactory
                     $mapper->addMapping(new PropertyValueMapper($name, $property->class, $property->name));
                 }
 
+                /**
+                 * Check for transformer annotations on an field, this can be
+                 * global defined and match column type or an annotation that
+                 * also implements the TransformInterface.
+                 */
                 foreach ($this->reader->getPropertyAnnotations($property) as $annotation) {
+
                     if ($annotation instanceof TransformInterface) {
-                        $mapper->addTransformer($property->name, $annotation);
+                        if ($annotation instanceof TransformerWeightInterface) {
+                            $mapper->addTransformer($property->name, $annotation, $annotation->getWeight());
+                        } else {
+                            $mapper->addTransformer($property->name, $annotation);
+                        }
                     }
+
                     if ($annotation instanceof Column) {
-                        foreach ($mapper->getOption('transformers', []) as $transformer => $pattern) {
+                        foreach ($mapper->getOption('transformers', []) as $transformer => list($weight, $pattern)) {
                             if (preg_match($pattern, $annotation->type)) {
-                                $mapper->addTransformer($name, $transformer);
+                                $mapper->addTransformer($name, $transformer, $weight);
                             }
                         }
                     }
@@ -368,6 +435,7 @@ class DocumentMapperMetadataFactory
     /**
      * @param Marshaller $marshaller
      * @param string $name
+     *
      * @return string
      */
     protected function getMethodName(Marshaller $marshaller, $name)
@@ -377,6 +445,17 @@ class DocumentMapperMetadataFactory
         }
 
         return 'from' . ucfirst(str_replace(['-', '_', '.'], '', ucwords($name, '-_.')));
+    }
+
+    /**
+     * @param string $annotationName
+     * @param string $propertyName
+     *
+     * @return string
+     */
+    protected function getName($annotationName, $propertyName)
+    {
+        return $annotationName ?: $this->namingStrategy->propertyToColumnName($propertyName);
     }
 
     /**

@@ -9,15 +9,13 @@ use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Annotation\Attribute;
 use Doctrine\Common\Annotations\Annotation\Attributes;
 use Doctrine\Common\Annotations\Annotation\Target;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Zicht\Bundle\SolrBundle\Doctrine\Repository\SearchDocumentRepositoryInterface;
 use Zicht\Bundle\SolrBundle\Exception\BadMethodCallException;
 
 /**
  * @Annotation
  * @Attributes({
  *    @Attribute("repository", required=false, type="string"),
- *    @Attribute("strict", required=false, type="boolean"),
+ *    @Attribute("children_not_inherit", required=false, type="boolean"),
  *    @Attribute("transformers", required=false, type="array")
  * })
  * @Target("CLASS")
@@ -32,17 +30,18 @@ final class Document implements AnnotationInterface
     public $repository;
 
     /**
-     * if false then a instance of comparison is done instead of a
+     * if true then a instance of comparison is done instead of a
      * strict comparison (===). So all child classes inherit the
      * same annotations (except entities with the NoDocument)
      *
      * @var bool
      */
-    public $strict = true;
+    public $child_inheritance = false;
 
     /**
      * automatic transformers based on type, the array should
-     * be a transformer class as key and type match for value.
+     * be a transformer class as key and type match for value
+     * or and array with weight and value.
      *
      * @var array
      */
@@ -57,20 +56,20 @@ final class Document implements AnnotationInterface
     {
         if (!empty($value['repository'])) {
 
-            if (is_a($value['repository'], SearchDocumentRepositoryInterface::class, true)) {
-                throw new BadMethodCallException(sprintf('@Zicht\Bundle\SolrBundle\Mapping\Document::repository should be an instance of "%s" but "%s" was given.', SearchDocumentRepositoryInterface::class, $value['repository']));
+            if (is_a($value['repository'], DocumentRepositoryInterface::class, true)) {
+                throw new BadMethodCallException(sprintf('@Zicht\Bundle\SolrBundle\Mapping\Document::repository should be an instance of "%s" but "%s" was given.', DocumentRepositoryInterface::class, $value['repository']));
             }
 
             $this->repository = $value['repository'];
         }
 
-        if (isset($value['strict'])) {
-            $this->strict = $value['strict'];
+        if (isset($value['child_inheritance'])) {
+            $this->child_inheritance = $value['child_inheritance'];
         }
 
         if (!array_key_exists('transformers', $value)) {
             $this->transformers = [
-                DateTransformer::class => '/^(?:date(?:time(?:z)?)?|time)(?:_immutable)?$/',
+                DateTimeTransformer::class => '/^(?:date(?:time(?:z)?)?|time)(?:_immutable)?$/',
             ];
         } else {
             $this->transformers = (array)$value['transformers'];

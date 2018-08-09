@@ -7,7 +7,6 @@ namespace Zicht\Bundle\SolrBundle\Mapping;
 
 use Zicht\Bundle\SolrBundle\Service\ObjectStorage;
 use Zicht\Bundle\SolrBundle\Service\ObjectStorageScopes;
-use Zicht\Bundle\SolrBundle\Service\SolrManager;
 
 class StaticMethodMapper extends AbstractMapper
 {
