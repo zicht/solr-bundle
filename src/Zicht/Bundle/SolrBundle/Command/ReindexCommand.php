@@ -8,17 +8,16 @@ namespace Zicht\Bundle\SolrBundle\Command;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\DBAL\Logging\EchoSQLLogger;
-use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Zicht\Bundle\SolrBundle\Doctrine\Repository\SearchDocumentRepositoryAdapter;
-use Zicht\Bundle\SolrBundle\Doctrine\Repository\SearchDocumentRepositoryInterface;
-use Zicht\Bundle\SolrBundle\Doctrine\Repository\WrappedSearchDocumentRepositoryInterface;
+use Zicht\Bundle\SolrBundle\Doctrine\ORM\BaseQueryBuilderRepositoryInterface;
 use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadata;
+use Zicht\Bundle\SolrBundle\Mapping\DocumentRepositoryInterface;
+use Zicht\Bundle\SolrBundle\Doctrine\ORM\EntityRepositoryWrapper;
 use Zicht\Bundle\SolrBundle\QueryBuilder\Update;
 use Zicht\Bundle\SolrBundle\Service\SolrManager;
 
@@ -56,9 +55,10 @@ class ReindexCommand extends Command
         $this
             ->setName('zicht:solr:reindex')
             ->addArgument('entities', InputArgument::IS_ARRAY, 'The entity class or classes to to reindex.')
-            ->addOption('where', 'w', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'An optional where clause to pass to the query builder. The entity\'s query alias is "d" (as in document), so you need to pass criteria such as \'d.dateCreated > CURDATE()\'')
+            ->addOption('where', 'w', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'An optional where clause to pass to the query builder. The entity\'s query alias is "d" (as in document), so you need to pass criteria such as \'d.dateCreated > CURDATE()\'. This only works when no custom repository is defined on the entity or when the custom repository extends the EntityRepositoryWrapper.')
             ->addOption('limit', 'l', InputArgument::OPTIONAL | InputOption::VALUE_REQUIRED, 'The LIMIT clause to facilitate paging (chunks) of indexing (number of items per chunk)')
             ->addOption('offset', 'o', InputArgument::OPTIONAL | InputOption::VALUE_REQUIRED, 'The OFFSET clause to facilitate paging (chunks) of indexing (offset to start the chunk at)')
+            ->addOption('batch-size', 'b', InputArgument::OPTIONAL | InputOption::VALUE_REQUIRED, 'The batch size when to flush solr.', 200)
             ->addOption('no-children', '', InputOption::VALUE_NONE, 'This will when no entities provided only reindex the parent entities.')
             ->addOption('debug', '', InputOption::VALUE_NONE, 'Debug: i.e. don\'t catch exceptions while indexing')
             ->setDescription('Reindexes entities in the SOLR index')
@@ -71,13 +71,14 @@ class ReindexCommand extends Command
      */
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
+        $metadataFactory = $this->solrManager->getDocumentMapperMetadataFactory();
+
         if ([] === $this->entities = $input->getArgument('entities')) {
-            $entities = $this->solrManager->getDocumentMapperMetadataFactory()->getEntities();
-            if ($input->getOption('no-children')) {
-                $this->entities = array_keys($entities);
-            } else {
-                $this->entities = array_merge(array_keys($entities), ...array_values($entities));
-            }
+            $this->entities = iterator_to_array($metadataFactory->getEntities(true));
+        }
+
+        if (false === $input->getOption('no-children')) {
+            $this->entities = array_merge($this->entities, ...array_filter(array_map([$metadataFactory, 'getChildrenOf'], $this->entities)));
         }
 
         if ($input->getOption('debug')) {
@@ -92,26 +93,18 @@ class ReindexCommand extends Command
     /**
      * @param DocumentMapperMetadata $meta
      * @param ObjectManager $manager
-     *
-     * @return EntityRepository|string|SearchDocumentRepositoryAdapter
+     * @return DocumentRepositoryInterface
      */
     private function getRepository(DocumentMapperMetadata $meta, ObjectManager $manager)
     {
-        if (null !== $repos = $this->solrManager->getRepository($meta->getClassName())) {
+        if (null === $repo = $this->solrManager->getRepository($meta->getClassName())) {
+            $repo = $manager->getRepository($meta->getClassName());
 
-            if ($repos instanceof WrappedSearchDocumentRepositoryInterface) {
-                $repos->setSourceRepository($manager->getRepository($meta->getClassName()));
-            }
-
-        } else {
-            /** @var EntityRepository $repos */
-            $repos = $manager->getRepository($meta->getClassName());
-
-            if (!$repos instanceof SearchDocumentRepositoryInterface) {
-                $repos = new SearchDocumentRepositoryAdapter($repos);
+            if (!$repo instanceof DocumentRepositoryInterface) {
+                $repo = new EntityRepositoryWrapper($repo);
             }
         }
-        return $repos;
+        return $repo;
     }
 
     /**
@@ -123,6 +116,9 @@ class ReindexCommand extends Command
         $where = $input->getOption('where');
         $limit = $input->getOption('limit');
         $offset = $input->getOption('offset');
+        $batch =  $input->getOption('batch-size');
+        $index = 0;
+        $update = new Update();
 
         foreach ($this->entities as $entity) {
             $output->writeln(sprintf('Processing "<info>%s</info>"', $entity));
@@ -133,45 +129,54 @@ class ReindexCommand extends Command
                 continue;
             }
 
+            /** @var $manager ObjectManager */
             if (null === $manager = $this->doctrine->getManagerForClass($entity)) {
                 throw new \RuntimeException('Could not find a ObjectManager for class "' . $entity . '"');
             }
 
             $repos = $this->getRepository($meta, $manager);
+            $total = $repos->getDocumentsCount($limit, $offset);
 
-            if ('' === $limit || null === $limit) {
-                $total = $repos->getCountIndexableDocuments($where);
-                if ('' !== $offset && null !== $offset) {
-                    $total -= $offset;
+            if (!empty($where)) {
+                if ($repos instanceof BaseQueryBuilderRepositoryInterface) {
+                    foreach ($where as $condition) {
+                        $repos->getBaseQueryBuilder()->andWhere($condition);
+                    }
+                } else {
+                    $output->write(sprintf('<comment>repository %s does not support the `where` filter (should implement "%s")</comment>', get_class($repos), BaseQueryBuilderRepositoryInterface::class));
                 }
-            } else {
-                $total = $limit;
             }
 
-            $output->writeln("Reindexing records {$total} ...");
+            if ($total > 0) {
+                $output->writeln("Reindexing {$total} records");
+            } else {
+                $output->writeln("Reindexing records...");
+            }
+
             $progress = new ProgressBar($output, $total);
             $progress->display();
-            $batch = 50;
-            $index = 0;
-            $update = new Update();
 
-            foreach ($repos->findIndexableDocuments($where, $limit, $offset) as $record) {
+            foreach ($repos->getDocuments($limit, $offset) as $record) {
                 $manager->detach($record);
                 $progress->advance(1);
                 $index++;
                 $update->add($this->solrManager->map($meta, $record));
-                if ($index > 0 && $index%$batch === 0) {
+                if ($index > 0 && 0 === $index % $batch) {
                     $update->commit();
                     $this->solrManager->getClient()->update($update);
                     $update->reset();
                 }
             }
 
-            $this->solrManager->getClient()->update($update);
             $progress->finish();
-            $output->write("\n");
+            $progress->clear();
+            $output->writeln("finished");
         }
 
+        if (0 !== $index % $batch) {
+            $update->commit();
+            $this->solrManager->getClient()->update($update);
+        }
 
         $output->writeln(sprintf("Total time: %.02fs, Peak mem usage: %.02fMB", microtime(true)-$start, memory_get_peak_usage()/1024/1024));
     }
