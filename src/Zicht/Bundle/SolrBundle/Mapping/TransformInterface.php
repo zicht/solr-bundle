@@ -7,7 +7,6 @@ namespace Zicht\Bundle\SolrBundle\Mapping;
 
 /**
  * Interface TransformInterface
- *
  * @package Zicht\Bundle\SolrBundle\Mapping
  */
 interface TransformInterface

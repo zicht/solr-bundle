@@ -1,12 +1,25 @@
 <?php
+/**
+ * @author    Philip Bergman <philip@zicht.nl>
+ * @copyright Zicht Online <http://www.zicht.nl>
+ */
 namespace Zicht\Bundle\SolrBundle\Mapping;
 
 use Zicht\Bundle\SolrBundle\Service\ObjectStorage;
 
+/**
+ * Class MethodMergeMapper
+ * @package Zicht\Bundle\SolrBundle\Mapping
+ */
 class MethodMergeMapper implements MapperInterface
 {
     use MethodMapperTrait;
 
+    /**
+     * MethodMergeMapper constructor.
+     * @param $class
+     * @param $method
+     */
     public function __construct($class, $method)
     {
         $this->class = $class;

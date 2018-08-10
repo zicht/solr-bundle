@@ -10,6 +10,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Zicht\Bundle\SolrBundle\Service\SolrManager;
 
+/**
+ * Class ListEntitiesCommand
+ * @package Zicht\Bundle\SolrBundle\Command
+ */
 class ListEntitiesCommand extends Command
 {
     /** @var SolrManager  */
@@ -43,19 +47,19 @@ class ListEntitiesCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $factory = $this->manager->getDocumentMapperMetadataFactory();
-        $output->writeln("");
-        foreach($factory->getEntities(true) as $name) {
-            $output->writeln("<info>●</info> " . $name);
+        $output->writeln('');
+        foreach ($factory->getEntities(true) as $name) {
+            $output->writeln('<info>●</info> ' . $name);
             if (null !== $children = $factory->getChildrenOf($name)) {
                 foreach ($children as $index => $child) {
                     if ($index === count($children)-1) {
-                        $output->writeln("<info>└── </info>" . $child);
+                        $output->writeln('<info>└── </info>' . $child);
                     } else {
-                        $output->writeln("<info>├── </info>" . $child);
+                        $output->writeln('<info>├── </info>' . $child);
                     }
                 }
             }
-            $output->writeln("");
+            $output->writeln('');
         }
     }
 }

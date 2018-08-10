@@ -43,8 +43,8 @@ class ZichtSolrExtension extends Extension
 
         $container
             ->getDefinition('zicht_solr.mapper.document_metadata_factory')
-            ->replaceArgument(0 , new Reference($config['mapper']['naming_strategy']))
-            ->replaceArgument(1 , new Reference($config['mapper']['cache']));
+            ->replaceArgument(0, new Reference($config['mapper']['naming_strategy']))
+            ->replaceArgument(1, new Reference($config['mapper']['cache']));
 
         if ($container->getParameter('kernel.debug')) {
             $socketDefinition = $container->getDefinition('zicht_solr.http.handler.socket');
@@ -52,7 +52,6 @@ class ZichtSolrExtension extends Extension
                 $container->setDefinition('zicht_solr.debug.request.logger',  (new Definition(TempStream::class))->setPublic(false));
                 $container->getDefinition('zicht_solr.data_collector')->addMethodCall('addDebugger', ['requests', new Reference('zicht_solr.debug.request.logger')]);
                 $socketDefinition->addMethodCall('setDebug', [new Reference('zicht_solr.debug.request.logger')]);
-
             }
         }
     }

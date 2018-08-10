@@ -5,6 +5,10 @@
  */
 namespace Zicht\Bundle\SolrBundle\Exception;
 
+/**
+ * Class RuntimeException
+ * @package Zicht\Bundle\SolrBundle\Exception
+ */
 class RuntimeException extends \RuntimeException implements SolrExceptionInterface
 {
 }

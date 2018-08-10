@@ -5,6 +5,10 @@
  */
 namespace Zicht\Http\Exception;
 
+/**
+ * Class ResponseException
+ * @package Zicht\Http\Exception
+ */
 class ResponseException extends ConnectionException
 {
 }

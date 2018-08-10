@@ -9,7 +9,6 @@ use Psr\SimpleCache\CacheInterface;
 
 /**
  * Class AbstractCache
- *
  * @package Zicht\Bundle\SolrBundle\SimpleCache
  */
 abstract class AbstractCache implements CacheInterface

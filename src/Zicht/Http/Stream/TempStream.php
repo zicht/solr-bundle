@@ -5,6 +5,10 @@
  */
 namespace Zicht\Http\Stream;
 
+/**
+ * Class TempStream
+ * @package Zicht\Http\Stream
+ */
 class TempStream extends ResourceStream
 {
     /**
@@ -30,5 +34,4 @@ class TempStream extends ResourceStream
         fseek($resource, $pos);
         return $self;
     }
-
 }

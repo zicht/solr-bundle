@@ -5,6 +5,10 @@
  */
 namespace Zicht\Bundle\SolrBundle;
 
+/**
+ * Class Events
+ * @package Zicht\Bundle\SolrBundle
+ */
 final class Events
 {
     /** This class should not be instantiated */

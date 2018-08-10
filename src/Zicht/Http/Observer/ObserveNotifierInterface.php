@@ -5,6 +5,10 @@
  */
 namespace Zicht\Http\Observer;
 
+/**
+ * Interface ObserveNotifierInterface
+ * @package Zicht\Http\Observer
+ */
 interface ObserveNotifierInterface extends \SplSubject
 {
     /**

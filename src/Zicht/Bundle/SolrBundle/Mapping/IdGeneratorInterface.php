@@ -7,7 +7,6 @@ namespace Zicht\Bundle\SolrBundle\Mapping;
 
 /**
  * Interface DocumentIdGeneratorInterface
- *
  * @package Zicht\Bundle\SolrBundle\Mapping
  */
 interface IdGeneratorInterface

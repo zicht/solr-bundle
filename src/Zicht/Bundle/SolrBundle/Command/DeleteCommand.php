@@ -3,7 +3,6 @@
  * @author Rik van der Kemp <rik@zicht.nl>
  * @copyright Zicht Online <http://zicht.nl>
  */
-
 namespace Zicht\Bundle\SolrBundle\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -12,7 +11,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Zicht\Bundle\SolrBundle\QueryBuilder\Update;
 
 /**
- * Class PurgeCommand
+ * Class DeleteCommand
+ *
+ * @package Zicht\Bundle\SolrBundle\Command
  */
 class DeleteCommand extends AbstractCommand
 {
@@ -25,8 +26,7 @@ class DeleteCommand extends AbstractCommand
             ->setName('zicht:solr:delete')
             ->setAliases(['zicht:solr:purge'])
             ->setDescription('Purges SOLR Index')
-            ->addArgument('query', InputArgument::OPTIONAL, 'Only delete documents matching this query', '*:*')
-        ;
+            ->addArgument('query', InputArgument::OPTIONAL, 'Only delete documents matching this query', '*:*');
     }
 
     /**

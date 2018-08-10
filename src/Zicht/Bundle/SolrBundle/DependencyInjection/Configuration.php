@@ -51,7 +51,8 @@ class Configuration implements ConfigurationInterface
             ->end()
 
             ->validate()
-                ->always(function($v) {
+                ->always(
+                    function ($v) {
                     if (is_null($v['uri'])) {
                         foreach (['host', 'core'] as $required) {
                             if (empty($v[$required])) {
@@ -65,7 +66,8 @@ class Configuration implements ConfigurationInterface
                     }
                     unset($v['scheme'], $v['host'], $v['port'], $v['path'], $v['core']);
                     return $v;
-                })
+                    }
+                )
             ->end();
         ;
 

@@ -8,6 +8,10 @@ namespace Zicht\Bundle\SolrBundle\EventListener;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Zicht\Bundle\SolrBundle\Exception\HttpResponseException;
 
+/**
+ * Class ResponseExceptionListener
+ * @package Zicht\Bundle\SolrBundle\EventListener
+ */
 class ResponseExceptionListener
 {
     /**

@@ -21,7 +21,7 @@ use Zicht\Bundle\UrlBundle\Url\Params\Params;
 abstract class AbstractSearchFacade
 {
     /** @var array  */
-    protected static $defaultParameterWhitelist = array('keywords', 'page', 'type', 'perpage');
+    protected static $defaultParameterWhitelist = ['keywords', 'page', 'type', 'perpage'];
     /** @var SolrClient */
     protected $client = null;
     /** @var Params */
@@ -154,7 +154,7 @@ abstract class AbstractSearchFacade
     final public function search()
     {
         if (!isset($this->searchParams)) {
-            throw new \LogicException("You need to call setParams() first");
+            throw new \LogicException('You need to call setParams() first');
         }
 
         if (null !== $this->getRequest()->request->get('search')) {
@@ -179,8 +179,7 @@ abstract class AbstractSearchFacade
     {
         $query
             ->setParam('facet', 'true')
-            ->setParam('facet.mincount', 1)
-        ;
+            ->setParam('facet.mincount', 1);
 
         foreach ($this->getFacetFields() as $field) {
             $query->addFacetField($field);
@@ -221,7 +220,7 @@ abstract class AbstractSearchFacade
      */
     public function getActiveFacets()
     {
-        $active = array();
+        $active = [];
 
         foreach ($this->getFacetFields() as $field) {
             if (($value = $this->searchParams->getOne($field)) && $this->isFacetActive($field, $value)) {
@@ -283,10 +282,10 @@ abstract class AbstractSearchFacade
     public function getFacetFilters($blacklist = null)
     {
         if (null === $blacklist) {
-            $blacklist = array();
+            $blacklist = [];
         }
 
-        $ret = array();
+        $ret = [];
         foreach ($this->getFacetFields() as $facetName) {
             if (!in_array($facetName, $blacklist)) {
                 foreach (array_chunk($this->response->facet_counts->facet_fields->$facetName, 2) as list($value, $count)) {
@@ -302,7 +301,7 @@ abstract class AbstractSearchFacade
                     // It should be similar to the above implementation of the facets. Dump the response to find out
                     // dump($this->response)
 
-                    throw new \Exception("not implemented yet: reading facet queries from response. Read source for info");
+                    throw new \Exception('not implemented yet: reading facet queries from response. Read source for info');
 
                     $count = $this->getResponse()->getFacetSet()->getFacet($facetName . '-' . $i)->getValue();
                     if ($count >= $this->facetMinimumCount) {
@@ -331,14 +330,14 @@ abstract class AbstractSearchFacade
      */
     public function getFacetMetaData($facetName, $value, $count = 0, $label = null)
     {
-        return array(
+        return [
             'value'         => $value,
             'label'         => ($label === null ? $value : $label),
             'count'         => $count,
             'active'        => $this->searchParams->contains($facetName, $value),
             'url'           => $this->getUrl($this->searchParams->without('page')->with($facetName, $value)),
             'url_filter'    => $this->getUrl($this->searchParams->without($facetName)->with($facetName, $value)),
-        );
+        ];
     }
 
     /**
@@ -352,9 +351,9 @@ abstract class AbstractSearchFacade
      * @param array $stack
      * @return array
      */
-    public function decorateHierarchy(&$filters, $facetName, $depth = 3, $stack = array())
+    public function decorateHierarchy(&$filters, $facetName, $depth = 3, $stack = [])
     {
-        $ret = array();
+        $ret = [];
         foreach ($filters as $i => &$term) {
             $ret[]= $term['id'];
             $term += $this->getFacetMetaData($facetName, $term['id']);
@@ -391,7 +390,7 @@ abstract class AbstractSearchFacade
     final public function getResponse()
     {
         if (!$this->response) {
-            throw new \LogicException("There is no response, call search() first");
+            throw new \LogicException('There is no response, call search() first');
         }
 
         return $this->response;
@@ -457,7 +456,7 @@ abstract class AbstractSearchFacade
     public function setDefaultLimit($defaultLimit)
     {
         if (!!$this->response) {
-            throw new \LogicException("There is already a response, call setDefaultLimit() before calling search()");
+            throw new \LogicException('There is already a response, call setDefaultLimit() before calling search()');
         }
 
         $this->defaultLimit = $defaultLimit;
@@ -483,7 +482,7 @@ abstract class AbstractSearchFacade
      * Execute the query.
      *
      * @param Select $query
-     * @return \GuzzleHttp\Message\ResponseInterface
+     * @return mixed
      */
     protected function execSearch($query)
     {
@@ -514,6 +513,11 @@ abstract class AbstractSearchFacade
     }
 
 
+    /**
+     * @param string $docId
+     * @param string $field
+     * @return null
+     */
     public function getHighlightedField($docId, $field)
     {
         if (isset($this->response->highlighting->$docId->$field)) {

@@ -19,13 +19,12 @@ use Psr\SimpleCache\CacheInterface;
 
 /**
  * Class DocumentMapperMetadataFactory
- *
  * @package Zicht\Bundle\SolrBundle\Pager
  */
 class DocumentMapperMetadataFactory
 {
+    /** @var string */
     const CACHE_SUFFIX = 'DocumentMetadata';
-
     /** @var array */
     private $entities;
     /** @var array  */
@@ -108,7 +107,6 @@ class DocumentMapperMetadataFactory
                                 $entry['children'][] = $className;
                             }
                         }
-
                     }
                 }
                 $entities[] = $entry;
@@ -117,15 +115,12 @@ class DocumentMapperMetadataFactory
 
         // remove inherited children that have document annotation
         foreach (array_column($entities, 'className') as $entityIndex => $entity) {
-
             foreach ($entities as $entityMapIndex => $entityMap) {
-
                 if ($entityMap['className'] === $entity) {
                     continue;
                 }
 
                 if (false !== $index = array_search($entity, $entityMap['children'])) {
-
                     // remove from child list because it is managed by it self
                     unset($entities[$entityMapIndex]['children'][$index]);
 
@@ -356,7 +351,6 @@ class DocumentMapperMetadataFactory
     protected function readMethods(\ReflectionClass $reflectionClass, DocumentMapperMetadata $mapper)
     {
         foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-
             if (null !== $annotation = $this->reader->getMethodAnnotation($method, Field::class)) {
                 $mapper->addMapping(new MethodMapper($this->getName($annotation->name, $method->name), $method->class, $method->name));
             }
@@ -374,7 +368,6 @@ class DocumentMapperMetadataFactory
     protected function readProperties(\ReflectionClass $reflectionClass, DocumentMapperMetadata $mapper)
     {
         foreach ($reflectionClass->getProperties() as $property) {
-
             // check for the doctrine id field, which will be used for generating an document id
             if (null !== $this->reader->getPropertyAnnotation($property, Id::class)) {
                 $mapper->setIdField($property->class, $property->name);
@@ -382,7 +375,6 @@ class DocumentMapperMetadataFactory
 
             /** @var Field $annotation */
             if (null !== $annotation = $this->reader->getPropertyAnnotation($property, Field::class)) {
-
                 $name = $this->getName($annotation->name, $property->name);
 
                 /**
@@ -394,13 +386,15 @@ class DocumentMapperMetadataFactory
                  * @var Marshaller $marshaller
                  */
                 if (null !== $marshaller = $this->reader->getPropertyAnnotation($property, Marshaller::class)) {
-                    $mapper->addMapping(new PropertyMethodMapper(
-                        $name,
-                        $property->class,
-                        $property->name,
-                        $marshaller->className,
-                        $this->getMethodName($marshaller , $property->name)
-                    ));
+                    $mapper->addMapping(
+                        new PropertyMethodMapper(
+                            $name,
+                            $property->class,
+                            $property->name,
+                            $marshaller->className,
+                            $this->getMethodName($marshaller, $property->name)
+                        )
+                    );
                 } else {
                     $mapper->addMapping(new PropertyValueMapper($name, $property->class, $property->name));
                 }
@@ -411,7 +405,6 @@ class DocumentMapperMetadataFactory
                  * also implements the TransformInterface.
                  */
                 foreach ($this->reader->getPropertyAnnotations($property) as $annotation) {
-
                     if ($annotation instanceof TransformInterface) {
                         if ($annotation instanceof TransformerWeightInterface) {
                             $mapper->addTransformer($property->name, $annotation, $annotation->getWeight());

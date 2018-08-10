@@ -7,6 +7,10 @@ namespace Zicht\Bundle\SolrBundle\Mapping;
 
 use Zicht\Bundle\SolrBundle\Service\ObjectStorage;
 
+/**
+ * Interface MapperInterface
+ * @package Zicht\Bundle\SolrBundle\Mapping
+ */
 interface MapperInterface
 {
     /**

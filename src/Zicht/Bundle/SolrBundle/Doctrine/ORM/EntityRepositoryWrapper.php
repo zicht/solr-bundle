@@ -1,10 +1,18 @@
 <?php
+/**
+ * @author    Philip Bergman <philip@zicht.nl>
+ * @copyright Zicht Online <http://www.zicht.nl>
+ */
 namespace Zicht\Bundle\SolrBundle\Doctrine\ORM;
 
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityRepository;
 use Zicht\Bundle\SolrBundle\Mapping\DocumentRepositoryInterface;
 
+/**
+ * Class EntityRepositoryWrapper
+ * @package Zicht\Bundle\SolrBundle\Doctrine\ORM
+ */
 class EntityRepositoryWrapper implements DocumentRepositoryInterface, BaseQueryBuilderRepositoryInterface
 {
     /** @var \Doctrine\ORM\QueryBuilder  */

@@ -5,6 +5,10 @@
  */
 namespace Zicht\Bundle\SolrBundle\Mapping;
 
+/**
+ * Interface AnnotationInterface
+ * @package Zicht\Bundle\SolrBundle\Mapping
+ */
 interface AnnotationInterface
 {
 }

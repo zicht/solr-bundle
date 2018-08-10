@@ -9,7 +9,6 @@ use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Class MetadataPostBuildEntitiesListEvent
- *
  * @package Zicht\Bundle\SolrBundle\Event
  */
 class MetadataPostBuildEntitiesListEvent extends Event
@@ -43,6 +42,10 @@ class MetadataPostBuildEntitiesListEvent extends Event
         $this->list = $list;
     }
 
+    /**
+     * @param string $className
+     * @param array $inheritance
+     */
     public function add($className, array $inheritance = [])
     {
         $this->list[]  = ['className' => $className, 'children' => $inheritance];

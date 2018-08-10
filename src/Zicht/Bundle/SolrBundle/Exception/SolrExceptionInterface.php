@@ -5,6 +5,10 @@
  */
 namespace Zicht\Bundle\SolrBundle\Exception;
 
+/**
+ * Interface SolrExceptionInterface
+ * @package Zicht\Bundle\SolrBundle\Exception
+ */
 interface SolrExceptionInterface
 {
 }

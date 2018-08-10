@@ -23,8 +23,7 @@ class UpdateCommand extends AbstractCommand
             ->setDescription('Update a document\'s fields.')
             ->addArgument('select', Console\Input\InputArgument::REQUIRED, "Select these documents to update (e.g.: 'id:abc')")
             ->addArgument('field', Console\Input\InputArgument::REQUIRED, 'Solr field name (e.g "title")')
-            ->addArgument('value', Console\Input\InputArgument::REQUIRED, 'Set the value (e.g. "New title")')
-        ;
+            ->addArgument('value', Console\Input\InputArgument::REQUIRED, 'Set the value (e.g. "New title")');
     }
 
     /**

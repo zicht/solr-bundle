@@ -5,7 +5,10 @@
  */
 namespace Zicht\Bundle\SolrBundle\Exception;
 
-
+/**
+ * Class InvalidArgumentException
+ * @package Zicht\Bundle\SolrBundle\Exception
+ */
 class InvalidArgumentException extends \InvalidArgumentException implements SolrExceptionInterface
 {
 }

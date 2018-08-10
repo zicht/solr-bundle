@@ -7,6 +7,10 @@ namespace Zicht\SimpleCache;
 
 use Psr\SimpleCache\CacheException;
 
+/**
+ * Class RuntimeException
+ * @package Zicht\SimpleCache
+ */
 class RuntimeException extends \RuntimeException implements CacheException
 {
 }

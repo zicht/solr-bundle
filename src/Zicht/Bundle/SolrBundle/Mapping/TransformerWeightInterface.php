@@ -7,7 +7,6 @@ namespace Zicht\Bundle\SolrBundle\Mapping;
 
 /**
  * Interface TransformerWeightInterface
- *
  * @package Zicht\Bundle\SolrBundle\Mapping
  */
 interface TransformerWeightInterface

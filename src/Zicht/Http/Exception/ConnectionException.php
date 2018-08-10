@@ -5,6 +5,10 @@
  */
 namespace Zicht\Http\Exception;
 
+/**
+ * Class ConnectionException
+ * @package Zicht\Http\Exception
+ */
 class ConnectionException extends \RuntimeException implements HttpExceptionInterface
 {
 }

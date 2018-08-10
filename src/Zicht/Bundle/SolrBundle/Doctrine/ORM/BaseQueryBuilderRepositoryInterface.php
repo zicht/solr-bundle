@@ -5,6 +5,10 @@
  */
 namespace Zicht\Bundle\SolrBundle\Doctrine\ORM;
 
+/**
+ * Interface BaseQueryBuilderRepositoryInterface
+ * @package Zicht\Bundle\SolrBundle\Doctrine\ORM
+ */
 interface BaseQueryBuilderRepositoryInterface
 {
     /**

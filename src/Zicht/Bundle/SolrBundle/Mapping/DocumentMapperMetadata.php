@@ -4,19 +4,15 @@
  * @copyright Zicht Online <http://www.zicht.nl>
  */
 namespace Zicht\Bundle\SolrBundle\Mapping;
+
 use Zicht\Bundle\SolrBundle\Exception\InvalidArgumentException;
 
 /**
  * Class DocumentMapperMetadata
- *
  * @package Zicht\Bundle\SolrBundle\Mapping
  */
 class DocumentMapperMetadata
 {
-    const MAPPING_PROPERTY = 0x01;
-    const MAPPING_METHOD = 0x02;
-    const MAPPING_STATIC = 0x04;
-
     /** @var array|MapperInterface[] */
     private $mapping = [];
     /** @var array */
@@ -124,7 +120,7 @@ class DocumentMapperMetadata
      */
     public function setRepository($repository)
     {
-        if (is_a($repository,DocumentRepositoryInterface::class, true)) {
+        if (is_a($repository, DocumentRepositoryInterface::class, true)) {
             throw new InvalidArgumentException(sprintf('Expected "%s" to implement "%s"', $repository, DocumentRepositoryInterface::class));
         }
 

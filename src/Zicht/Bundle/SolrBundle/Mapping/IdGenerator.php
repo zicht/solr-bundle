@@ -34,7 +34,6 @@ final class IdGenerator implements AnnotationInterface
        $this->value = $value['value'];
     }
 
-
     /**
      * @var string
      */

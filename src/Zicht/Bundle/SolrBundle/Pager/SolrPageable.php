@@ -65,7 +65,6 @@ class SolrPageable implements Pageable
     {
         $this->query
             ->setStart($start)
-            ->setRows($length)
-        ;
+            ->setRows($length);
     }
 }

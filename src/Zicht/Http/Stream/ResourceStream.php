@@ -9,6 +9,10 @@ use Psr\Http\Message\StreamInterface;
 use Zicht\Http\Exception\RuntimeException;
 use Zicht\Http\Exception\InvalidArgumentException;
 
+/**
+ * Class ResourceStream
+ * @package Zicht\Http\Stream
+ */
 class ResourceStream implements StreamInterface
 {
     /** @var resource  */
@@ -204,7 +208,6 @@ class ResourceStream implements StreamInterface
         $this->clear();
 
         return fwrite($this->resource, $string);
-
     }
 
     /**
@@ -244,12 +247,12 @@ class ResourceStream implements StreamInterface
 
         return stream_get_contents($this->resource, $this->getSize(), 0);
     }
-
+    // @codingStandardsIgnoreStart
     private function clear()
     {
         $this->meta = $this->stats = null;
     }
-
+    // @codingStandardsIgnoreEnd
     /**
      * @{inheritDoc}
      */

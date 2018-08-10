@@ -10,8 +10,11 @@ use Symfony\Component\Stopwatch\Stopwatch;
 use Zicht\Bundle\SolrBundle\Exception\BadResponseException;
 use Zicht\Http\ClientInterface;
 use Zicht\Bundle\SolrBundle\QueryBuilder;
-use Zicht\Http\RequestFactoryInterface;
 
+/**
+ * Class SolrClient
+ * @package Zicht\Bundle\SolrBundle\Service
+ */
 class SolrClient
 {
     /** @var ClientInterface */
@@ -69,7 +72,6 @@ class SolrClient
         }
 
         try {
-
             $request = $handler->createRequest($this->client);
             $response = $this->client->sendRequest($request);
 
@@ -82,7 +84,6 @@ class SolrClient
             }
 
             return $response;
-
         } finally {
             if (null !== $this->stopWatch) {
                 $this->stopWatch->stop('solr.request');
@@ -107,7 +108,7 @@ class SolrClient
                 return $body;
             }
         } else {
-            return sprintf("Request failed with status code %s (%s)", $response->getStatusCode(), $response->getReasonPhrase());
+            return sprintf('Request failed with status code %s (%s)', $response->getStatusCode(), $response->getReasonPhrase());
         }
     }
 
@@ -133,8 +134,7 @@ class SolrClient
         $ret = [];
         $select = (new QueryBuilder\Select())
             ->setFieldList($fieldName)
-            ->setQuery($query)
-        ;
+            ->setQuery($query);
         foreach ($this->select($select)->response->docs as $doc) {
             $ret[]= $doc->$fieldName;
         }

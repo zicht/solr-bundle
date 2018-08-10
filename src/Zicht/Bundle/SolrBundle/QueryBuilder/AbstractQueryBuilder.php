@@ -32,7 +32,7 @@ abstract class AbstractQueryBuilder implements RequestBuilderInterface
             } elseif (is_scalar($value)) {
                 $ret .= '&'. rawurlencode($key) . '=' . rawurlencode($value);
             } else {
-                throw new \InvalidArgumentException("Unhandled parameter type " . gettype($value) . " in call to buildQuery()");
+                throw new \InvalidArgumentException('Unhandled parameter type ' . gettype($value) . ' in call to buildQuery()');
             }
         }
 

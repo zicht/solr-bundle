@@ -9,6 +9,10 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 
+/**
+ * Interface RequestFactoryInterface
+ * @package Zicht\Http
+ */
 interface RequestFactoryInterface
 {
     /**

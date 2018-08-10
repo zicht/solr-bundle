@@ -5,6 +5,10 @@
  */
 namespace Zicht\Http\Exception;
 
+/**
+ * Interface HttpExceptionInterface
+ * @package Zicht\Http\Exception
+ */
 interface HttpExceptionInterface
 {
 }

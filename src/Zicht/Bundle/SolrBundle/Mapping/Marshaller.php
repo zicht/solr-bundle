@@ -45,7 +45,6 @@ final class Marshaller implements AnnotationInterface
                 $this->className = $value['value'];
                 break;
             default:
-
                 throw new BadMethodCallException(sprintf('@Zicht\Bundle\SolrBundle\Mapping\Marshaller should be an array or string, %s given', $type));
         }
     }

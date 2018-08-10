@@ -48,13 +48,13 @@ class StreamableOutputWrapper
         return fopen('output://', 'w', false, stream_context_create(['output'=>['writer' => $output, 'fmt' => $fmt]]));
     }
 
+    // @codingStandardsIgnoreStart
     public static function init()
     {
         if (!in_array('output', stream_get_wrappers())) {
             stream_wrapper_register('output', self::class);
         }
     }
-
     /**
      * @inheritdoc
      */
@@ -65,33 +65,19 @@ class StreamableOutputWrapper
             throw new \RuntimeException('Missing output in wrapper context.');
         }
         if (!$options['output']['writer'] instanceof OutputInterface) {
-            throw new \RuntimeException(sprintf(
-                'Output writer should be an instance of %s, and %s was given',
-                OutputInterface::class,
-                is_object($options['output']['writer'])? get_class($options['output']['writer']) : gettype($options['output']['writer'])
-            ));
+            throw new \RuntimeException(
+                sprintf(
+                    'Output writer should be an instance of %s, and %s was given',
+                    OutputInterface::class,
+                    is_object($options['output']['writer'])? get_class($options['output']['writer']) : gettype($options['output']['writer'])
+                )
+            );
         }
         $this->output = $options['output']['writer'];
         if (isset($options['output']['fmt'])) {
             $this->fmt = $options['output']['fmt'];
         }
         return true;
-    }
-
-    /**
-     * @return array
-     */
-    private function getContext()
-    {
-        $options = stream_context_get_options(stream_context_get_default());
-        foreach (stream_context_get_options($this->context) as $key => $ctx) {
-            if (isset($options[$key])) {
-                $options[$key] = array_merge($options[$key], $ctx);
-            } else {
-                $options[$key] = $ctx;
-            }
-        }
-        return $options;
     }
 
     /**
@@ -112,5 +98,22 @@ class StreamableOutputWrapper
     public function stream_eof()
     {
         return false;
+    }
+    // @codingStandardsIgnoreEnd
+
+    /**
+     * @return array
+     */
+    private function getContext()
+    {
+        $options = stream_context_get_options(stream_context_get_default());
+        foreach (stream_context_get_options($this->context) as $key => $ctx) {
+            if (isset($options[$key])) {
+                $options[$key] = array_merge($options[$key], $ctx);
+            } else {
+                $options[$key] = $ctx;
+            }
+        }
+        return $options;
     }
 }

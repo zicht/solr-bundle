@@ -17,7 +17,6 @@ use Zicht\Http\Message\Response;
 
 /**
  * Class SocketHandler
- *
  * @package Zicht\Http\Handler
  */
 class SocketHandler implements HandlerInterface, HandlerDebugInterface
@@ -58,7 +57,7 @@ class SocketHandler implements HandlerInterface, HandlerDebugInterface
         $resp = $this->readResponse($conn);
         $conn->close();
         $this->log('* finished ' . microtime(true));
-        $this->log("* EOT");
+        $this->log('* EOT');
         return $resp;
     }
 
@@ -134,7 +133,6 @@ class SocketHandler implements HandlerInterface, HandlerDebugInterface
         }
 
         return new Response($code, $phrase, $protocol, $headers, $body);
-
     }
 
     /**
@@ -234,7 +232,7 @@ class SocketHandler implements HandlerInterface, HandlerDebugInterface
             throw new ConnectionException(sprintf('Failed to connect to %s:%s, %s', $host, $port, $errstr), $errno);
         }
         $stream = new ResourceStream($fp);
-        return ($this->isDebug()) ? new WrappedDebugStream($stream , $this->getLog()) : $stream;
+        return ($this->isDebug()) ? new WrappedDebugStream($stream, $this->getLog()) : $stream;
     }
 
 
@@ -260,7 +258,6 @@ class SocketHandler implements HandlerInterface, HandlerDebugInterface
                     break;
                 default:
                     $port = 80;
-
             }
         }
         return [$host, $port];

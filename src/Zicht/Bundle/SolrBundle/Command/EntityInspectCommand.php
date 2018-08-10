@@ -20,6 +20,10 @@ use Zicht\Bundle\SolrBundle\Mapping\IdGeneratorDefault;
 use Zicht\Bundle\SolrBundle\Mapping\MethodMergeMapper;
 use Zicht\Bundle\SolrBundle\Service\SolrManager;
 
+/**
+ * Class EntityInspectCommand
+ * @package Zicht\Bundle\SolrBundle\Command
+ */
 class EntityInspectCommand extends Command
 {
     /** @var SolrManager */
@@ -71,11 +75,11 @@ class EntityInspectCommand extends Command
      */
     private function renderClassInfo(DocumentMapperMetadata $meta, Table $table)
     {
-        $table->addRow([new TableCell("<fg=cyan;options=bold>Class Name</>", ['colspan' => 2])]);
+        $table->addRow([new TableCell('<fg=cyan;options=bold>Class Name</>', ['colspan' => 2])]);
         $table->addRow(new TableSeparator());
         $table->addRow([new TableCell($meta->getClassName(), ['colspan' => 2])]);
         $table->addRow(new TableSeparator());
-        $table->addRow([new TableCell("<fg=cyan;options=bold>Id Field</>", ['colspan' => 2])]);
+        $table->addRow([new TableCell('<fg=cyan;options=bold>Id Field</>', ['colspan' => 2])]);
         $table->addRow(new TableSeparator());
         $table->addRow([new TableCell(sprintf('%s::$%s', ...$meta->getIdField()), ['colspan' => 2])]);
         $table->addRow(new TableSeparator());
@@ -84,14 +88,14 @@ class EntityInspectCommand extends Command
             $generator = IdGeneratorDefault::class;
         }
 
-        $table->addRow([new TableCell("<fg=cyan;options=bold>Id Generator</>", ['colspan' => 2])]);
+        $table->addRow([new TableCell('<fg=cyan;options=bold>Id Generator</>', ['colspan' => 2])]);
         $table->addRow(new TableSeparator());
         $table->addRow([new TableCell($generator, ['colspan' => 2])]);
 
         if ($meta->getOption('child_inheritance')) {
             if (null !== $children = $this->manager->getDocumentMapperMetadataFactory()->getChildrenOf($meta->getClassName())) {
                 $table->addRow(new TableSeparator());
-                $table->addRow([new TableCell("<fg=cyan;options=bold>Child Entities</>", ['colspan' => 2])]);
+                $table->addRow([new TableCell('<fg=cyan;options=bold>Child Entities</>', ['colspan' => 2])]);
                 $table->addRow(new TableSeparator());
                 foreach ($children as $name) {
                     $table->addRow([new TableCell($name, ['colspan' => 2])]);
@@ -101,7 +105,7 @@ class EntityInspectCommand extends Command
 
         if (null !== $repository = $meta->getRepository()) {
             $table->addRow(new TableSeparator());
-            $table->addRow([new TableCell("<fg=cyan;options=bold>Repository</>", ['colspan' => 2])]);
+            $table->addRow([new TableCell('<fg=cyan;options=bold>Repository</>', ['colspan' => 2])]);
             $table->addRow(new TableSeparator());
             $table->addRow([new TableCell($repository, ['colspan' => 2])]);
         }
@@ -114,11 +118,10 @@ class EntityInspectCommand extends Command
     private function renderMapping(DocumentMapperMetadata $meta, Table $table)
     {
         $table->addRow(new TableSeparator());
-        $table->addRow([new TableCell("<fg=cyan;options=bold>Field mapping</>", ['colspan' => 2])]);
+        $table->addRow([new TableCell('<fg=cyan;options=bold>Field mapping</>', ['colspan' => 2])]);
         $table->addRow(new TableSeparator());
 
         foreach ($meta->getMapping() as $mapper) {
-
             if ($mapper instanceof MethodMergeMapper) {
                 $table->addRow(['...', (string)$mapper]);
             } else {
@@ -129,12 +132,11 @@ class EntityInspectCommand extends Command
         $transformers = array_keys(iterator_to_array($meta->getTransformers()));
 
         if (count($transformers) > 0) {
-
             $table->addRow(new TableSeparator());
-            $table->addRow([new TableCell("<fg=cyan;options=bold>Field Transformers</>", ['colspan' => 2])]);
+            $table->addRow([new TableCell('<fg=cyan;options=bold>Field Transformers</>', ['colspan' => 2])]);
             $table->addRow(new TableSeparator());
 
-            foreach($transformers as $name) {
+            foreach ($transformers as $name) {
                 foreach ($meta->getTransformers($name) as $list) {
                     foreach ($list as $transformer) {
                         $table->addRow([$name, $transformer]);
@@ -151,7 +153,7 @@ class EntityInspectCommand extends Command
     private function renderOptions(DocumentMapperMetadata $meta, Table $table)
     {
         $table->addRow(new TableSeparator());
-        $table->addRow([new TableCell("<fg=cyan;options=bold>Options</>", ['colspan' => 2])]);
+        $table->addRow([new TableCell('<fg=cyan;options=bold>Options</>', ['colspan' => 2])]);
         $table->addRow(new TableSeparator());
         $table->addRow(['active', ($meta->isActive()) ? 'yes' : 'no']);
         foreach ($meta->getOptions() as $name => $option) {
@@ -164,7 +166,7 @@ class EntityInspectCommand extends Command
 
         if (count($meta->getParams()) > 0) {
             $table->addRow(new TableSeparator());
-            $table->addRow([new TableCell("<fg=cyan;options=bold>Parameters</>", ['colspan' => 2])]);
+            $table->addRow([new TableCell('<fg=cyan;options=bold>Parameters</>', ['colspan' => 2])]);
             $table->addRow(new TableSeparator());
             foreach ($meta->getParams() as $name => $value) {
                 $table->addRow([$name, $value]);

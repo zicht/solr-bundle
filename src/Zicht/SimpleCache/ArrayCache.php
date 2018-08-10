@@ -7,7 +7,6 @@ namespace Zicht\SimpleCache;
 
 /**
  * Class ArrayCache
- *
  * @package Zicht\Bundle\SimpleCache
  */
 class ArrayCache extends AbstractCache

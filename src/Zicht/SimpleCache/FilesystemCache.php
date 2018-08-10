@@ -7,7 +7,6 @@ namespace Zicht\SimpleCache;
 
 /**
  * Class FilesystemCache
- *
  * @package Zicht\Bundle\SimpleCache
  */
 class FilesystemCache extends AbstractCache
@@ -72,7 +71,7 @@ class FilesystemCache extends AbstractCache
     public function clear()
     {
         $result = true;
-        foreach(glob($this->base . '/*.php') as $file) {
+        foreach (glob($this->base . '/*.php') as $file) {
             $result &= unlink($file);
         }
         return (bool)$result;

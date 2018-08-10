@@ -7,6 +7,10 @@ namespace Zicht\Http\Stream;
 
 use Psr\Http\Message\StreamInterface;
 
+/**
+ * Class WrappedDebugStream
+ * @package Zicht\Http\Stream
+ */
 class WrappedDebugStream implements StreamInterface
 {
     /** @var StreamInterface  */
@@ -150,7 +154,7 @@ class WrappedDebugStream implements StreamInterface
      */
     protected function decorate($str, $read = false)
     {
-        return (($read) ? "<< " : ">> ") . $str;
+        return (($read) ? '<< ' : '>> ') . $str;
     }
 
     /**

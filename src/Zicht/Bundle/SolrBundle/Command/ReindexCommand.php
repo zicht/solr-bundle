@@ -61,8 +61,7 @@ class ReindexCommand extends Command
             ->addOption('batch-size', 'b', InputArgument::OPTIONAL | InputOption::VALUE_REQUIRED, 'The batch size when to flush solr.', 200)
             ->addOption('no-children', '', InputOption::VALUE_NONE, 'This will when no entities provided only reindex the parent entities.')
             ->addOption('debug', '', InputOption::VALUE_NONE, 'Debug: i.e. don\'t catch exceptions while indexing')
-            ->setDescription('Reindexes entities in the SOLR index')
-        ;
+            ->setDescription('Reindexes entities in the SOLR index');
     }
 
     /**
@@ -85,8 +84,7 @@ class ReindexCommand extends Command
             $this->doctrine
                 ->getConnection()
                 ->getConfiguration()
-                ->setSQLLogger(new EchoSQLLogger())
-            ;
+                ->setSQLLogger(new EchoSQLLogger());
         }
     }
 
@@ -125,7 +123,7 @@ class ReindexCommand extends Command
             $meta = $this->solrManager->getDocumentMapperMetadata($entity);
 
             if (!$meta->isActive()) {
-                $output->writeln("<comment>Mapper is disabled, skipping indexing</comment>");
+                $output->writeln('<comment>Mapper is disabled, skipping indexing</comment>');
                 continue;
             }
 
@@ -150,7 +148,7 @@ class ReindexCommand extends Command
             if ($total > 0) {
                 $output->writeln("Reindexing {$total} records");
             } else {
-                $output->writeln("Reindexing records...");
+                $output->writeln('Reindexing records...');
             }
 
             $progress = new ProgressBar($output, $total);
@@ -170,7 +168,7 @@ class ReindexCommand extends Command
 
             $progress->finish();
             $progress->clear();
-            $output->writeln("finished");
+            $output->writeln('finished');
         }
 
         if (0 !== $index % $batch) {
@@ -178,6 +176,6 @@ class ReindexCommand extends Command
             $this->solrManager->getClient()->update($update);
         }
 
-        $output->writeln(sprintf("Total time: %.02fs, Peak mem usage: %.02fMB", microtime(true)-$start, memory_get_peak_usage()/1024/1024));
+        $output->writeln(sprintf('Total time: %.02fs, Peak mem usage: %.02fMB', microtime(true)-$start, memory_get_peak_usage()/1024/1024));
     }
 }

@@ -12,7 +12,10 @@ use Zicht\Bundle\SolrBundle\Mapping\IdGeneratorDefault;
 use Zicht\Bundle\SolrBundle\Mapping\PropertyValueTrait;
 use Zicht\Bundle\SolrBundle\QueryBuilder\Update;
 
-
+/**
+ * Class SolrManager
+ * @package Zicht\Bundle\SolrBundle\Service
+ */
 class SolrManager
 {
     use PropertyValueTrait;

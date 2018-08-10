@@ -13,6 +13,10 @@ use Zicht\Http\Observer\ObserveCtxWrapper;
 use Zicht\Http\Observer\ObserveRequestContext;
 use Zicht\Http\Observer\ObserveResponseContext;
 
+/**
+ * Class ObserverBridge
+ * @package Zicht\Bundle\SolrBundle\Http
+ */
 class ObserverBridge implements \SplObserver
 {
     /** @var EventDispatcherInterface */

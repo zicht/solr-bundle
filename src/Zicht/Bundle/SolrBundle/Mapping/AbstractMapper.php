@@ -5,6 +5,10 @@
  */
 namespace Zicht\Bundle\SolrBundle\Mapping;
 
+/**
+ * Class AbstractMapper
+ * @package Zicht\Bundle\SolrBundle\Mapping
+ */
 abstract class AbstractMapper implements MapperInterface
 {
     /** @var string */

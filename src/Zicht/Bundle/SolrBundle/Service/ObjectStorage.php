@@ -5,6 +5,10 @@
  */
 namespace Zicht\Bundle\SolrBundle\Service;
 
+/**
+ * Class ObjectStorage
+ * @package Zicht\Bundle\SolrBundle\Service
+ */
 final class ObjectStorage
 {
     /** @var \SplObjectStorage */

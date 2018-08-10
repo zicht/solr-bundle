@@ -62,7 +62,7 @@ class Request implements RequestInterface
             $target = '/';
         }
 
-        if ("" !== $query = $this->uri->getQuery()) {
+        if ('' !== $query = $this->uri->getQuery()) {
             $target .= '?' . $query;
         }
 

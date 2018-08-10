@@ -7,6 +7,10 @@ namespace Zicht\Bundle\SolrBundle\Mapping;
 
 use Zicht\Bundle\SolrBundle\Service\ObjectStorage;
 
+/**
+ * Class PropertyValueMapper
+ * @package Zicht\Bundle\SolrBundle\Mapping
+ */
 class PropertyValueMapper extends AbstractMapper
 {
     use PropertyValueTrait;

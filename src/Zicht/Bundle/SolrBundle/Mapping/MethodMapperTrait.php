@@ -7,6 +7,10 @@ namespace Zicht\Bundle\SolrBundle\Mapping;
 
 use Zicht\Bundle\SolrBundle\Service\ObjectStorage;
 
+/**
+ * Trait MethodMapperTrait
+ * @package Zicht\Bundle\SolrBundle\Mapping
+ */
 trait MethodMapperTrait
 {
     /** @var string  */

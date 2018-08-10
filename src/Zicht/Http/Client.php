@@ -17,7 +17,6 @@ use Zicht\Http\Observer\ObserveResponseContext;
 
 /**
  * Class Client
- *
  * @package Zicht\Http
  */
 class Client implements ClientInterface, ObservableClientInterface

@@ -5,6 +5,10 @@
  */
 namespace Zicht\Bundle\SolrBundle\Service;
 
+/**
+ * Class ObjectStorageScopes
+ * @package Zicht\Bundle\SolrBundle\Service
+ */
 final class ObjectStorageScopes
 {
     /** no need to initialize this class */
@@ -42,4 +46,3 @@ final class ObjectStorageScopes
         ];
     }
 }
-

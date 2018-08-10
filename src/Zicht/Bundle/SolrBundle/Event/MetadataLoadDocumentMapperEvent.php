@@ -9,6 +9,10 @@ namespace Zicht\Bundle\SolrBundle\Event;
 use Symfony\Component\EventDispatcher\Event;
 use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadata;
 
+/**
+ * Class MetadataLoadDocumentMapperEvent
+ * @package Zicht\Bundle\SolrBundle\Event
+ */
 class MetadataLoadDocumentMapperEvent extends Event
 {
     /** @var DocumentMapperMetadata  */

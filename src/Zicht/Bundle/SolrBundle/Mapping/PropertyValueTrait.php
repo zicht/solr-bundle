@@ -7,7 +7,6 @@ namespace Zicht\Bundle\SolrBundle\Mapping;
 
 /**
  * Trait PropertyValueTrait
- *
  * @package Zicht\Bundle\SolrBundle\Mapping
  */
 trait PropertyValueTrait

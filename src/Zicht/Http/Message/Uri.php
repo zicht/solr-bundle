@@ -10,7 +10,6 @@ use Zicht\Http\Exception\InvalidArgumentException;
 
 /**
  * Class Uri
- *
  * @package Zicht\Http\Message
  */
 class Uri implements UriInterface
@@ -283,6 +282,7 @@ class Uri implements UriInterface
         return $uri;
     }
 
+    // @codingStandardsIgnoreStart
     private function validate()
     {
         if (null !== $this->scheme) {
@@ -296,7 +296,6 @@ class Uri implements UriInterface
         }
 
         if (null !== $this->port) {
-
             if ($this->port > (2**16-1) || $this->port < 0) {
                 throw new InvalidArgumentException('Port is out-of-range.');
             }
@@ -305,6 +304,7 @@ class Uri implements UriInterface
         }
     }
 
+    // @codingStandardsIgnoreEnd
     /**
      * @param string $path
      */
@@ -321,7 +321,7 @@ class Uri implements UriInterface
         $this->query = implode(
             '&',
             array_map(
-                function($v) {
+                function ($v) {
                     return implode('=', array_map('rawurlencode', array_map('rawurldecode', explode('=', $v, 2))));
                 },
                 explode(

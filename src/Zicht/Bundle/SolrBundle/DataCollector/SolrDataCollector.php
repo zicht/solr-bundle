@@ -47,7 +47,6 @@ class SolrDataCollector extends DataCollector
                     default:
                         $this->data[$name] = (string)$data;
                 }
-
             }
         }
     }
@@ -61,7 +60,6 @@ class SolrDataCollector extends DataCollector
         $ret = [];
 
         foreach (explode('* EOT', $s) as $req) {
-
             if (empty(trim($req))) {
                 continue;
             }
@@ -110,7 +108,6 @@ class SolrDataCollector extends DataCollector
     private function getQuery($s)
     {
         if (preg_match('/^[^\s]+\s([^\s]+)\sHTTP\//', $s, $m)) {
-
             $parts = parse_url($m[1]);
             $query = [];
             $request = $this->getBody($s);
@@ -145,6 +142,10 @@ class SolrDataCollector extends DataCollector
         ];
     }
 
+    /**
+     * @param string $s
+     * @return array|mixed
+     */
     private function getBody($s)
     {
         if (preg_match('/(\{.*\})$/is', $s, $m)) {

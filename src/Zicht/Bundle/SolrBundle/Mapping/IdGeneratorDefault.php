@@ -27,7 +27,6 @@ class IdGeneratorDefault implements IdGeneratorInterface
         $this->metadataFactory = $metadataFactory;
     }
 
-
     /**
      * @inheritdoc
      */

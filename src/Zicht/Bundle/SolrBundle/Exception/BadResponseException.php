@@ -7,6 +7,10 @@ namespace Zicht\Bundle\SolrBundle\Exception;
 
 use Psr\Http\Message\ResponseInterface;
 
+/**
+ * Class BadResponseException
+ * @package Zicht\Bundle\SolrBundle\Exception
+ */
 class BadResponseException extends \RuntimeException implements SolrExceptionInterface
 {
     /** @var ResponseInterface  */

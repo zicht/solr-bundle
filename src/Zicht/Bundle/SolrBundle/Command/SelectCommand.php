@@ -45,7 +45,7 @@ class SelectCommand extends AbstractCommand
                 'field',
                 'f',
                 Console\Input\InputOption::VALUE_REQUIRED | Console\Input\InputOption::VALUE_IS_ARRAY,
-                "Fields to display. Defaults to all fields and score"
+                'Fields to display. Defaults to all fields and score'
             )
             ->addOption(
                 'deftype',
@@ -76,8 +76,7 @@ class SelectCommand extends AbstractCommand
                 '',
                 Console\Input\InputOption::VALUE_REQUIRED,
                 'Specify the start of the paged results'
-            )
-        ;
+            );
     }
 
     /**
@@ -135,8 +134,7 @@ class SelectCommand extends AbstractCommand
         if ($input->getOption('deftype')) {
             $select
                 ->setDefType($input->getOption('deftype'))
-                ->setQueryFields($input->getOption('qf'))
-            ;
+                ->setQueryFields($input->getOption('qf'));
         }
         if ($fq = $input->getOption('fq')) {
             $select->setFilterQuery($fq);

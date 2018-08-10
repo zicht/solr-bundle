@@ -8,6 +8,10 @@ namespace Zicht\Http\Handler;
 use Psr\Http\Message\StreamInterface;
 use Zicht\Http\Stream\ResourceStream;
 
+/**
+ * Trait HandlerDebugTrait
+ * @package Zicht\Http\Handler
+ */
 trait HandlerDebugTrait
 {
     /** @var StreamInterface */

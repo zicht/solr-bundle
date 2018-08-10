@@ -3,7 +3,6 @@
  * @author Rik van der Kemp <rik@zicht.nl>
  * @copyright Zicht Online <http://zicht.nl>
  */
-
 namespace Zicht\Bundle\SolrBundle\Command;
 
 use Symfony\Component\Console;
@@ -20,8 +19,7 @@ class PingCommand extends AbstractCommand
     {
         $this
             ->setName('zicht:solr:ping')
-            ->setDescription('Do a PING request on the client')
-        ;
+            ->setDescription('Do a PING request on the client');
     }
 
     /**

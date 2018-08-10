@@ -7,7 +7,6 @@ namespace Zicht\SimpleCache;
 
 /**
  * Class InvalidKeyException
- *
  * @package Zicht\Bundle\SimpleCache
  */
 class InvalidKeyException extends InvalidArgumentException

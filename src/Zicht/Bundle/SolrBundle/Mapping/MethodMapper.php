@@ -7,6 +7,10 @@ namespace Zicht\Bundle\SolrBundle\Mapping;
 
 use Zicht\Bundle\SolrBundle\Service\ObjectStorage;
 
+/**
+ * Class MethodMapper
+ * @package Zicht\Bundle\SolrBundle\Mapping
+ */
 class MethodMapper extends AbstractMapper
 {
     use MethodMapperTrait;

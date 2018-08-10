@@ -94,7 +94,7 @@ class Update extends AbstractQueryBuilder
     {
         $instruction = ['doc' => ['id' => $id]];
         $instruction['doc'] += array_map(
-            function($v) {
+            function ($v) {
                 return ['set' => $v];
             },
             $values

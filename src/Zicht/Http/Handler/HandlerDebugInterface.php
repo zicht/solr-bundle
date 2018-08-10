@@ -7,6 +7,10 @@ namespace Zicht\Http\Handler;
 
 use Psr\Http\Message\StreamInterface;
 
+/**
+ * Interface HandlerDebugInterface
+ * @package Zicht\Http\Handler
+ */
 interface HandlerDebugInterface
 {
     /**

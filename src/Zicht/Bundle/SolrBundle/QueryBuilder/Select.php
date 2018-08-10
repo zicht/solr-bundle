@@ -133,7 +133,6 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
 
         if (preg_match('!^application/json!', $contentType) || preg_match('!^text/plain!', $contentType)) {
             $response = json_decode($response->getBody()->getContents());
-
         }
 
         return $response;
@@ -275,6 +274,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
     public function setDebugQuery($value, $structured = false)
     {
         $this->setParam('debugQuery', $value);
+
         if ($structured) {
             $this->setParam('debug.explain.structured', 'true');
         }
