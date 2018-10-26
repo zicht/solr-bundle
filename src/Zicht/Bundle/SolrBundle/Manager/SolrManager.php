@@ -73,8 +73,9 @@ class SolrManager
                 try {
                     if ($delete) {
                         $mapper->delete($this->client, $record, $update);
+                    } else {
+                        $mapper->update($this->client, $record, $update);
                     }
-                    $mapper->update($this->client, $record, $update);
                 } catch (\Exception $e) {
                     if ($errorCallback) {
                         call_user_func($errorCallback, $record, $e);
