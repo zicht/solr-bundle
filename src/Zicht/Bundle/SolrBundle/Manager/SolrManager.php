@@ -62,9 +62,12 @@ class SolrManager
      * Updates as batch. Acts as a stub for future optimization.
      *
      * @param array $records
+     * @param callback|null $incrementCallback
+     * @param callback|null $errorCallback
+     * @param bool $deleteFirst
      * @return array
      */
-    public function updateBatch($records, $incrementCallback = null, $errorCallback = null, $delete = false)
+    public function updateBatch($records, $incrementCallback = null, $errorCallback = null, $deleteFirst = false)
     {
         $update = $this->client->createUpdate();
 
@@ -73,11 +76,10 @@ class SolrManager
             if ($mapper = $this->getMapper($record)) {
                 $i ++;
                 try {
-                    if ($delete) {
+                    if ($deleteFirst) {
                         $mapper->delete($this->client, $record, $update);
-                    } else {
-                        $mapper->update($this->client, $record, $update);
                     }
+                    $mapper->update($this->client, $record, $update);
                 } catch (\Exception $e) {
                     if ($errorCallback) {
                         call_user_func($errorCallback, $record, $e);
