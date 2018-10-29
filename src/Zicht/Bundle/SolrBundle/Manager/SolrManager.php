@@ -95,11 +95,11 @@ class SolrManager
      * @param array $records
      * @param callable|null $incrementCallback
      * @param callable|null $errorCallback
-     * @param boolean $delete
+     * @param bool $deleteFirst
      *
      * @return array
      */
-    public function updateBatch($records, $incrementCallback = null, $errorCallback = null, $delete = false)
+    public function updateBatch($records, $incrementCallback = null, $errorCallback = null, $deleteFirst = false)
     {
         $update = new QueryBuilder\Update();
 
@@ -108,11 +108,10 @@ class SolrManager
             if ($mapper = $this->getMapper($record)) {
                 $i++;
                 try {
-                    if ($delete) {
+                    if ($deleteFirst) {
                         $mapper->delete($update, $record, $update);
-                    } else {
-                        $mapper->update($update, $record, $update);
                     }
+                    $mapper->update($update, $record, $update);
                 } catch (\Exception $e) {
                     if ($errorCallback) {
                         call_user_func($errorCallback, $record, $e);
