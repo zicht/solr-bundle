@@ -349,11 +349,11 @@ abstract class SearchFacade
      *
      * @param string $facetName
      * @param mixed $value
-     * @param int $count
-     * @param string $label
+     * @param int|null $count
+     * @param string|null $label
      * @return array
      */
-    public function getFacetMetaData($facetName, $value, $count, $label = null)
+    public function getFacetMetaData($facetName, $value, $count = null, $label = null)
     {
         return array(
             'value'         => $value,
