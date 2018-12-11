@@ -136,7 +136,7 @@ class Client
             ->setQuery($query)
         ;
         foreach ($this->select($select)->response->docs as $doc) {
-            $ret[]= $doc->$fieldName;
+            $ret[] = $doc->{$fieldName};
         }
         return $ret;
     }
