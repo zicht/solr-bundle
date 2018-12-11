@@ -286,16 +286,23 @@ abstract class SearchFacade
      * @param mixed $value
      * @return int
      */
-    public function getFacetCount($name, $value)
+    public function getFacetCount($facetName, $value)
     {
-        $ret = 0;
-        if ($facet = $this->getResponse()->getFacetSet()->getFacet($name)) {
-            $values = $facet->getValues();
-            if (isset($values[$value])) {
-                $ret = $values[$value];
+        $count = 0;
+
+        if (!isset($this->response->facet_counts->facet_fields->{$facetName})) {
+            return $count;
+        }
+        $facet = $this->response->facet_counts->facet_fields->{$facetName};
+
+        foreach (array_chunk($facet, 2) as list($facetValue, $facetCount)) {
+            if ((string)$facetValue === (string)$value) {
+                $count = $facetCount;
+                break;
             }
         }
-        return $ret;
+
+        return $count;
     }
 
     /**
@@ -313,7 +320,7 @@ abstract class SearchFacade
         $ret = array();
         foreach ($this->getFacetFields() as $facetName) {
             if (!in_array($facetName, $blacklist)) {
-                foreach (array_chunk($this->response->facet_counts->facet_fields->$facetName, 2) as list($value, $count)) {
+                foreach (array_chunk($this->response->facet_counts->facet_fields->{$facetName}, 2) as list($value, $count)) {
                     $ret[$facetName][$value] = $this->getFacetMetaData($facetName, $value, $count);
                 }
             }
@@ -540,8 +547,8 @@ abstract class SearchFacade
 
     public function getHighlightedField($docId, $field)
     {
-        if (isset($this->response->highlighting->$docId->$field)) {
-            return $this->response->highlighting->$docId->$field;
+        if (isset($this->response->highlighting->{$docId}->{$field})) {
+            return $this->response->highlighting->{$docId}->{$field};
         }
 
         return null;
