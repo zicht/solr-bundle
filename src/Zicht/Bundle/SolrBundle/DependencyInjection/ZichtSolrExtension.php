@@ -29,7 +29,7 @@ class ZichtSolrExtension extends Extension
         $loader->load('services.xml');
         $loader->load('commands.xml');
 
-        $container->getDefinition('_zicht_solr.http_client')->setArguments([
+        $container->getDefinition('zicht_solr.http_client')->setArguments([
             ['base_url' => sprintf('http://%s:%d%s/%s/', $config['host'], $config['port'], $config['path'], $config['core'])]
         ]);
     }
