@@ -263,7 +263,7 @@ class DocumentMapperMetadataFactory
      */
     private function getCacheKeyForClassName($className)
     {
-        return sprintf('%s[metadata][%s]', self::CACHE_SUFFIX, $className);
+        return sprintf('%s[metadata][%s]', self::CACHE_SUFFIX, str_replace('\\', '', $className));
     }
 
     /**
