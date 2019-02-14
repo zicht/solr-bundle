@@ -43,9 +43,9 @@ example config:
 # Default configuration for "ZichtSolrBundle"
 zicht_solr:
     mapper:
-        # This should be a service id of a class that implements 
-        # 'Psr\SimpleCache\CacheInterface'
-        cache:                zicht_solr.cache.filesystem
+        # This should be a service prefixed with @ or on of "file", 
+        # "array", or "apcu" values. 
+        cache: files
         # This should be a service id of a class that implements 
         # "Doctrine\ORM\Mapping\NamingStrategy" and will be used 
         # for generating the solr field then no name is provided
@@ -148,25 +148,36 @@ To map classes not managed by doctrine you could use the `solr.metadata_post_bui
 
 ## Caching
 
-This bundle has some cache implementations in the `Zicht/SimpleCache` namespace and could be replaced (when available) with the [symfony cache](https://symfony.com/doc/current/components/cache.html) as it both implements the [PSR-16](https://www.php-fig.org/psr/psr-16/).
+for caching you could use on of "file", "array" or "apcu" which uses the default simple cache of symfony but could also be a custom implementation of the `Psr\SimpleCache\CacheInterface`. 
 
-
-Currently this bundle support [array cache](../src/Zicht/SimpleCache/ArrayCache.php) and [filesystem cache](../src/Zicht/SimpleCache/ArrayCache.php) where the filesystem cache is default for the DocumentMapperMetadataFactory.   
-This bundle uses caching for the DocumentMapperMetadataFactory for caching the build entity lists and the entity mapper metadata. By default it will use the file system cache and defined as:
-
-```
-    <service id="zicht_solr.cache.filesystem" class="Zicht\SimpleCache\FilesystemCache" public="false">
-        <argument>%kernel.cache_dir%/solr/</argument>
-    </service>
-```
-
-To use the array cache (for development) you can set in the config cache to `zicht_solr.cache.array`
+To use the array cache (for development) you can set in the config cache to `array`
 
 ```
 zicht_solr:
     mapper:
-        cache: zicht_solr.cache.array
+        cache: array
             
+```
+
+or custom cache:
+
+```
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <service id="zicht_solr.cache.custom" class="Zicht\SimpleCache\CustomCache" public="false">
+            <argument>%kernel.cache_dir%/solr/</argument>
+        </service>
+    </services>
+</container>
+```
+
+```
+zicht_solr:
+    mapper:
+        cache: @zicht_solr.cache.custom
 ```
 
 ## Http

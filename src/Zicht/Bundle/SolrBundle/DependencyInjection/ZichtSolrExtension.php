@@ -5,14 +5,15 @@
  */
 namespace Zicht\Bundle\SolrBundle\DependencyInjection;
 
+use Symfony\Component\Cache\Simple\ApcuCache;
+use Symfony\Component\Cache\Simple\ArrayCache;
+use Symfony\Component\Cache\Simple\FilesystemCache;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
-use Symfony\Component\ExpressionLanguage\Expression;
 use Zicht\Http\Handler\HandlerDebugInterface;
 use Zicht\Http\Message\Uri;
 use Zicht\Http\Stream\TempStream;
@@ -41,10 +42,31 @@ class ZichtSolrExtension extends Extension
         $container->setDefinition('zicht_solr.uri', (new Definition(Uri::class, [$config['uri']]))->setPublic(false));
         $container->getDefinition('zicht_solr.http.handler.socket')->replaceArgument(0, new Reference('zicht_solr.uri'));
 
+        switch ($config['mapper']['cache']['type']) {
+            case 'service':
+                $cache = new Reference($config['mapper']['cache']['name']);
+                break;
+            case 'auto':
+                switch ($config['mapper']['cache']['name']) {
+                    case 'file':
+                        $definition = new Definition(FilesystemCache::class, ['solr', 0, '%kernel.cache_dir%']);
+                        break;
+                    case 'array':
+                        $definition = new Definition(ArrayCache::class, [0, false]);
+                        break;
+                    case 'apcu':
+                        $definition = new Definition(ApcuCache::class, ['solr']);
+                        break;
+                }
+                $container->setDefinition('zicht_solr.cache.default', $definition)->setPublic(false);
+                $cache = new Reference('zicht_solr.cache.default');
+                break;
+        }
+
         $container
             ->getDefinition('zicht_solr.mapper.document_metadata_factory')
             ->replaceArgument(0, new Reference($config['mapper']['naming_strategy']))
-            ->replaceArgument(1, new Reference($config['mapper']['cache']));
+            ->replaceArgument(1, $cache);
 
         if ($container->getParameter('kernel.debug')) {
             $socketDefinition = $container->getDefinition('zicht_solr.http.handler.socket');

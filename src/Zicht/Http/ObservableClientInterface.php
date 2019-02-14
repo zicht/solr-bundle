@@ -5,10 +5,6 @@
  */
 namespace Zicht\Http;
 
-/**
- * Interface ObservableClientInterface
- * @package Zicht\Http
- */
 interface ObservableClientInterface
 {
     /**

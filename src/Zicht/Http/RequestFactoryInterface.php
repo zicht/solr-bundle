@@ -9,10 +9,6 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 
-/**
- * Interface RequestFactoryInterface
- * @package Zicht\Http
- */
 interface RequestFactoryInterface
 {
     /**
@@ -23,5 +19,5 @@ interface RequestFactoryInterface
      *
      * @return RequestInterface
      */
-    public function createRequest($method, $uri, array $headers = [], StreamInterface $body = null);
+    public function createRequest($method, $uri, array $headers = [], StreamInterface $body = null) :RequestInterface;
 }

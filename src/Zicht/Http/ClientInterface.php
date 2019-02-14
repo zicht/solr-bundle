@@ -5,32 +5,19 @@
  */
 namespace Zicht\Http;
 
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Client\ClientInterface as BaseClientInterface;
 use Zicht\Http\Handler\HandlerInterface;
 
-/**
- * Interface ClientInterface
- * @package Zicht\Http
- */
-interface ClientInterface extends RequestFactoryInterface
+interface ClientInterface extends RequestFactoryInterface, BaseClientInterface
 {
     /**
-     * PSR-18 is still in draft, but for the future we implement
-     * a copy of the client interface so it can be easily overwritten
-     *
-     * @param RequestInterface $request
-     * @return ResponseInterface
-     */
-    public function sendRequest(RequestInterface $request);
-
-    /**
      * @return HandlerInterface
      */
-    public function getHandler();
+    public function getHandler() :HandlerInterface;
 
     /**
-     * @return HandlerInterface
+     * @param HandlerInterface $handler
+     * @return void
      */
-    public function setHandler(HandlerInterface $handler);
+    public function setHandler(HandlerInterface $handler) :void;
 }

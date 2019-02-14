@@ -29,9 +29,40 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode('mapper')
                     ->addDefaultsIfNotSet()
                     ->children()
-                        ->scalarNode('cache')
-                            ->info("This should be a service id of a class that implements 'Psr\SimpleCache\CacheInterface'")
-                            ->defaultValue('zicht_solr.cache.filesystem')
+                        ->arrayNode('cache')
+                            ->defaultValue('file')
+                            ->info('This should be a service prefixed with @ or on of "file", "array", or "apcu" values.')
+                            ->beforeNormalization()
+                            ->ifString()
+                                ->then(function($value) {
+                                    if ($value[0] === '@') {
+                                        return [
+                                            'type' => 'service',
+                                            'name' => substr($value, 1),
+                                        ];
+                                    } else {
+                                        return [
+                                            'type' => 'auto',
+                                            'name' => $value,
+                                        ];
+                                    }
+                                })
+                            ->end()
+                            ->children()
+                                ->enumNode('type')
+                                    ->values(['service', 'auto'])
+                                ->end()
+                                ->scalarNode('name')
+                                    ->isRequired()
+                                ->end()
+                            ->end()
+                            ->validate()
+                                ->always(function($v) {
+                                    if ('auto' === $v['type'] && !in_array($v['name'], ['file', 'array', 'apcu'])) {
+                                        throw new \RuntimeException('Invalid cache value,expected one of "file", "array" or "apcu" got ' . $v['name']);
+                                    }
+                                })
+                            ->end()
                         ->end()
                         ->scalarNode('naming_strategy')
                             ->info('This should be a service id of a class that implements "Doctrine\ORM\Mapping\NamingStrategy" and will be used for generating the solr field then no name is provided')
@@ -39,36 +70,8 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
-                // BC configuration
-                ->scalarNode('scheme')->defaultValue('http')->end()
-                ->scalarNode('port')->defaultValue(8983)->end()
-                ->scalarNode('host')->end()
-                ->scalarNode('path')->defaultValue('/solr')->end()
-                ->scalarNode('core')->end()
-                // new configuration
                 ->scalarNode('uri')->defaultNull()->end()
-
             ->end()
-
-            ->validate()
-                ->always(
-                    function ($v) {
-                    if (is_null($v['uri'])) {
-                        foreach (['host', 'core'] as $required) {
-                            if (empty($v[$required])) {
-                                throw new InvalidConfigurationException(sprintf('The child node "%s" at path "zicht_solr" must be configured.', $required));
-                            }
-                        }
-                        if (!in_array($v['scheme'], ['http', 'https'])) {
-                            throw new InvalidConfigurationException('Unsupported scheme provided for child node "host" at path "zicht_solr", got "%s" while expected "http" or "https"', $v['scheme']);
-                        }
-                        $v['uri'] = sprintf('%s://%s:%d%s/%s/', $v['scheme'], $v['host'], $v['port'], $v['path'], $v['core']);
-                    }
-                    unset($v['scheme'], $v['host'], $v['port'], $v['path'], $v['core']);
-                    return $v;
-                    }
-                )
-            ->end();
         ;
 
         return $treeBuilder;

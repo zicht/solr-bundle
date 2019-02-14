@@ -3,6 +3,8 @@
  * @author    Philip Bergman <philip@zicht.nl>
  * @copyright Zicht Online <http://www.zicht.nl>
  */
+declare(strict_types=1);
+
 namespace Zicht\Http;
 
 use Psr\Http\Message\RequestInterface;
@@ -15,10 +17,7 @@ use Zicht\Http\Observer\ObserveNotifierInterface;
 use Zicht\Http\Observer\ObserveRequestContext;
 use Zicht\Http\Observer\ObserveResponseContext;
 
-/**
- * Class Client
- * @package Zicht\Http
- */
+
 class Client implements ClientInterface, ObservableClientInterface
 {
     /** @var HandlerInterface */
@@ -27,8 +26,6 @@ class Client implements ClientInterface, ObservableClientInterface
     private $notifier;
 
     /**
-     * Client constructor.
-     *
      * @param HandlerInterface $handler
      * @param ObserveNotifierInterface|null $notifier
      */
@@ -41,7 +38,7 @@ class Client implements ClientInterface, ObservableClientInterface
     /**
      * @{inheritDoc}
      */
-    public function sendRequest(RequestInterface $request)
+    public function sendRequest(RequestInterface $request) :ResponseInterface
     {
         $request = $this->notifyRequest($request);
         $response = $this->handler->send($request);
@@ -51,7 +48,7 @@ class Client implements ClientInterface, ObservableClientInterface
     /**
      * @{inheritdoc}
      */
-    public function createRequest($method, $uri, array $headers = [], StreamInterface $body = null)
+    public function createRequest($method, $uri, array $headers = [], StreamInterface $body = null) :RequestInterface
     {
         return new Request($method, $uri, $headers, $body);
     }
@@ -76,7 +73,7 @@ class Client implements ClientInterface, ObservableClientInterface
      * @param RequestInterface $request
      * @return RequestInterface
      */
-    private function notifyRequest(RequestInterface $request)
+    private function notifyRequest(RequestInterface $request) :RequestInterface
     {
         $ctx = new ObserveRequestContext($request);
         $this->notifier->notifyWithCtx($ctx);
@@ -88,7 +85,7 @@ class Client implements ClientInterface, ObservableClientInterface
      * @param ResponseInterface $response
      * @return ResponseInterface
      */
-    private function notifyResponse(RequestInterface $request, ResponseInterface $response)
+    private function notifyResponse(RequestInterface $request, ResponseInterface $response) :ResponseInterface
     {
         $ctx = new ObserveResponseContext($request, $response);
         $this->notifier->notifyWithCtx($ctx);
@@ -98,7 +95,7 @@ class Client implements ClientInterface, ObservableClientInterface
     /**
      * @return HandlerInterface
      */
-    public function getHandler()
+    public function getHandler() :HandlerInterface
     {
         return $this->handler;
     }
@@ -107,7 +104,7 @@ class Client implements ClientInterface, ObservableClientInterface
      * @param HandlerInterface $handler
      * @return void
      */
-    public function setHandler(HandlerInterface $handler)
+    public function setHandler(HandlerInterface $handler) :void
     {
         $this->handler = $handler;
     }
