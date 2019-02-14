@@ -7,7 +7,7 @@ namespace Zicht\Bundle\SolrBundle\DependencyInjection;
 
 use Symfony\Component\Cache\Simple\ApcuCache;
 use Symfony\Component\Cache\Simple\ArrayCache;
-use Symfony\Component\Cache\Simple\FilesystemCache;
+use Symfony\Component\Cache\Simple\PhpFilesCache;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Definition;
@@ -34,7 +34,6 @@ class ZichtSolrExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
-        $loader->load('cache.xml');
         $loader->load('net.xml');
         $loader->load('services.xml');
         $loader->load('commands.xml');
@@ -49,7 +48,7 @@ class ZichtSolrExtension extends Extension
             case 'auto':
                 switch ($config['mapper']['cache']['name']) {
                     case 'file':
-                        $definition = new Definition(FilesystemCache::class, ['solr', 0, '%kernel.cache_dir%']);
+                        $definition = new Definition(PhpFilesCache::class, ['solr', 0, '%kernel.cache_dir%']);
                         break;
                     case 'array':
                         $definition = new Definition(ArrayCache::class, [0, false]);
@@ -58,9 +57,15 @@ class ZichtSolrExtension extends Extension
                         $definition = new Definition(ApcuCache::class, ['solr']);
                         break;
                 }
-                $container->setDefinition('zicht_solr.cache.default', $definition)->setPublic(false);
-                $cache = new Reference('zicht_solr.cache.default');
+                if (isset($definition)) {
+                    $container->setDefinition('zicht_solr.cache.default', $definition)->setPublic(false);
+                    $cache = new Reference('zicht_solr.cache.default');
+                }
                 break;
+        }
+
+        if (!isset($cache)) {
+            throw new \RuntimeException(sprintf('Failed to set cache for zicht_solr.mapper.document_metadata_factory with %s', var_export($config['mapper']['cache'], true)));
         }
 
         $container

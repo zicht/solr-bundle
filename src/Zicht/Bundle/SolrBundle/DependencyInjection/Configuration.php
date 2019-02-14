@@ -30,7 +30,7 @@ class Configuration implements ConfigurationInterface
                     ->addDefaultsIfNotSet()
                     ->children()
                         ->arrayNode('cache')
-                            ->defaultValue('file')
+                            ->addDefaultsIfNotSet()
                             ->info('This should be a service prefixed with @ or on of "file", "array", or "apcu" values.')
                             ->beforeNormalization()
                             ->ifString()
@@ -51,16 +51,19 @@ class Configuration implements ConfigurationInterface
                             ->children()
                                 ->enumNode('type')
                                     ->values(['service', 'auto'])
+                                    ->defaultValue('auto')
                                 ->end()
                                 ->scalarNode('name')
                                     ->isRequired()
+                                    ->defaultValue('file')
                                 ->end()
                             ->end()
                             ->validate()
                                 ->always(function($v) {
                                     if ('auto' === $v['type'] && !in_array($v['name'], ['file', 'array', 'apcu'])) {
-                                        throw new \RuntimeException('Invalid cache value,expected one of "file", "array" or "apcu" got ' . $v['name']);
+                                        throw new \InvalidArgumentException('Invalid cache value,expected one of "file", "array" or "apcu" got ' . $v['name']);
                                     }
+                                    return $v;
                                 })
                             ->end()
                         ->end()
