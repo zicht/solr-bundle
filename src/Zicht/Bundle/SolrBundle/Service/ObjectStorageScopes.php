@@ -35,6 +35,11 @@ final class ObjectStorageScopes
     const SCOPE_DOCUMENT_ID_GENERATOR = 'document.id_generator';
 
     /**
+     * used for registering an document listener (see @Zicht\Bundle\SolrBundle\Mapping\DocumentListener)
+     */
+    const SCOPE_DOCUMENT_LISTENER = 'document.listener';
+
+    /**
      * @return array
      */
     public static function getAllScopes()
@@ -42,7 +47,8 @@ final class ObjectStorageScopes
         return [
             self::SCOPE_MAPPING_MARSHALLER,
             self::SCOPE_MAPPING_REPOSITORY,
-            self::SCOPE_DOCUMENT_ID_GENERATOR ,
+            self::SCOPE_DOCUMENT_ID_GENERATOR,
+            self::SCOPE_DOCUMENT_LISTENER ,
         ];
     }
 }

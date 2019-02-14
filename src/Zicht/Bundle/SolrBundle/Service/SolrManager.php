@@ -129,9 +129,22 @@ class SolrManager
     public function map(DocumentMapperMetadata $meta, $entity)
     {
         $data = ['id' => $this->getDocumentId($meta, $entity)];
+        $events = $meta->getOption('events', []);
+
+        if (!empty($events['pre_map'])) {
+            foreach($events['pre_map'] as $class) {
+                $this->objectStorage->get($class, ObjectStorageScopes::SCOPE_DOCUMENT_LISTENER)->preMap($entity, $data);
+            }
+        }
 
         foreach ($meta->getMapping() as $mapping) {
             $mapping->append($entity, $data, $this->objectStorage);
+        }
+
+        if (!empty($events['post_map'])) {
+            foreach($events['post_map'] as $class) {
+                $this->objectStorage->get($class, ObjectStorageScopes::SCOPE_DOCUMENT_LISTENER)->postMap($entity, $data);
+            }
         }
 
         return $data;

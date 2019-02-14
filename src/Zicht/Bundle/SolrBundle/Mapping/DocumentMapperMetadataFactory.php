@@ -295,7 +295,17 @@ class DocumentMapperMetadataFactory
                 )
             ];
         }
-
+        /** @var DocumentListener $annotation */
+        if (null !== $annotation = $this->reader->getClassAnnotation($reflection, DocumentListener::class)) {
+            foreach ((array)$annotation->value as $class) {
+                if (is_a($class, PreMapInterface::class, true)) {
+                    $args[2]['events']['pre_map'][] = $class;
+                }
+                if (is_a($class, PostMapInterface::class, true)) {
+                    $args[2]['events']['post_map'][] = $class;
+                }
+            }
+        }
         return new DocumentMapperMetadata(...$args);
     }
 
@@ -311,7 +321,7 @@ class DocumentMapperMetadataFactory
         }
     }
 
-            /**
+    /**
      * @param \ReflectionClass $reflectionClass
      * @param DocumentMapperMetadata $mapper
      */

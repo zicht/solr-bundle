@@ -6,6 +6,7 @@
 
 namespace Zicht\Bundle\SolrBundle\Command;
 
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableCell;
@@ -13,8 +14,8 @@ use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Helper\TableStyle;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadata;
 use Zicht\Bundle\SolrBundle\Mapping\IdGeneratorDefault;
 use Zicht\Bundle\SolrBundle\Mapping\MethodMergeMapper;
@@ -28,16 +29,21 @@ class EntityInspectCommand extends Command
 {
     /** @var SolrManager */
     private $manager;
+    /** @var Registry  */
+    private $doctrine;
+    /** @var object|null  */
+    private $entity;
 
     /**
      * EntityInspectCommand constructor.
      *
      * @param SolrManager $manager
      */
-    public function __construct(SolrManager $manager)
+    public function __construct(SolrManager $manager, Registry $doctrine)
     {
         parent::__construct();
         $this->manager = $manager;
+        $this->doctrine = $doctrine;
     }
 
 
@@ -49,7 +55,28 @@ class EntityInspectCommand extends Command
         $this
             ->setName('zicht:solr:inspect-entity')
             ->addArgument('entity', InputArgument::REQUIRED)
+            ->addOption('dump', 'd', InputOption::VALUE_NONE, 'Create a mapping and dump the result')
+            ->addOption('id', 'i', InputOption::VALUE_REQUIRED, 'Id to print')
             ->setDescription('Print debug mapping information from the given entity');
+    }
+
+    /**
+     * @{inheritDoc}
+     */
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
+        parent::initialize($input, $output);
+        if ($input->getOption('dump') || $input->getOption('id')) {
+            $query = sprintf('SELECT p FROM %s p ', $input->getArgument('entity'));
+            if (null !== $id = $input->getOption('id')) {
+                $query .= 'WHERE p.id = ' . $id;
+            } else {
+                $query .= 'ORDER BY RAND()';
+            }
+            $query = $this->doctrine->getManager()->createQuery($query);
+            $query->setMaxResults(1);
+            $this->entity = $query->getSingleResult();
+        }
     }
 
     /**
@@ -67,6 +94,25 @@ class EntityInspectCommand extends Command
         $this->renderOptions($meta, $table);
         $table->setStyle($this->getTableStyle());
         $table->render();
+
+        if (null !== $this->entity) {
+            $output->writeln('');
+            $output->writeln(sprintf('<fg=cyan;options=bold>ENTITY DUMP(%d)</>', $this->entity->getId()));
+            $data = $this->manager->map($meta, $this->entity);
+            $table = new Table($output);
+            $table->setHeaders(['name', 'value']);
+            foreach ($data as $name => $value) {
+                if (is_array($value)) {
+                    $value = sprintf('[%s]', implode(', ', $value));
+                }
+                if (strlen($value) > 90) {
+                    $value = substr($value, 0, 90) . '...';
+                }
+                $table->addRow([$name, $value]);
+            }
+            $table->setStyle($this->getTableStyle());
+            $table->render();
+        }
     }
 
     /**
@@ -161,6 +207,17 @@ class EntityInspectCommand extends Command
                 case 'child_inheritance':
                     $table->addRow(['child_inheritance', ($option) ? 'yes' : 'no']);
                     break;
+            }
+        }
+
+        if (null !== $events = $meta->getOption('events')) {
+            $table->addRow(new TableSeparator());
+            foreach ($events as $name => $class) {
+                $table->addRow([new TableCell('<fg=cyan;options=bold>events_' . $name . '</>', ['colspan' => 2])]);
+                $table->addRow(new TableSeparator());
+                foreach ($class as $className) {
+                    $table->addRow([new TableCell($className, ['colspan' => 2])]);
+                }
             }
         }
 

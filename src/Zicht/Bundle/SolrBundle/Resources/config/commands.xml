@@ -33,7 +33,7 @@
 
         <service id="zicht_solr.command.inspect_entity" class="Zicht\Bundle\SolrBundle\Command\EntityInspectCommand">
             <argument type="service" id="zicht_solr.manager" />
-            <argument type="service" id="event_dispatcher" />
+            <argument type="service" id="doctrine" />
             <tag name="console.command"/>
         </service>
 
