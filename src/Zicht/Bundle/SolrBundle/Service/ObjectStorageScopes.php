@@ -40,6 +40,11 @@ final class ObjectStorageScopes
     const SCOPE_DOCUMENT_LISTENER = 'document.listener';
 
     /**
+     * used for registering document field transformers (see @Zicht\Bundle\SolrBundle\Mapping\TransformInterface)
+     */
+    const SCOPE_MAPPING_FIELD_TRANSFORMER = 'mapping.field.transformer';
+
+    /**
      * @return array
      */
     public static function getAllScopes()
@@ -49,6 +54,7 @@ final class ObjectStorageScopes
             self::SCOPE_MAPPING_REPOSITORY,
             self::SCOPE_DOCUMENT_ID_GENERATOR,
             self::SCOPE_DOCUMENT_LISTENER ,
+            self::SCOPE_MAPPING_FIELD_TRANSFORMER ,
         ];
     }
 }

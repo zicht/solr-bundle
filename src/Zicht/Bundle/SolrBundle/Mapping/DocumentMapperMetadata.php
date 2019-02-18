@@ -267,8 +267,12 @@ class DocumentMapperMetadata
      */
     public function addTransformer($name, $transformer, $weight = 0)
     {
-        if (!is_a($transformer, TransformInterface::class)) {
+        if (!is_a($transformer, TransformInterface::class, true)) {
             throw new InvalidArgumentException(sprintf('Expected "%s" to implement "%s"', $transformer, TransformInterface::class));
+        }
+
+        if (isset($this->transformers[$weight][$name]) && in_array($transformer, (array)$this->transformers[$weight][$name])) {
+            return;
         }
 
         $dirty = !isset($this->transformers[$weight]);

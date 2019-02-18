@@ -103,12 +103,27 @@ class EntityInspectCommand extends Command
             $table->setHeaders(['name', 'value']);
             foreach ($data as $name => $value) {
                 if (is_array($value)) {
-                    $value = sprintf('[%s]', implode(', ', $value));
+                    $nl = false;
+                    foreach ($value as &$v) {
+                        if (strlen($v) > 90) {
+                            $v = substr($v, 0, 90) . '...';
+                            $nl = true;
+                        }
+                    }
+                    if ($nl) {
+                        $value = var_export($value, true);
+                    } else {
+                        $value = '[' . implode(', ', $value) . ']';
+                    }
+                } else {
+                    if (strlen($value) > 90) {
+                        $value = substr($value, 0, 90) . '...';
+                    }
                 }
-                if (strlen($value) > 90) {
-                    $value = substr($value, 0, 90) . '...';
+                if (is_bool($value)) {
+                    $value = ($value) ? 'true' : 'false';
                 }
-                $table->addRow([$name, $value]);
+                $table->addRow([$name, (string)$value]);
             }
             $table->setStyle($this->getTableStyle());
             $table->render();

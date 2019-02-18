@@ -130,6 +130,7 @@ class SolrManager
     {
         $data = ['id' => $this->getDocumentId($meta, $entity)];
         $events = $meta->getOption('events', []);
+        $transformers = $this->getTransFormers($meta);
 
         if (!empty($events['pre_map'])) {
             foreach($events['pre_map'] as $class) {
@@ -141,6 +142,14 @@ class SolrManager
             $mapping->append($entity, $data, $this->objectStorage);
         }
 
+        foreach ($data as $name => &$value) {
+            if (array_key_exists($name, $transformers)) {
+                foreach ($transformers[$name] as $transformer) {
+                    $value = $transformer($value);
+                }
+            }
+        }
+
         if (!empty($events['post_map'])) {
             foreach($events['post_map'] as $class) {
                 $this->objectStorage->get($class, ObjectStorageScopes::SCOPE_DOCUMENT_LISTENER)->postMap($entity, $data);
@@ -148,6 +157,21 @@ class SolrManager
         }
 
         return $data;
+    }
+
+    /**
+     * @param DocumentMapperMetadata $meta
+     * @return array
+     */
+    private function getTransFormers(DocumentMapperMetadata $meta)
+    {
+        $ret = [];
+        foreach ($meta->getTransformers() as $property => $classes) {
+            foreach ($classes as $className) {
+                $ret[$property][] = $this->objectStorage->get($className, ObjectStorageScopes::SCOPE_MAPPING_FIELD_TRANSFORMER);
+            }
+        }
+        return $ret;
     }
 
     /**
