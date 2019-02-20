@@ -297,13 +297,23 @@ class DocumentMapperMetadataFactory
         }
         /** @var DocumentListener $annotation */
         if (null !== $annotation = $this->reader->getClassAnnotation($reflection, DocumentListener::class)) {
+            $events = [];
             foreach ((array)$annotation->value as $class) {
                 if (is_a($class, PreMapInterface::class, true)) {
-                    $args[2]['events']['pre_map'][] = $class;
+                    $events['pre_map'][] = $class;
                 }
                 if (is_a($class, PostMapInterface::class, true)) {
-                    $args[2]['events']['post_map'][] = $class;
+                    $events['post_map'][] = $class;
                 }
+                if (is_a($class, PostSolrDeleteInterface::class, true)) {
+                    $events['post_solr_delete'][] = $class;
+                }
+                if (is_a($class, PostSolrUpdateInterface::class, true)) {
+                    $events['post_solr_update'][] = $class;
+                }
+            }
+            if (!empty($events)) {
+                $args[2]['events'] = $events;
             }
         }
         return new DocumentMapperMetadata(...$args);

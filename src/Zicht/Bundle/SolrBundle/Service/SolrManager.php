@@ -5,11 +5,15 @@
  */
 namespace Zicht\Bundle\SolrBundle\Service;
 
+use Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Zicht\Bundle\SolrBundle\Event\MapEvent;
+use Zicht\Bundle\SolrBundle\Event\SolrUpdateEvent;
+use Zicht\Bundle\SolrBundle\Events;
 use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadata;
 use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadataFactory;
 use Zicht\Bundle\SolrBundle\Mapping\DocumentRepositoryInterface;
 use Zicht\Bundle\SolrBundle\Mapping\IdGeneratorDefault;
-use Zicht\Bundle\SolrBundle\Mapping\PropertyValueTrait;
 use Zicht\Bundle\SolrBundle\QueryBuilder\Update;
 
 /**
@@ -18,8 +22,6 @@ use Zicht\Bundle\SolrBundle\QueryBuilder\Update;
  */
 class SolrManager
 {
-    use PropertyValueTrait;
-
     /** @var bool */
     private $enabled = true;
     /** @var SolrClient  */
@@ -28,15 +30,18 @@ class SolrManager
     private $documentMetadataFactory;
     /** @var ObjectStorage */
     private $objectStorage;
+    /** @var EventDispatcherInterface  */
+    private $dispatcher;
 
     /**
      * @param SolrClient $client
      * @param DocumentMapperMetadataFactory $documentMetadataFactory
      * @param ObjectStorage|null $objectStorage
      */
-    public function __construct(SolrClient $client, DocumentMapperMetadataFactory $documentMetadataFactory, ObjectStorage $objectStorage = null)
+    public function __construct(SolrClient $client, DocumentMapperMetadataFactory $documentMetadataFactory, ObjectStorage $objectStorage = null, EventDispatcherInterface $dispatcher)
     {
         $this->client = $client;
+        $this->dispatcher = $dispatcher;
         $this->objectStorage = $objectStorage ?: new ObjectStorage();
         $this->documentMetadataFactory = $documentMetadataFactory;
     }
@@ -86,14 +91,9 @@ class SolrManager
         }
         $update = new Update();
         foreach ($entities as $entity) {
-            $meta = $this->getDocumentMapperMetadata($entity);
-            if (!$meta->isActive()) {
-                continue;
-            }
-            $update->deleteOne($this->getDocumentId($meta, $entity));
+            $this->removeEntity($update, $entity);
         }
-        $update->commit();
-        $this->client->update($update);
+        $this->persis($update);
         return true;
     }
 
@@ -110,15 +110,51 @@ class SolrManager
         }
         $update = new Update();
         foreach ($entities as $entity) {
-            $meta = $this->getDocumentMapperMetadata($entity);
-            if (!$meta->isActive()) {
-                continue;
-            }
-            $update->add($this->map($meta, $entity), $meta->getParams());
+            $this->updateEntity($update, $entity);
         }
+        $this->persis($update);
+        return true;
+    }
+
+    /**
+     * @param Update $update
+     * @param object $entity
+     */
+    public function updateEntity(Update $update, $entity)
+    {
+        $meta = $this->getDocumentMapperMetadata($entity);
+
+        if (!$meta->isActive()) {
+            return;
+        }
+
+        $update->add($this->marshall($meta, $entity), $meta->getParams());
+        $this->dispatchSolrEvents($update, $meta, $entity, Events::SOLR_POST_UPDATE, 'post_solr_update');
+    }
+
+    /**
+     * @param Update $update
+     * @param object $entity
+     */
+    public function removeEntity(Update $update, $entity)
+    {
+        $meta = $this->getDocumentMapperMetadata($entity);
+
+        if (!$meta->isActive()) {
+            return;
+        }
+
+        $update->deleteOne($this->getDocumentId($meta, $entity));
+        $this->dispatchSolrEvents($update, $meta, $entity, Events::SOLR_POST_DELETE, 'post_solr_delete');
+    }
+
+    /**
+     * @param Update $update
+     */
+    public function persis(Update $update)
+    {
         $update->commit();
         $this->client->update($update);
-        return true;
     }
 
     /**
@@ -126,17 +162,10 @@ class SolrManager
      * @param object $entity
      * @return array
      */
-    public function map(DocumentMapperMetadata $meta, $entity)
+    private function marshall(DocumentMapperMetadata $meta, $entity)
     {
-        $data = ['id' => $this->getDocumentId($meta, $entity)];
-        $events = $meta->getOption('events', []);
         $transformers = $this->getTransFormers($meta);
-
-        if (!empty($events['pre_map'])) {
-            foreach($events['pre_map'] as $class) {
-                $this->objectStorage->get($class, ObjectStorageScopes::SCOPE_DOCUMENT_LISTENER)->preMap($entity, $data);
-            }
-        }
+        $data = $this->dispatchMappingEvents(['id' => $this->getDocumentId($meta, $entity)], $meta, $entity, Events::DOCUMENT_MAPPING_PRE, 'pre_map');
 
         foreach ($meta->getMapping() as $mapping) {
             $mapping->append($entity, $data, $this->objectStorage);
@@ -150,13 +179,63 @@ class SolrManager
             }
         }
 
-        if (!empty($events['post_map'])) {
-            foreach($events['post_map'] as $class) {
-                $this->objectStorage->get($class, ObjectStorageScopes::SCOPE_DOCUMENT_LISTENER)->postMap($entity, $data);
+        $data = $this->dispatchMappingEvents($data, $meta, $entity, Events::DOCUMENT_MAPPING_POST, 'post_map');
+
+        return $data;
+    }
+
+    /**
+     * @param array $data
+     * @param DocumentMapperMetadata $meta
+     * @param object $entity
+     * @param string $eventName
+     * @param string  $key
+     *
+     * @return array
+     */
+    private function dispatchMappingEvents(array $data, DocumentMapperMetadata $meta, $entity, $eventName, $key)
+    {
+        return $this->dispatchEvents(new MapEvent($data, $entity, $meta), $eventName, $meta, $key)->getData();
+    }
+
+    /**
+     * @param Update $update
+     * @param DocumentMapperMetadata $meta
+     * @param object $entity
+     * @param string $eventName
+     * @param string $key
+     */
+    private function dispatchSolrEvents(Update $update, DocumentMapperMetadata $meta, $entity, $eventName, $key)
+    {
+        $this->dispatchEvents(new SolrUpdateEvent($update, $entity), $eventName, $meta, $key);
+    }
+
+    /**
+     * @param Event $event
+     * @param string $eventName
+     * @param DocumentMapperMetadata $meta
+     * @param string $key
+     *
+     * @return Event
+     */
+    private function dispatchEvents(Event $event, $eventName, DocumentMapperMetadata $meta, $key)
+    {
+        $method = str_replace('_', '', ucwords($key, '_'));
+
+        if ($this->dispatcher->hasListeners($eventName)) {
+            $event = $this->dispatcher->dispatch($eventName, $event);
+        }
+
+        if ((null !== $events = $meta->getOption('events')) && isset($events[$key])) {
+            foreach ((array)$events[$key] as $class) {
+                $this->objectStorage->get($class, ObjectStorageScopes::SCOPE_DOCUMENT_LISTENER)->{$method}($event);
+                if ($event->isPropagationStopped()) {
+                    break;
+                }
             }
         }
 
-        return $data;
+        return $event;
     }
 
     /**
@@ -203,13 +282,5 @@ class SolrManager
     public function setEnabled($enabled)
     {
         $this->enabled = $enabled;
-    }
-
-    /**
-     * @return SolrClient
-     */
-    public function getClient()
-    {
-        return $this->client;
     }
 }

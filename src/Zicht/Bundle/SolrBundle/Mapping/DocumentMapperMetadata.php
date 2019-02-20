@@ -43,7 +43,9 @@ class DocumentMapperMetadata
     {
         $this->className = $className;
         $this->options = $options;
-        $this->setRepository($repository);
+        if ($repository !== null) {
+            $this->setRepository($repository);
+        }
     }
 
     /**
@@ -120,7 +122,7 @@ class DocumentMapperMetadata
      */
     public function setRepository($repository)
     {
-        if (is_a($repository, DocumentRepositoryInterface::class, true)) {
+        if (!is_a($repository, DocumentRepositoryInterface::class, true)) {
             throw new InvalidArgumentException(sprintf('Expected "%s" to implement "%s"', $repository, DocumentRepositoryInterface::class));
         }
 

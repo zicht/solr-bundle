@@ -94,24 +94,43 @@ class EntityInspectCommand extends Command
         $this->renderOptions($meta, $table);
         $table->setStyle($this->getTableStyle());
         $table->render();
+        $this->dumpEntity($meta, $output);
+    }
 
+    /**
+     * @param DocumentMapperMetadata $meta
+     * @param OutputInterface $output
+     */
+    private function dumpEntity(DocumentMapperMetadata $meta, OutputInterface $output)
+    {
         if (null !== $this->entity) {
             $output->writeln('');
             $output->writeln(sprintf('<fg=cyan;options=bold>ENTITY DUMP(%d)</>', $this->entity->getId()));
-            $data = $this->manager->map($meta, $this->entity);
+            $method = new \ReflectionMethod($this->manager, 'marshall');
+            $method->setAccessible(true);
+            $data = $method->invoke($this->manager, $meta, $this->entity);
             $table = new Table($output);
             $table->setHeaders(['name', 'value']);
+            $fmt = function(&$v) {
+                $v = preg_replace('/(\s{2,}|\n)/', '', strip_tags(htmlentities(nl2br($v), ENT_QUOTES | ENT_IGNORE, "UTF-8")));
+            };
             foreach ($data as $name => $value) {
                 if (is_array($value)) {
                     $nl = false;
                     foreach ($value as &$v) {
+                        $fmt($v);
                         if (strlen($v) > 90) {
                             $v = substr($v, 0, 90) . '...';
                             $nl = true;
                         }
                     }
                     if ($nl) {
-                        $value = var_export($value, true);
+                        $out = "[\n";
+                        foreach ($value as $v) {
+                            $out .= "  '$v',\n";
+                        }
+                        $out .= "]";
+                        $value = $out;
                     } else {
                         $value = '[' . implode(', ', $value) . ']';
                     }

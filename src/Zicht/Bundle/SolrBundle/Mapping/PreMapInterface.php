@@ -7,11 +7,10 @@ declare(strict_types=1);
 
 namespace Zicht\Bundle\SolrBundle\Mapping;
 
+use Zicht\Bundle\SolrBundle\Event\MapEvent;
+
 interface PreMapInterface
 {
-    /**
-     * @param object $object
-     * @param array $map
-     */
-    public function preMap($object, array &$map) :void;
+    /** @param MapEvent $event */
+    public function preMap(MapEvent $event) :void;
 }

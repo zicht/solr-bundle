@@ -33,4 +33,12 @@ interface DocumentRepositoryInterface
      * @return int
      */
     public function getDocumentsCount($limit = null, $offset = null);
+
+    /**
+     * free all or given object(s) from memory
+     *
+     * @param null|object $object
+     * @return void
+     */
+    public function free($object = null);
 }

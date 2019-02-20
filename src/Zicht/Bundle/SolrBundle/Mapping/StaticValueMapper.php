@@ -41,6 +41,6 @@ class StaticValueMapper extends AbstractMapper
      */
     public function __toString()
     {
-        return $this->value;
+        return (is_string($this->value)) ? $this->value : var_export($this->value, true);
     }
 }

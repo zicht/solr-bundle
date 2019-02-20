@@ -33,12 +33,54 @@ final class Events
     const METADATA_POST_BUILD_ENTITIES_LIST = 'solr.metadata_post_build_entities_list';
 
     /**
-     * @param \Zicht\Bundle\SolrBundle\Event\MetadataPostBuildEntitiesListEvent $event.
+     * will be dispatched before the request is give to the handler to send
+     * and an be used to alter the request.
+     *
+     * @param \Zicht\Bundle\SolrBundle\Event\HttpClientRequestEvent $event.
      */
     const HTTP_CLIENT_REQUEST = 'http.client_request';
 
     /**
-     * @param \Zicht\Bundle\SolrBundle\Event\MetadataPostBuildEntitiesListEvent $event.
+     * will be dispatched after request is send and can be used to alter
+     * or check the response.
+     *
+     * @param \Zicht\Bundle\SolrBundle\Event\HttpClientResponseEvent $event.
      */
     const HTTP_CLIENT_RESPONSE = 'net.client_response';
+
+    /**
+     * this event can be used to add dynamic fields names to the solr
+     * document or when a bit more control is needed for the document
+     * mapping.
+     *
+     * @param \Zicht\Bundle\SolrBundle\Event\MapEvent $event.
+     */
+    const DOCUMENT_MAPPING_PRE = 'solr.document_mapping.pre';
+
+    /**
+     * this event is can be used to the same as DOCUMENT_MAPPING_PRE
+     * but because it is afgter the mapping it can also be used to
+     * alter the dynamic mappings.
+     *
+     * @param \Zicht\Bundle\SolrBundle\Event\MapEvent $event.
+     */
+    const DOCUMENT_MAPPING_POST = 'solr.document_mapping.post';
+
+    /**
+     * this event will be fired after the `updateEntity` call
+     * when an entity is added to the update query and can be
+     * used to add extra data to the query builder
+     *
+     * @param \Zicht\Bundle\SolrBundle\Event\SolrUpdateEvent $event.
+     */
+    const SOLR_POST_UPDATE = 'solr.post_update';
+
+    /**
+     * this event will be fired after the `removeEntity` call
+     * when an entity is added to the update query and can be
+     * used to add extra data to the query builder
+     *
+     * @param \Zicht\Bundle\SolrBundle\Event\SolrUpdateEvent $event.
+     */
+    const SOLR_POST_DELETE = 'solr.post_delete';
 }

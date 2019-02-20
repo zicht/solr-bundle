@@ -7,11 +7,10 @@ declare(strict_types=1);
 
 namespace Zicht\Bundle\SolrBundle\Mapping;
 
+use Zicht\Bundle\SolrBundle\Event\MapEvent;
+
 interface PostMapInterface
 {
-    /**
-     * @param object $object
-     * @param array $map
-     */
-    public function postMap($object, array &$map) :void;
+    /** @param MapEvent $event */
+    public function postMap(MapEvent $event) :void;
 }

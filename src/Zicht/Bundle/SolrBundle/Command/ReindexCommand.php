@@ -155,13 +155,13 @@ class ReindexCommand extends Command
             $progress->display();
 
             foreach ($repos->getDocuments($limit, $offset) as $record) {
-                $manager->detach($record);
                 $progress->advance(1);
                 $index++;
-                $update->add($this->solrManager->map($meta, $record));
+                $this->solrManager->updateEntity($update, $record);
+                $repos->free($record);
                 if ($index > 0 && 0 === $index % $batch) {
                     $update->commit();
-                    $this->solrManager->getClient()->update($update);
+                    $this->solrManager->persis($update);
                     $update->reset();
                 }
             }
@@ -173,7 +173,7 @@ class ReindexCommand extends Command
 
         if (0 !== $index % $batch) {
             $update->commit();
-            $this->solrManager->getClient()->update($update);
+            $this->solrManager->persis($update);
         }
 
         $output->writeln(sprintf('Total time: %.02fs, Peak mem usage: %.02fMB', microtime(true)-$start, memory_get_peak_usage()/1024/1024));

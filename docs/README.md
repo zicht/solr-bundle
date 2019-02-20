@@ -7,7 +7,7 @@
 5. [Http](#http)
 6. [Annotations](#annotations)
 7. [Events](#)
-7. [Events Listeners](#)
+8. [Events Listeners](#)
 
 ## Installing
 
@@ -50,17 +50,12 @@ zicht_solr:
         # "Doctrine\ORM\Mapping\NamingStrategy" and will be used 
         # for generating the solr field then no name is provided
         naming_strategy:      doctrine.orm.naming_strategy.underscore
-    scheme:               http
-    port:                 8983
-    host:                 ~
-    path:                 /solr
-    core:                 ~
-    uri:                  null
 
+    uri:
 
 ```  
 
-The config now support one uri instead of defining all components separate. It still support the old config but will transform this to the new uri format to keep BC.
+The config now support one uri instead of defining all components separate. It dropped the support the old config.
 
 So the old way was to define an host like:
 
@@ -72,7 +67,7 @@ zicht_solr:
     core:                 example
 ``` 
 
-This could be replaced by:
+This should be replaced by:
 
 ```
 zicht_solr:
@@ -184,7 +179,7 @@ zicht_solr:
 
 This bundle comes with an light http client (with no hard dependencies) what is build around the [PSR-7](https://www.php-fig.org/psr/psr-7) and uses the [fsockopen](http://php.net/manual/en/function.fsockopen.php) as transport layer but you could easily create handlers for curl etc.
 
-At the moment there is no client/request-factory psr so whe using the [Zicht\Http\ClientInterface](../src/Zicht/Http/ClientInterface.php) and that is for now an hard dependency in the solr bundle and should be easly bridged to for example to guzzle. 
+Wwe are using the [Zicht\Http\ClientInterface](../src/Zicht/Http/ClientInterface.php) and that is for now an hard dependency in the solr bundle and should be easly bridged to for example to guzzle. 
 
 ## Annotations
 
