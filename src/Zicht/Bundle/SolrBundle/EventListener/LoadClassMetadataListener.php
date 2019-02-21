@@ -3,6 +3,8 @@
  * @author    Philip Bergman <philip@zicht.nl>
  * @copyright Zicht Online <http://www.zicht.nl>
  */
+declare(strict_types=1);
+
 namespace Zicht\Bundle\SolrBundle\EventListener;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -19,36 +21,46 @@ class LoadClassMetadataListener
 {
     /** @var DocumentMapperMetadataFactory  */
     private $factory;
-    /** @var array  */
-    private $events = [
-        Events::postPersist,
-        Events::preUpdate,
-        Events::preRemove
-    ];
+    /** @var string */
+    private $listener;
 
     /**
      * LoadClassMetadataListener constructor.
      *
      * @param DocumentMapperMetadataFactory $factory
+     * @param string $listener
      */
-    public function __construct(DocumentMapperMetadataFactory $factory)
+    public function __construct(DocumentMapperMetadataFactory $factory, $listener = EntityListener::class)
     {
         $this->factory = $factory;
+        $this->listener = $listener;
     }
 
     /**
      * @param LoadClassMetadataEventArgs $args
      */
-    public function loadClassMetadata(LoadClassMetadataEventArgs $args)
+    public function loadClassMetadata(LoadClassMetadataEventArgs $args) :void
     {
         $metadata = $args->getClassMetadata();
         if ($this->factory->support($metadata->getReflectionClass()->getName())) {
-            foreach ($this->events as $event) {
+            foreach ($this->getEvent() as $event) {
                 if (false === $this->hasEventListenerFor($event, $metadata)) {
-                    $metadata->addEntityListener($event, EntityListener::class, $event);
+                    $metadata->addEntityListener($event, $this->listener, $event);
                 }
             }
         }
+    }
+
+    /**
+     * @return array
+     */
+    protected function getEvent() :array
+    {
+        return [
+            Events::postPersist,
+            Events::preUpdate,
+            Events::preRemove
+        ];
     }
 
     /**
@@ -56,11 +68,12 @@ class LoadClassMetadataListener
      * @param ClassMetadata $metadata
      * @return bool
      */
-    protected function hasEventListenerFor($event, ClassMetadata $metadata)
+    private function hasEventListenerFor($event, ClassMetadata $metadata) :bool
     {
         if (!isset($metadata->entityListeners[$event])) {
             return false;
         }
-        return in_array(EntityListener::class, array_column($metadata->entityListeners[$event], 'class'));
+
+        return in_array($this->listener, array_column($metadata->entityListeners[$event], 'class'));
     }
 }
