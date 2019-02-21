@@ -40,6 +40,7 @@
         <service id="zicht_solr.command.reindex" class="Zicht\Bundle\SolrBundle\Command\ReindexCommand">
             <argument type="service" id="zicht_solr.manager" />
             <argument type="service" id="doctrine" />
+            <argument type="service" id="zicht_solr.http.client" />
             <tag name="console.command"/>
         </service>
 

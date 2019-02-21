@@ -240,14 +240,18 @@ class DocumentMapperMetadataFactory
                     }
                 }
             }
+            $reflections = [];
             do {
+                $reflections[] = $reflection;
+            } while ($reflection = $reflection->getParentClass());
+            // start for first to last so we get the latest values
+            foreach (array_reverse($reflections) as $reflection) {
                 $this->readDocumentIdGenerator($reflection, $metadata);
                 $this->readParams($reflection, $metadata);
                 $this->readStaticFields($reflection, $metadata);
                 $this->readProperties($reflection, $metadata);
                 $this->readMethods($reflection, $metadata);
-            } while ($reflection = $reflection->getParentClass());
-
+            }
             if ($this->eventDispatcher->hasListeners(Events::METADATA_LOAD_DOCUMENT_MAPPER)) {
                 $this->eventDispatcher->dispatch(Events::METADATA_LOAD_DOCUMENT_MAPPER, new MetadataLoadDocumentMapperEvent($metadata));
             }
@@ -416,20 +420,20 @@ class DocumentMapperMetadataFactory
                             } else {
                                 $mapper->addMapping(new PropertyValueMapper($name, $property->class, $property->name));
                             }
-                            break;
-                        case Column::class:
-                            foreach ($mapper->getOption('transformers', []) as $transformer => list($weight, $pattern)) {
-                                if (preg_match($pattern, $annotation->type)) {
-                                    $mapper->addTransformer($this->getName($annotation->name, $property->name), $transformer, $weight);
+                            /** @var Column $column */
+                            if (null !== $column = $this->reader->getPropertyAnnotation($property, Column::class)) {
+                                foreach ($mapper->getOption('transformers', []) as $transformer => list($weight, $pattern)) {
+                                    if (preg_match($pattern, $column->type)) {
+                                        $mapper->addTransformer($name, $transformer, $weight);
+                                    }
                                 }
                             }
+
                             break;
                         default:
-                            /**
-                             * Check for transformer annotations on an field, this can be
-                             * global defined and match column type or an annotation that
-                             * also implements the TransformInterface.
-                             */
+                            // Check for transformer annotations on an field, this can be
+                            // global defined and match column type or an annotation that
+                            // also implements the TransformInterface.
                             if ($annotation instanceof TransformInterface) {
                                 if ($annotation instanceof TransformerWeightInterface) {
                                     $mapper->addTransformer($property->name, $annotation, $annotation->getWeight());

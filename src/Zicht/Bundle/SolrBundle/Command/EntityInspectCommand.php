@@ -163,22 +163,25 @@ class EntityInspectCommand extends Command
         $table->addRow(new TableSeparator());
         $table->addRow([new TableCell('<fg=cyan;options=bold>Field mapping</>', ['colspan' => 2])]);
         $table->addRow(new TableSeparator());
-
-        foreach ($meta->getMapping() as $mapper) {
+        $mappings = $meta->getMapping();
+        usort($mappings, function($a, $b) {
+            if ($a->getName() == $b->getName()) {
+                return 0;
+            }
+            return ($a->getName() < $b->getName()) ? -1 : 1;
+        });
+        foreach ($mappings as $mapper) {
             if ($mapper instanceof MethodMergeMapper) {
                 $table->addRow(['...', (string)$mapper]);
             } else {
                 $table->addRow([$mapper->getName(), (string)$mapper]);
             }
         }
-
         $transformers = array_keys(iterator_to_array($meta->getTransformers()));
-
         if (count($transformers) > 0) {
             $table->addRow(new TableSeparator());
             $table->addRow([new TableCell('<fg=cyan;options=bold>Field Transformers</>', ['colspan' => 2])]);
             $table->addRow(new TableSeparator());
-
             foreach ($transformers as $name) {
                 foreach ($meta->getTransformers($name) as $list) {
                     foreach ($list as $transformer) {

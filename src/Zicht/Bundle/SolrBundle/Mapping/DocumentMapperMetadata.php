@@ -73,7 +73,7 @@ class DocumentMapperMetadata
      */
     public function addMapping(MapperInterface $mapping)
     {
-        $this->mapping[] = $mapping;
+        $this->mapping[$mapping->getName()] = $mapping;
         return $this;
     }
 
@@ -83,12 +83,7 @@ class DocumentMapperMetadata
      */
     public function hasMapping($name)
     {
-        foreach ($this->mapping as $mapping) {
-            if ($name === $mapping->getName()) {
-                return true;
-            }
-        }
-        return false;
+        return isset($this->mapping[$name]);
     }
 
     /**

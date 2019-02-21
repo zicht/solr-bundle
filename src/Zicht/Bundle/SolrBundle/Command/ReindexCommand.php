@@ -20,6 +20,9 @@ use Zicht\Bundle\SolrBundle\Mapping\DocumentRepositoryInterface;
 use Zicht\Bundle\SolrBundle\Doctrine\ORM\EntityRepositoryWrapper;
 use Zicht\Bundle\SolrBundle\QueryBuilder\Update;
 use Zicht\Bundle\SolrBundle\Service\SolrManager;
+use Zicht\Http\ClientInterface;
+use Zicht\Http\Handler\HandlerDebugInterface;
+use Zicht\Http\Stream\ResourceStream;
 
 /**
  * Reindex a specified repository or entity in SOLR
@@ -32,6 +35,8 @@ class ReindexCommand extends Command
     private $solrManager;
     /** @var Registry  */
     private $doctrine;
+    /** @var ClientInterface  */
+    private $client;
 
     /**
      * Setup the reindex command
@@ -39,12 +44,13 @@ class ReindexCommand extends Command
      * @param SolrManager $solrManager
      * @param Registry $doctrine
      */
-    public function __construct(SolrManager $solrManager, Registry $doctrine)
+    public function __construct(SolrManager $solrManager, Registry $doctrine, ClientInterface $client)
     {
         parent::__construct();
 
         $this->solrManager = $solrManager;
         $this->doctrine = $doctrine;
+        $this->client = $client;
     }
 
     /**
@@ -60,7 +66,8 @@ class ReindexCommand extends Command
             ->addOption('offset', 'o', InputArgument::OPTIONAL | InputOption::VALUE_REQUIRED, 'The OFFSET clause to facilitate paging (chunks) of indexing (offset to start the chunk at)')
             ->addOption('batch-size', 'b', InputArgument::OPTIONAL | InputOption::VALUE_REQUIRED, 'The batch size when to flush solr.', 200)
             ->addOption('no-children', '', InputOption::VALUE_NONE, 'This will when no entities provided only reindex the parent entities.')
-            ->addOption('debug', '', InputOption::VALUE_NONE, 'Debug: i.e. don\'t catch exceptions while indexing')
+            ->addOption('no-progress', '', InputOption::VALUE_NONE, 'Disable progressbar.')
+            ->addOption('print-sql', '', InputOption::VALUE_NONE, 'Print the doctrine sql')
             ->setDescription('Reindexes entities in the SOLR index');
     }
 
@@ -80,11 +87,19 @@ class ReindexCommand extends Command
             $this->entities = array_merge($this->entities, ...array_filter(array_map([$metadataFactory, 'getChildrenOf'], $this->entities)));
         }
 
-        if ($input->getOption('debug')) {
+        if ($input->getOption('print-sql')) {
             $this->doctrine
                 ->getConnection()
                 ->getConfiguration()
                 ->setSQLLogger(new EchoSQLLogger());
+        }
+
+        if (($handler = $this->client->getHandler()) && $handler instanceof HandlerDebugInterface) {
+            if ($output->isDebug()) {
+                $handler->setDebug(new ResourceStream(fopen('php://output', 'r+')));
+            } else {
+                $handler->setDebug(false);
+            }
         }
     }
 
@@ -115,6 +130,8 @@ class ReindexCommand extends Command
         $limit = $input->getOption('limit');
         $offset = $input->getOption('offset');
         $batch =  $input->getOption('batch-size');
+        $isProgress = !$input->getOption('no-progress');
+
         $index = 0;
         $update = new Update();
 
@@ -151,11 +168,15 @@ class ReindexCommand extends Command
                 $output->writeln('Reindexing records...');
             }
 
-            $progress = new ProgressBar($output, $total);
-            $progress->display();
+            if ($isProgress) {
+                $progress = new ProgressBar($output, $total);
+                $progress->display();
+            }
 
             foreach ($repos->getDocuments($limit, $offset) as $record) {
-                $progress->advance(1);
+                if ($isProgress) {
+                    $progress->advance(1);
+                }
                 $index++;
                 $this->solrManager->updateEntity($update, $record);
                 $repos->free($record);
@@ -165,9 +186,10 @@ class ReindexCommand extends Command
                     $update->reset();
                 }
             }
-
-            $progress->finish();
-            $progress->clear();
+            if ($isProgress) {
+                $progress->finish();
+                $progress->clear();
+            }
             $output->writeln('finished');
         }
 
