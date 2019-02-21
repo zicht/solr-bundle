@@ -55,7 +55,7 @@ final class Document implements AnnotationInterface
     public function __construct(array $value)
     {
         if (!empty($value['repository'])) {
-            if (is_a($value['repository'], DocumentRepositoryInterface::class, true)) {
+            if (!is_a($value['repository'], DocumentRepositoryInterface::class, true)) {
                 throw new BadMethodCallException(sprintf('@Zicht\Bundle\SolrBundle\Mapping\Document::repository should be an instance of "%s" but "%s" was given.', DocumentRepositoryInterface::class, $value['repository']));
             }
 

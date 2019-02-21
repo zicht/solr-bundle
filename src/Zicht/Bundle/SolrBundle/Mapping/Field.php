@@ -13,7 +13,8 @@ use Doctrine\Common\Annotations\Annotation\Target;
 /**
  * @Annotation
  * @Attributes({
- *    @Attribute("name", required=false,  type="string"),
+ *    @Attribute("name", required=false, type="string"),
+ *    @Attribute("marshaller", required=false, type="Zicht\Bundle\SolrBundle\Mapping\Marshaller"),
  * })
  * @Target({"PROPERTY", "METHOD"})
  */
@@ -27,4 +28,10 @@ final class Field
      * @var string
      */
     public $name;
+
+    /**
+     * Marshaller that will have the value as argument and
+     * can be used to format the alter the data.
+     */
+    public $marshaller;
 }

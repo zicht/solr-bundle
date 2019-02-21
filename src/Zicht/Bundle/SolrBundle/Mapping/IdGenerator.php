@@ -21,6 +21,11 @@ final class IdGenerator implements AnnotationInterface
 {
 
     /**
+     * @var string
+     */
+    public $value;
+
+    /**
      * DocumentIdGenerator constructor.
      *
      * @param array $value
@@ -33,9 +38,4 @@ final class IdGenerator implements AnnotationInterface
 
        $this->value = $value['value'];
     }
-
-    /**
-     * @var string
-     */
-    public $value;
 }

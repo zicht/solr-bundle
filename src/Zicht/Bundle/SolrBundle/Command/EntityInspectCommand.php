@@ -105,47 +105,10 @@ class EntityInspectCommand extends Command
     {
         if (null !== $this->entity) {
             $output->writeln('');
-            $output->writeln(sprintf('<fg=cyan;options=bold>ENTITY DUMP(%d)</>', $this->entity->getId()));
+            $output->writeln(sprintf('<fg=cyan;options=bold>Document dump (%d)</>', $this->entity->getId()));
             $method = new \ReflectionMethod($this->manager, 'marshall');
             $method->setAccessible(true);
-            $data = $method->invoke($this->manager, $meta, $this->entity);
-            $table = new Table($output);
-            $table->setHeaders(['name', 'value']);
-            $fmt = function(&$v) {
-                $v = preg_replace('/(\s{2,}|\n)/', '', strip_tags(htmlentities(nl2br($v), ENT_QUOTES | ENT_IGNORE, "UTF-8")));
-            };
-            foreach ($data as $name => $value) {
-                if (is_array($value)) {
-                    $nl = false;
-                    foreach ($value as &$v) {
-                        $fmt($v);
-                        if (strlen($v) > 90) {
-                            $v = substr($v, 0, 90) . '...';
-                            $nl = true;
-                        }
-                    }
-                    if ($nl) {
-                        $out = "[\n";
-                        foreach ($value as $v) {
-                            $out .= "  '$v',\n";
-                        }
-                        $out .= "]";
-                        $value = $out;
-                    } else {
-                        $value = '[' . implode(', ', $value) . ']';
-                    }
-                } else {
-                    if (strlen($value) > 90) {
-                        $value = substr($value, 0, 90) . '...';
-                    }
-                }
-                if (is_bool($value)) {
-                    $value = ($value) ? 'true' : 'false';
-                }
-                $table->addRow([$name, (string)$value]);
-            }
-            $table->setStyle($this->getTableStyle());
-            $table->render();
+            $output->writeln(\json_encode($method->invoke($this->manager, $meta, $this->entity), JSON_PRETTY_PRINT));
         }
     }
 

@@ -365,18 +365,25 @@ class DocumentMapperMetadataFactory
     }
 
     /**
+     * read all annotation on an method and add as mapper, no need to check
+     * for marshaller(s) because this is already a method.
+     *
      * @param \ReflectionClass $reflectionClass
      * @param DocumentMapperMetadata $mapper
      */
     protected function readMethods(\ReflectionClass $reflectionClass, DocumentMapperMetadata $mapper)
     {
         foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-            if (null !== $annotation = $this->reader->getMethodAnnotation($method, Field::class)) {
-                $mapper->addMapping(new MethodMapper($this->getName($annotation->name, $method->name), $method->class, $method->name));
-            }
+            foreach ($this->reader->getMethodAnnotations($method) as $annotation) {
+                switch (get_class($annotation)) {
+                    case Field::class:
+                        $mapper->addMapping(new MethodMapper($this->getName($annotation->name, $method->name), $method->class, $method->name));
+                        break;
+                    case Fields::class:
+                        $mapper->addMapping(new MethodMergeMapper($method->class, $method->name));
+                        break;
 
-            if (null !== $annotation = $this->reader->getMethodAnnotation($method, Fields::class)) {
-                $mapper->addMapping(new MethodMergeMapper($method->class, $method->name));
+                }
             }
         }
     }
@@ -388,57 +395,48 @@ class DocumentMapperMetadataFactory
     protected function readProperties(\ReflectionClass $reflectionClass, DocumentMapperMetadata $mapper)
     {
         foreach ($reflectionClass->getProperties() as $property) {
-            // check for the doctrine id field, which will be used for generating an document id
-            if (null !== $this->reader->getPropertyAnnotation($property, Id::class)) {
-                $mapper->setIdField($property->class, $property->name);
-            }
-
-            /** @var Field $annotation */
-            if (null !== $annotation = $this->reader->getPropertyAnnotation($property, Field::class)) {
-                $name = $this->getName($annotation->name, $property->name);
-
-                /**
-                 * properties with the field annotation can also have an Marshaller
-                 * annotation to define and property value marshaller. Similar as
-                 * on the fields annotation except this will only get the property
-                 * value as argument.
-                 *
-                 * @var Marshaller $marshaller
-                 */
-                if (null !== $marshaller = $this->reader->getPropertyAnnotation($property, Marshaller::class)) {
-                    $mapper->addMapping(
-                        new PropertyMethodMapper(
-                            $name,
-                            $property->class,
-                            $property->name,
-                            $marshaller->className,
-                            $this->getMethodName($marshaller, $property->name)
-                        )
-                    );
-                } else {
-                    $mapper->addMapping(new PropertyValueMapper($name, $property->class, $property->name));
-                }
-
-                /**
-                 * Check for transformer annotations on an field, this can be
-                 * global defined and match column type or an annotation that
-                 * also implements the TransformInterface.
-                 */
+            if (null !== $this->reader->getPropertyAnnotation($property, Field::class)) {
                 foreach ($this->reader->getPropertyAnnotations($property) as $annotation) {
-                    if ($annotation instanceof TransformInterface) {
-                        if ($annotation instanceof TransformerWeightInterface) {
-                            $mapper->addTransformer($property->name, $annotation, $annotation->getWeight());
-                        } else {
-                            $mapper->addTransformer($property->name, $annotation);
-                        }
-                    }
-
-                    if ($annotation instanceof Column) {
-                        foreach ($mapper->getOption('transformers', []) as $transformer => list($weight, $pattern)) {
-                            if (preg_match($pattern, $annotation->type)) {
-                                $mapper->addTransformer($name, $transformer, $weight);
+                    switch (get_class($annotation)) {
+                        case Id::class:
+                            $mapper->setIdField($property->class, $property->name);
+                            break;
+                        case Field::class:
+                            $name = $this->getName($annotation->name, $property->name);
+                            if ($annotation->marshaller instanceof Marshaller) {
+                                $mapper->addMapping(
+                                    new PropertyMethodMapper(
+                                        $name,
+                                        $property->class,
+                                        $property->name,
+                                        $annotation->marshaller->className,
+                                        $this->getMethodName($annotation->marshaller, $property->name)
+                                    )
+                                );
+                            } else {
+                                $mapper->addMapping(new PropertyValueMapper($name, $property->class, $property->name));
                             }
-                        }
+                            break;
+                        case Column::class:
+                            foreach ($mapper->getOption('transformers', []) as $transformer => list($weight, $pattern)) {
+                                if (preg_match($pattern, $annotation->type)) {
+                                    $mapper->addTransformer($this->getName($annotation->name, $property->name), $transformer, $weight);
+                                }
+                            }
+                            break;
+                        default:
+                            /**
+                             * Check for transformer annotations on an field, this can be
+                             * global defined and match column type or an annotation that
+                             * also implements the TransformInterface.
+                             */
+                            if ($annotation instanceof TransformInterface) {
+                                if ($annotation instanceof TransformerWeightInterface) {
+                                    $mapper->addTransformer($property->name, $annotation, $annotation->getWeight());
+                                } else {
+                                    $mapper->addTransformer($property->name, $annotation);
+                                }
+                            }
                     }
                 }
             }

@@ -31,7 +31,7 @@ final class Marshaller implements AnnotationInterface
      */
     public function __construct(array $value)
     {
-        $type = gettype($value);
+        $type = gettype($value['value']);
 
         switch ($type) {
             case 'array':

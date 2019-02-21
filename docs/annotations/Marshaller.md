@@ -34,8 +34,7 @@ class Page {
 
     ...
     /**
-     * @Solr\Field
-     * @Solr\Marshaller("ReverseMarshaller")
+     * @Solr\Field(marshaller=@Solr\Marshaller("ReverseMarshaller"))
      * @ORM\Column(type="string", nullable=true)
      */
     private $title;
