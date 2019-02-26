@@ -21,8 +21,6 @@ class DocumentMapperMetadata
     private $className;
     /** @var string */
     private $repository;
-    /** @var bool */
-    private $active = true;
     /** @var array */
     private $params = [];
     /** @var string[][] */
@@ -140,24 +138,6 @@ class DocumentMapperMetadata
     public function getOption($name, $default = null)
     {
         return isset($this->options[$name]) ? $this->options[$name] : $default;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isActive()
-    {
-        return $this->active;
-    }
-
-    /**
-     * @param bool $active
-     * @return DocumentMapperMetadata
-     */
-    public function setActive($active)
-    {
-        $this->active = $active;
-        return $this;
     }
 
     /**

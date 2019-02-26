@@ -6,8 +6,8 @@
 4. [Caching](#caching)
 5. [Http](#http)
 6. [Annotations](#annotations)
-7. [Events](#)
-8. [Events Listeners](#)
+7. [Voters](#voters)
+8. [Events](../src/Zicht/Bundle/SolrBundle/Events.php)
 
 ## Installing
 
@@ -191,4 +191,47 @@ Wwe are using the [Zicht\Http\ClientInterface](../src/Zicht/Http/ClientInterface
 6. [Marshaller](./annotations/Marshaller.md) 
 7. [Params](./annotations/Params.md) 
 
- 
+## Voters
+
+To control whether a entity should be updated/deleted by the manager we have introduced an simple voter similar to the AccessDecisionManager from symfony. 
+
+The main difference is that the default [DecisionManager](../src/Zicht/Bundle/SolrBundle/Authorization/UnanimousDecisionManager.php) is an unanimous voter and when all voters abstain it returns true and. The decision is not token based but is based on transaction (delete or update), metadata and object (see [VoterInterface](../src/Zicht/Bundle/SolrBundle/Authorization/VoterInterface.php)).
+
+To register an voter you should tag the service wth `zicht_solr.authorization.voter` and there is an `priority` to control the voter position.    
+
+
+#### Example  
+
+A simple voter that decide on update based on the isPublic method from the object.
+
+the service definition:
+
+```
+        <service id="zicht_solr.authorization.public_voter" class="Zicht\Bundle\ExampleBundle\Solr\Authorization\IsPublicVoter">
+            <tag name="zicht_solr.authorization.voter" priority="255" />
+        </service>
+```
+
+the voter:
+
+```
+namepsace Zicht\Bundle\ExampleBundle\Solr\Authorization;
+
+use Zicht\Bundle\SolrBundle\Authorization\VoterInterface;
+use Zicht\Bundle\SolrBundle\Authorization\DecisionManagerInterface;
+use Zicht\Bundle\PageBundle\Model\PublicInterface;
+
+class IsPublicVote implements VoterInterface
+{
+    
+    public function vote(int $transaction, DocumentMapperMetadata $meta, $object) :int
+    {
+        if ($transaction === DecisionManagerInterface::TRANSACTION_UPDATE && $object instanceof PublicInterface) {
+            return $object->isPublic() ? VoterInterface::GRANTED : VoterInterface::DENIED; 
+        }
+        
+        return VoterInterface::ABSTAIN;
+    }
+}
+
+```

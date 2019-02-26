@@ -139,11 +139,6 @@ class ReindexCommand extends Command
             $output->writeln(sprintf('Processing "<info>%s</info>"', $entity));
             $meta = $this->solrManager->getDocumentMapperMetadata($entity);
 
-            if (!$meta->isActive()) {
-                $output->writeln('<comment>Mapper is disabled, skipping indexing</comment>');
-                continue;
-            }
-
             /** @var $manager ObjectManager */
             if (null === $manager = $this->doctrine->getManagerForClass($entity)) {
                 throw new \RuntimeException('Could not find a ObjectManager for class "' . $entity . '"');

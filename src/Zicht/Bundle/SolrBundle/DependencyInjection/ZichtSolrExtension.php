@@ -41,9 +41,61 @@ class ZichtSolrExtension extends Extension
         $container->setDefinition('zicht_solr.uri', (new Definition(Uri::class, [$config['uri']]))->setPublic(false));
         $container->getDefinition('zicht_solr.http.handler.socket')->replaceArgument(0, new Reference('zicht_solr.uri'));
 
+        if (null === $cache = $this->getCacheReference($config, $container)) {
+            throw new \RuntimeException(sprintf('Failed to set cache for zicht_solr.mapper.document_metadata_factory with %s', var_export($config['mapper']['cache'], true)));
+        }
+
+        $container
+            ->getDefinition('zicht_solr.mapper.document_metadata_factory')
+            ->replaceArgument(0, new Reference($config['mapper']['naming_strategy']))
+            ->replaceArgument(1, $cache);
+
+
+        $this->setDebugging($container);
+        $this->setVoters($container);
+
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     */
+    public function setVoters(ContainerBuilder $container)
+    {
+        $definition = $container->getDefinition('zicht_solr.authorization.decision_manager');
+        foreach ($container->findTaggedServiceIds('zicht_solr.authorization.voter') as $id => $tags) {
+            $args = [new Reference($id)];
+            if (isset($tags[0]['priority'])) {
+                $args[] = $tags[0]['priority'];
+            }
+            $definition->addMethodCall('addVoter', $args);
+        }
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     */
+    private function setDebugging(ContainerBuilder $container)
+    {
+        if ($container->getParameter('kernel.debug')) {
+            $definition = $container->getDefinition('zicht_solr.http.handler.socket');
+            if (is_a($definition ->getClass(), HandlerDebugInterface::class, true)) {
+                $container->setDefinition('zicht_solr.debug.request.logger',  (new Definition(TempStream::class))->setPublic(false));
+                $container->getDefinition('zicht_solr.data_collector')->addMethodCall('addDebugger', ['requests', new Reference('zicht_solr.debug.request.logger')]);
+                $definition->addMethodCall('setDebug', [new Reference('zicht_solr.debug.request.logger')]);
+            }
+        }
+    }
+
+    /**
+     * @param array $config
+     * @param ContainerBuilder $container
+     * @return null|Reference
+     */
+    private function getCacheReference(array $config, ContainerBuilder $container)
+    {
         switch ($config['mapper']['cache']['type']) {
             case 'service':
-                $cache = new Reference($config['mapper']['cache']['name']);
+                return new Reference($config['mapper']['cache']['name']);
                 break;
             case 'auto':
                 switch ($config['mapper']['cache']['name']) {
@@ -56,30 +108,13 @@ class ZichtSolrExtension extends Extension
                     case 'apcu':
                         $definition = new Definition(ApcuCache::class, ['solr']);
                         break;
+                    default:
+                        throw new \InvalidArgumentException('invalid cache type ' . $config['mapper']['cache']['name'] . ' for type auto');
                 }
-                if (isset($definition)) {
-                    $container->setDefinition('zicht_solr.cache.default', $definition)->setPublic(false);
-                    $cache = new Reference('zicht_solr.cache.default');
-                }
+                $container->setDefinition('zicht_solr.cache.default', $definition)->setPublic(false);
+                return new Reference('zicht_solr.cache.default');
                 break;
         }
-
-        if (!isset($cache)) {
-            throw new \RuntimeException(sprintf('Failed to set cache for zicht_solr.mapper.document_metadata_factory with %s', var_export($config['mapper']['cache'], true)));
-        }
-
-        $container
-            ->getDefinition('zicht_solr.mapper.document_metadata_factory')
-            ->replaceArgument(0, new Reference($config['mapper']['naming_strategy']))
-            ->replaceArgument(1, $cache);
-
-        if ($container->getParameter('kernel.debug')) {
-            $socketDefinition = $container->getDefinition('zicht_solr.http.handler.socket');
-            if (is_a($socketDefinition->getClass(), HandlerDebugInterface::class, true)) {
-                $container->setDefinition('zicht_solr.debug.request.logger',  (new Definition(TempStream::class))->setPublic(false));
-                $container->getDefinition('zicht_solr.data_collector')->addMethodCall('addDebugger', ['requests', new Reference('zicht_solr.debug.request.logger')]);
-                $socketDefinition->addMethodCall('setDebug', [new Reference('zicht_solr.debug.request.logger')]);
-            }
-        }
+        return null;
     }
 }

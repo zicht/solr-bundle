@@ -15,5 +15,5 @@ interface IdGeneratorInterface
      * @param object $object
      * @return string
      */
-    public function generate($object);
+    public function generate($object) :string;
 }

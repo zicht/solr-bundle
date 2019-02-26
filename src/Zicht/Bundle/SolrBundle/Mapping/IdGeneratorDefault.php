@@ -30,7 +30,7 @@ class IdGeneratorDefault implements IdGeneratorInterface
     /**
      * @inheritdoc
      */
-    public function generate($object)
+    public function generate($object) :string
     {
         $meta = $this->metadataFactory->getDocumentMapperMetadataForClass($object);
         return sha1($meta->getClassName() . ':' . $this->resolveProperty($object, ...$meta->getIdField()));

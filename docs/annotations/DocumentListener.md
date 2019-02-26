@@ -1,6 +1,10 @@
 ## [DocumentListener](../../src/Zicht/Bundle/SolrBundle/Mapping/DocumentListener.php)
 
-This can be used to register pre/post mapping listeners similar as EntityListeners. Classes should implement either [PostMapInterface](../../src/Zicht/Bundle/SolrBundle/Mapping/PostMapInterface.php) or [PreMapInterface](../../src/Zicht/Bundle/SolrBundle/Mapping/PreMapInterface) or both when needed. When the service container is needed the service should be tagged with `zicht_solr.document.listener`. 
+This can be used to register pre/post mapping listeners similar as doctrine EntityListeners. 
+
+The listener should implement either [PostMapInterface](../../src/Zicht/Bundle/SolrBundle/Mapping/PostMapInterface.php) or [PreMapInterface](../../src/Zicht/Bundle/SolrBundle/Mapping/PreMapInterface) or both when needed. 
+
+When the service container is needed the service should be tagged with `zicht_solr.document.listener`. 
 
 #### Example
 
