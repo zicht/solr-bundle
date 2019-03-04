@@ -52,23 +52,6 @@ class ZichtSolrExtension extends Extension
 
 
         $this->setDebugging($container);
-        $this->setVoters($container);
-
-    }
-
-    /**
-     * @param ContainerBuilder $container
-     */
-    public function setVoters(ContainerBuilder $container)
-    {
-        $definition = $container->getDefinition('zicht_solr.authorization.decision_manager');
-        foreach ($container->findTaggedServiceIds('zicht_solr.authorization.voter') as $id => $tags) {
-            $args = [new Reference($id)];
-            if (isset($tags[0]['priority'])) {
-                $args[] = $tags[0]['priority'];
-            }
-            $definition->addMethodCall('addVoter', $args);
-        }
     }
 
     /**
