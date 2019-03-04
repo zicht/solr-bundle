@@ -35,7 +35,7 @@ class EntityListener
      */
     public function postPersist($entity, LifecycleEventArgs $event)
     {
-        $this->manager->update($entity);
+        $this->getManager()->update($entity);
     }
 
     /**
@@ -44,7 +44,7 @@ class EntityListener
      */
     public function preUpdate($entity, PreUpdateEventArgs $event)
     {
-        $this->manager->update($entity);
+        $this->getManager()->update($entity);
     }
 
     /**
@@ -53,6 +53,14 @@ class EntityListener
      */
     public function preRemove($entity, LifecycleEventArgs $event)
     {
-        $this->manager->delete($entity);
+        $this->getManager()->delete($entity);
+    }
+
+    /**
+     * @return SolrManager
+     */
+    public function getManager() :SolrManager
+    {
+        return $this->manager;
     }
 }

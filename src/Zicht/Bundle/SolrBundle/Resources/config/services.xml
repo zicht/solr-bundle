@@ -53,5 +53,10 @@
             <tag name="kernel.event_listener" event="kernel.exception" priority="255" />
         </service>
 
+        <service id="zicht_solr.event_listener.entity_listener" class="Zicht\Bundle\SolrBundle\EventListener\EntityListener">
+            <argument type="service" id="zicht_solr.manager"/>
+            <tag name="doctrine.orm.entity_listener"/>
+        </service>
+
     </services>
 </container>
