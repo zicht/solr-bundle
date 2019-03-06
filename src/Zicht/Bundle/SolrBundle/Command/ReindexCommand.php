@@ -15,9 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Zicht\Bundle\SolrBundle\Doctrine\ORM\BaseQueryBuilderRepositoryInterface;
-use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadata;
-use Zicht\Bundle\SolrBundle\Mapping\DocumentRepositoryInterface;
-use Zicht\Bundle\SolrBundle\Doctrine\ORM\EntityRepositoryWrapper;
+use Zicht\Bundle\SolrBundle\Mapping\RepositoryTrait;
 use Zicht\Bundle\SolrBundle\QueryBuilder\Update;
 use Zicht\Bundle\SolrBundle\Service\SolrManager;
 use Zicht\Http\ClientInterface;
@@ -29,6 +27,8 @@ use Zicht\Http\Stream\ResourceStream;
  */
 class ReindexCommand extends Command
 {
+    use RepositoryTrait;
+
     /** @var array  */
     private $entities;
     /** @var SolrManager */
@@ -104,23 +104,6 @@ class ReindexCommand extends Command
     }
 
     /**
-     * @param DocumentMapperMetadata $meta
-     * @param ObjectManager $manager
-     * @return DocumentRepositoryInterface
-     */
-    private function getRepository(DocumentMapperMetadata $meta, ObjectManager $manager)
-    {
-        if (null === $repo = $this->solrManager->getRepository($meta->getClassName())) {
-            $repo = $manager->getRepository($meta->getClassName());
-
-            if (!$repo instanceof DocumentRepositoryInterface) {
-                $repo = new EntityRepositoryWrapper($repo);
-            }
-        }
-        return $repo;
-    }
-
-    /**
      * @{inheritDoc}
      */
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -144,7 +127,7 @@ class ReindexCommand extends Command
                 throw new \RuntimeException('Could not find a ObjectManager for class "' . $entity . '"');
             }
 
-            $repos = $this->getRepository($meta, $manager);
+            $repos = $this->getRepository($meta, $manager, $this->solrManager);
             $total = $repos->getDocumentsCount($limit, $offset);
 
             if (!empty($where)) {

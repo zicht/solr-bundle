@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\NamingStrategy;
 use Doctrine\Common\Annotations\Reader;
+use Doctrine\ORM\Proxy\Proxy;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Zicht\Bundle\SolrBundle\Event\MetadataLoadDocumentMapperEvent;
 use Zicht\Bundle\SolrBundle\Event\MetadataPostBuildEntitiesListEvent;
@@ -185,9 +186,7 @@ class DocumentMapperMetadataFactory
      */
     public function support($className)
     {
-        if (is_object($className)) {
-            $className = get_class($className);
-        }
+        $className = $this->getRealClassName($className);
 
         foreach ($this->entities as $map) {
             if ($map['className'] === $className || in_array($className, $map['children'])) {
@@ -196,6 +195,23 @@ class DocumentMapperMetadataFactory
         }
 
         return false;
+    }
+
+    /**
+     * @param string $className
+     * @return bool|string
+     */
+    private function getRealClassName($className)
+    {
+        if (is_object($className)) {
+            $className = get_class($className);
+        }
+
+        if (false !== $pos = strrpos($className, '\\' . Proxy::MARKER . '\\')) {
+            $className = substr($className, $pos + Proxy::MARKER_LENGTH + 2);
+        }
+
+        return $className;
     }
 
     /**
@@ -217,9 +233,7 @@ class DocumentMapperMetadataFactory
      */
     public function getDocumentMapperMetadataForClass($className)
     {
-        if (is_object($className)) {
-            $className = get_class($className);
-        }
+        $className = $this->getRealClassName($className);
         if (false === $this->support($className)) {
             throw new InvalidArgumentException(sprintf('"%s" is not a solr mapped entity', $className));
         }
@@ -267,7 +281,7 @@ class DocumentMapperMetadataFactory
      */
     private function getCacheKeyForClassName($className)
     {
-        return sprintf('%s[metadata][%s]', self::CACHE_SUFFIX, str_replace('\\', '', $className));
+        return sprintf('%s[metadata][%s]', self::CACHE_SUFFIX, str_replace('\\', '', $this->getRealClassName($className)));
     }
 
     /**

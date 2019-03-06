@@ -16,9 +16,11 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Zicht\Bundle\SolrBundle\Doctrine\ORM\BaseQueryBuilderRepositoryInterface;
 use Zicht\Bundle\SolrBundle\Mapping\DocumentMapperMetadata;
 use Zicht\Bundle\SolrBundle\Mapping\IdGeneratorDefault;
 use Zicht\Bundle\SolrBundle\Mapping\MethodMergeMapper;
+use Zicht\Bundle\SolrBundle\Mapping\RepositoryTrait;
 use Zicht\Bundle\SolrBundle\Service\SolrManager;
 
 /**
@@ -27,12 +29,12 @@ use Zicht\Bundle\SolrBundle\Service\SolrManager;
  */
 class EntityInspectCommand extends Command
 {
+    use RepositoryTrait;
+
     /** @var SolrManager */
     private $manager;
     /** @var Registry  */
     private $doctrine;
-    /** @var object|null  */
-    private $entity;
 
     /**
      * EntityInspectCommand constructor.
@@ -63,25 +65,6 @@ class EntityInspectCommand extends Command
     /**
      * @{inheritDoc}
      */
-    protected function initialize(InputInterface $input, OutputInterface $output)
-    {
-        parent::initialize($input, $output);
-        if ($input->getOption('dump') || $input->getOption('id')) {
-            $query = sprintf('SELECT p FROM %s p ', $input->getArgument('entity'));
-            if (null !== $id = $input->getOption('id')) {
-                $query .= 'WHERE p.id = ' . $id;
-            } else {
-                $query .= 'ORDER BY RAND()';
-            }
-            $query = $this->doctrine->getManager()->createQuery($query);
-            $query->setMaxResults(1);
-            $this->entity = $query->getSingleResult();
-        }
-    }
-
-    /**
-     * @{inheritDoc}
-     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if (null === $meta = $this->manager->getDocumentMapperMetadata($input->getArgument('entity'))) {
@@ -94,21 +77,31 @@ class EntityInspectCommand extends Command
         $this->renderOptions($meta, $table);
         $table->setStyle($this->getTableStyle());
         $table->render();
-        $this->dumpEntity($meta, $output);
+        $this->dumpEntity($meta, $input, $output);
     }
 
     /**
      * @param DocumentMapperMetadata $meta
      * @param OutputInterface $output
      */
-    private function dumpEntity(DocumentMapperMetadata $meta, OutputInterface $output)
+    private function dumpEntity(DocumentMapperMetadata $meta, InputInterface $input, OutputInterface $output)
     {
-        if (null !== $this->entity) {
+        if ($input->getOption('dump') || $input->getOption('id')) {
+            $repo = $this->getRepository($meta, $this->doctrine->getManagerForClass($meta->getClassName()), $this->manager);
+
+            if ($input->getOption('id') && $repo instanceof BaseQueryBuilderRepositoryInterface) {
+                $repo->getBaseQueryBuilder()->andWhere(sprintf('%s.id = %d', $repo->getBaseQueryBuilder()->getRootAliases()[0], $input->getOption('id')));
+                $entity = $repo->getDocuments(1)->current();
+            } else {
+                $entity = $repo->getDocuments(1, rand(1, $repo->getDocumentsCount()))->current();
+            }
+
             $output->writeln('');
             $output->writeln(sprintf('<fg=cyan;options=bold>Document dump (%d)</>', $this->entity->getId()));
             $method = new \ReflectionMethod($this->manager, 'marshall');
             $method->setAccessible(true);
-            $output->writeln(\json_encode($method->invoke($this->manager, $meta, $this->entity), JSON_PRETTY_PRINT));
+            $output->writeln(\json_encode($method->invoke($this->manager, $meta, $entity), JSON_PRETTY_PRINT));
+
         }
     }
 
@@ -201,7 +194,6 @@ class EntityInspectCommand extends Command
         $table->addRow(new TableSeparator());
         $table->addRow([new TableCell('<fg=cyan;options=bold>Options</>', ['colspan' => 2])]);
         $table->addRow(new TableSeparator());
-        $table->addRow(['active', ($meta->isActive()) ? 'yes' : 'no']);
         foreach ($meta->getOptions() as $name => $option) {
             switch ($name) {
                 case 'child_inheritance':
@@ -212,11 +204,15 @@ class EntityInspectCommand extends Command
 
         if (null !== $events = $meta->getOption('events')) {
             $table->addRow(new TableSeparator());
+            $last = @end(array_keys($events));
             foreach ($events as $name => $class) {
                 $table->addRow([new TableCell('<fg=cyan;options=bold>events_' . $name . '</>', ['colspan' => 2])]);
                 $table->addRow(new TableSeparator());
                 foreach ($class as $className) {
                     $table->addRow([new TableCell($className, ['colspan' => 2])]);
+                }
+                if ($last !== $name) {
+                    $table->addRow(new TableSeparator());
                 }
             }
         }
