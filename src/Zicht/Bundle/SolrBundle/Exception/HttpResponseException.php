@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Class HttpResponseException
  * @package Zicht\Bundle\SolrBundle\Exception
  */
-class HttpResponseException extends \HttpResponseException implements SolrExceptionInterface
+class HttpResponseException extends \RuntimeException implements SolrExceptionInterface
 {
     /** @var Response */
     private $response;
