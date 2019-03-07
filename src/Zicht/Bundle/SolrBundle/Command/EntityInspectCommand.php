@@ -97,7 +97,7 @@ class EntityInspectCommand extends Command
             }
 
             $output->writeln('');
-            $output->writeln(sprintf('<fg=cyan;options=bold>Document dump (%d)</>', $this->entity->getId()));
+            $output->writeln(sprintf('<fg=cyan;options=bold>Document dump (%d)</>', $entity->getId()));
             $method = new \ReflectionMethod($this->manager, 'marshall');
             $method->setAccessible(true);
             $output->writeln(\json_encode($method->invoke($this->manager, $meta, $entity), JSON_PRETTY_PRINT));
