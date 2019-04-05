@@ -38,6 +38,8 @@ class DocumentMapperMetadataFactory
     private $namingStrategy;
     /** @var EventDispatcherInterface */
     private $eventDispatcher;
+    /** @var ClassNameResolver  */
+    private $classNameResolver;
 
     /**
      * DocumentMapperMetadataFactory constructor.
@@ -46,9 +48,10 @@ class DocumentMapperMetadataFactory
      * @param CacheInterface $cache
      * @param Reader $reader
      * @param EventDispatcherInterface $dispatcher
+     * @param ClassNameResolver $classNameResolver
      * @param MappingDriver[] $mappings
      */
-    public function __construct(NamingStrategy $namingStrategy, CacheInterface $cache, Reader $reader, EventDispatcherInterface $dispatcher, MappingDriver ...$mappings)
+    public function __construct(NamingStrategy $namingStrategy, CacheInterface $cache, Reader $reader, EventDispatcherInterface $dispatcher, ClassNameResolver $classNameResolver, MappingDriver ...$mappings)
     {
         if (null === $entities = $cache->get($this->getCacheKey())) {
             $entities = $this->getEntityInheritanceList($dispatcher, $reader, ...$mappings);
@@ -59,13 +62,14 @@ class DocumentMapperMetadataFactory
         $this->reader = $reader;
         $this->namingStrategy = $namingStrategy;
         $this->eventDispatcher = $dispatcher;
+        $this->classNameResolver = $classNameResolver;
     }
 
     /**
      * @param MappingDriver[] ...$mappings
      * @return array
      */
-    private function getAllEntities(...$mappings)
+    private function getAllEntities(MappingDriver ...$mappings)
     {
         $entities = [];
         foreach ($mappings as $mapping) {
@@ -203,15 +207,7 @@ class DocumentMapperMetadataFactory
      */
     private function getRealClassName($className)
     {
-        if (is_object($className)) {
-            $className = get_class($className);
-        }
-
-        if (false !== $pos = strrpos($className, '\\' . Proxy::MARKER . '\\')) {
-            $className = substr($className, $pos + Proxy::MARKER_LENGTH + 2);
-        }
-
-        return $className;
+        return $this->classNameResolver->getRealClassName($className);
     }
 
     /**

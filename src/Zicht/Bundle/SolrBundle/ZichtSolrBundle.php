@@ -8,7 +8,7 @@ namespace Zicht\Bundle\SolrBundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Zicht\Bundle\SolrBundle\DependencyInjection\CompilerPass\SolrAuthorizationVoterPass;
-use Zicht\Bundle\SolrBundle\DependencyInjection\CompilerPass\SolrManagerMappingDriverPass;
+use Zicht\Bundle\SolrBundle\DependencyInjection\CompilerPass\SolrDocumentMetadataFactoryPass;
 use Zicht\Bundle\SolrBundle\DependencyInjection\CompilerPass\SolrManagerObjectStoragePass;
 
 /**
@@ -22,7 +22,7 @@ class ZichtSolrBundle extends Bundle
     public function build(ContainerBuilder $container)
     {
         parent::build($container);
-        $container->addCompilerPass(new SolrManagerMappingDriverPass());
+        $container->addCompilerPass(new SolrDocumentMetadataFactoryPass());
         $container->addCompilerPass(new SolrManagerObjectStoragePass());
         $container->addCompilerPass(new SolrAuthorizationVoterPass());
     }
