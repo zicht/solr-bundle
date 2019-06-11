@@ -19,7 +19,7 @@ use Zicht\Bundle\SolrBundle\Pager\SolrPageable;
  */
 abstract class SearchFacade
 {
-    protected static $defaultParameterWhitelist = array('keywords', 'page', 'type', 'perpage');
+    protected static $defaultParameterWhitelist = array('keywords', 'page', 'type', 'perpage', 'story_id');
 
     /**
      * @var Client
