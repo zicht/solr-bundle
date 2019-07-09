@@ -9,6 +9,7 @@ namespace Zicht\Bundle\SolrBundle\Manager\Doctrine;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
+use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Events;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -56,9 +57,9 @@ class Subscriber implements EventSubscriber
 
 
     /**
-     * @param PostFlushEventArgs $args
+     * @param PreFlushEventArgs $args
      */
-    public function postFlush(PostFlushEventArgs $args)
+    public function preFlush(PreFlushEventArgs $args)
     {
         if (count($this->changeSet->getChanges())) {
             $changeSet = $this->changeSet;
@@ -100,7 +101,7 @@ class Subscriber implements EventSubscriber
             Events::postPersist,
             Events::preUpdate,
             Events::preRemove,
-            Events::postFlush
+            Events::preFlush
         );
     }
 }
