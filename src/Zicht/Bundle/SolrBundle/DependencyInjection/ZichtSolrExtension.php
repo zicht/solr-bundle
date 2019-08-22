@@ -26,6 +26,7 @@ class ZichtSolrExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader->load('admin.xml');
         $loader->load('services.xml');
         $loader->load('commands.xml');
 
@@ -36,7 +37,9 @@ class ZichtSolrExtension extends Extension
         }
 
         $container->getDefinition('_zicht_solr.http_client')->setArguments([
-            ['base_url' => sprintf('http://%s:%d%s/%s/', $config['host'], $config['port'], $config['path'], $config['core'])]
+            ['base_url' => sprintf('http://%s:%d%s/%s/', $config['host'], $config['port'], $config['path'], $config['core'])],
         ]);
+        $container->setParameter('zicht_solr.managed', $config['managed']);
+        $container->setParameter('zicht_solr.absolute_base_url', sprintf('http://%s:%d%s/', $config['host'], $config['port'], $config['path']));
     }
 }
