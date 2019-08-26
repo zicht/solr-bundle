@@ -3,6 +3,7 @@
  * @author Gerard van Helden <gerard@zicht.nl>
  * @copyright Zicht Online <http://zicht.nl>
  */
+
 namespace Zicht\Bundle\SolrBundle\Command;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
@@ -43,6 +44,11 @@ class ReindexCommand extends AbstractCommand
     private $doctrine;
 
     /**
+     * @var array
+     */
+    private $entities;
+
+    /**
      * Setup the reindex command
      *
      * @param Client $solr
@@ -55,6 +61,7 @@ class ReindexCommand extends AbstractCommand
 
         $this->solrManager = $solrManager;
         $this->doctrine = $doctrine;
+        $this->entities = array();
     }
 
     /**
@@ -64,7 +71,7 @@ class ReindexCommand extends AbstractCommand
     {
         $this
             ->setName('zicht:solr:reindex')
-            ->addArgument('entity', InputArgument::REQUIRED, 'The entity class to fetch records from')
+            ->addArgument('entity', InputArgument::OPTIONAL, 'The entity class to fetch records from. If none supplied we fetch all SOLR-managed entities')
             ->addOption('em', '', InputArgument::OPTIONAL, 'The entity manager to get the repository from', 'default')
             ->addOption('where', 'w', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'An optional where clause to pass to the query builder. The entity\'s query alias is "d" (as in document), so you need to pass criteria such as \'d.dateCreated > CURDATE()\'')
             ->addOption('limit', 'l', InputArgument::OPTIONAL | InputOption::VALUE_REQUIRED, 'The LIMIT clause to facilitate paging (chunks) of indexing (number of items per chunk)')
@@ -72,6 +79,18 @@ class ReindexCommand extends AbstractCommand
             ->addOption('debug', '', InputOption::VALUE_NONE, 'Debug: i.e. don\'t catch exceptions while indexing')
             ->addOption('delete-first', 'd', InputOption::VALUE_NONE, 'Delete the document from solr before updating')
             ->setDescription('Reindexes entities in the SOLR index');
+    }
+
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
+        if ($entity = $input->getArgument('entity')) {
+            $this->entities[] = $entity;
+        } else {
+            foreach ($this->solrManager->getMappers() as $mapper) {
+                $this->entities = array_merge($this->entities, $mapper->getClassNames());
+            }
+            $this->entities = array_unique($this->entities);
+        }
     }
 
     /**
@@ -82,61 +101,60 @@ class ReindexCommand extends AbstractCommand
         /** @var $solrManager \Zicht\Bundle\SolrBundle\Manager\SolrManager */
 
         $output->writeln('Preparing entities ...');
+        foreach ($this->entities as $entity) {
+            $em = $this->doctrine->getManager($input->getOption('em'));
+            $reflection = $em->getClassMetadata($entity)->getReflectionClass();
+            $entity = $reflection->name;
 
-        $em = $this->doctrine->getManager($input->getOption('em'));
+            if (null !== ($repos = $this->solrManager->getRepository($entity))) {
+                if ($repos instanceof WrappedSearchDocumentRepository) {
+                    $repos->setSourceRepository($em->getRepository($entity));
+                }
+            } else {
+                $repos = $em->getRepository($entity);
 
-        $reflection = $em->getClassMetadata($input->getArgument('entity'))->getReflectionClass();
-        $entity = $reflection->name;
-
-        if (null !== ($repos = $this->solrManager->getRepository($entity))) {
-            if ($repos instanceof WrappedSearchDocumentRepository) {
-                $repos->setSourceRepository($em->getRepository($entity));
+                if (!$repos instanceof SearchDocumentRepository) {
+                    $repos = new SearchDocumentRepositoryAdapter($repos);
+                }
             }
-        } else {
-            $repos = $em->getRepository($entity);
 
-            if (!$repos instanceof SearchDocumentRepository) {
-                $repos = new SearchDocumentRepositoryAdapter($repos);
+            if ($input->getOption('debug')) {
+                $this->doctrine
+                    ->getConnection()
+                    ->getConfiguration()
+                    ->setSQLLogger(new EchoSQLLogger());
             }
-        }
+            $output->writeln('Finding indexable documents...');
 
-        if ($input->getOption('debug')) {
-            $this->doctrine
-                ->getConnection()
-                ->getConfiguration()
-                ->setSQLLogger(new EchoSQLLogger());
-        }
-        $output->writeln('Finding indexable documents...');
+            $records = $repos->findIndexableDocuments(
+                $input->getOption('where'),
+                $input->getOption('limit'),
+                $input->getOption('offset')
+            );
 
-        $records = $repos->findIndexableDocuments(
-            $input->getOption('where'),
-            $input->getOption('limit'),
-            $input->getOption('offset')
-        );
+            $total = count($records);
 
-        $total = count($records);
+            $output->writeln('Reindexing records ...');
 
-        $output->writeln('Reindexing records ...');
-
-        if ($reflection->implementsInterface(Extractable::class)) {
-            list($extractableRecords, $updatableRecords) = $this->splitRecords($records);
-            list($n, $i) = $this->extractBatch($input, $output, $extractableRecords, $total);
-            $output->write("\n");
-            $output->writeln(sprintf('Processed (Extracted) %s of %s items.', $i, $n));
-
-            if (count($updatableRecords)) {
-                list($n, $i) = $this->updateBatch($input, $output, $updatableRecords, $total);
+            if ($reflection->implementsInterface(Extractable::class)) {
+                list($extractableRecords, $updatableRecords) = $this->splitRecords($records);
+                list($n, $i) = $this->extractBatch($input, $output, $extractableRecords, $total);
                 $output->write("\n");
-                $output->writeln(sprintf('Processed (Updated) %s of %s items.', $i, $n));
+                $output->writeln(sprintf('Processed (Extracted) %s of %s items.', $i, $n));
+
+                if (count($updatableRecords)) {
+                    list($n, $i) = $this->updateBatch($input, $output, $updatableRecords, $total);
+                    $output->write("\n");
+                    $output->writeln(sprintf('Processed (Updated) %s of %s items.', $i, $n));
+                }
+            } else {
+                list($n, $i) = $this->updateBatch($input, $output, $records, $total);
             }
-
-            $output->writeln(sprintf('Peak mem usage: .%2d Mb', memory_get_peak_usage() / 1024 / 1024));
-            return;
+            $output->write("\n");
+            $output->writeln(sprintf('Processed %s of %s items. Peak mem usage: %2d Mb', $i, $n, memory_get_peak_usage() / 1024 / 1024));
+            $em->clear();
+            gc_collect_cycles();
         }
-
-        list($n, $i) = $this->updateBatch($input, $output, $records, $total);
-        $output->write("\n");
-        $output->writeln(sprintf('Processed %s of %s items. Peak mem usage: .%2d Mb', $i, $n, memory_get_peak_usage() / 1024 / 1024));
     }
 
     /**
@@ -175,6 +193,7 @@ class ReindexCommand extends AbstractCommand
 
         return array($n, $i);
     }
+
     /**
      * Extracts in batches
      *

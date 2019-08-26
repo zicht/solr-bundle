@@ -144,14 +144,19 @@ abstract class AbstractDataMapper implements DataMapperInterface
     }
 
     /**
-     * Set a list of classnames that are supported by this mapper.
-     *
-     * @param array $classNames
-     * @return void
+     * {@inheritDoc}
      */
     public function setClassNames($classNames)
     {
         $this->classNames = $classNames;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getClassNames()
+    {
+        return $this->classNames;
     }
 
     /**

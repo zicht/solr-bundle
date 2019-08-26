@@ -65,4 +65,17 @@ interface DataMapperInterface
      * @return mixed
      */
     public function supports($entity);
+
+    /**
+     * Set a list of classnames that are supported by this mapper.
+     *
+     * @param array $classNames
+     * @return void
+     */
+    public function setClassNames($classNames);
+
+    /**
+     * @return DataMapperInterface[]
+     */
+    public function getClassNames();
 }
