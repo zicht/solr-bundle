@@ -57,6 +57,14 @@ class SolrManager
     }
 
     /**
+     * @return DataMapperInterface[]
+     */
+    public function getMappers()
+    {
+        return $this->mappers;
+    }
+
+    /**
      * Adds a document repository responsible for querying documents when doing a reindex of multiple records
      *
      * @param string $class
