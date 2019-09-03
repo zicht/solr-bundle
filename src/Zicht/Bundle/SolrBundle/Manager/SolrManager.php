@@ -131,7 +131,9 @@ class SolrManager
             }
             $n++;
         }
-        call_user_func($incrementCallback, $n);
+        if ($incrementCallback) {
+            call_user_func($incrementCallback, $n);
+        }
 
         $update->commit();
         $this->client->update($update);
