@@ -5,13 +5,18 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-        <service id="zicht_solr.manager" class="Zicht\Bundle\SolrBundle\Manager\SolrManager">
+        <!-- "zicht_solr.manager" service will be created in \Zicht\Bundle\SolrBundle\DependencyInjection\ZichtSolrExtension from
+             either the zicht_solr.manager.default_manager or zicht_solr.manager.entity_manager definition -->
+        <service id="zicht_solr.manager.default_manager" class="Zicht\Bundle\SolrBundle\Manager\SolrManager">
             <argument type="service" id="zicht_solr.solr"/>
         </service>
+        <service id="zicht_solr.manager.entity_manager" class="Zicht\Bundle\SolrBundle\Manager\SolrEntityManager" parent="zicht_solr.manager.default_manager" />
+
         <service id="zicht_solr.doctrine.subscriber" class="Zicht\Bundle\SolrBundle\Manager\Doctrine\Subscriber">
             <argument type="service" id="service_container"/>
             <tag name="doctrine.event_subscriber" />
         </service>
+
         <service id="zicht_solr.solr" class="Zicht\Bundle\SolrBundle\Solr\Client">
             <argument type="service" id="_zicht_solr.http_client" />
         </service>
