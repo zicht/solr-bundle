@@ -6,7 +6,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
-Nothing so far
+- Added Extract query (through merging in v3.2)
+- Added Solr Entity Manager (through merging in v3.3)
+
+## 4.0.2 - 2019-08-27
+### Added
+- Reindex all enities when no entity class is passed to the reindex command
+
+## 4.0.1 - 2019-01-08
+### Fixed
+- Fix call to service
+
+## 4.0.0 - 2018-12-11
+### Changed
+- Upgraded Guzzle from v5 to v6
+### Removed
+- v4 is based on v3.1, so no Extract query support and no Entity Manager
 
 ## 3.3.0 - 2019-09-05
 ### Added
