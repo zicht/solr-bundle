@@ -1,19 +1,34 @@
-# 3.3 #
-* Added Solr Entity Manager to better manage updates of entities and their related entities
+# Change Log
+All notable changes to this project will be documented in this file.
 
-# 3.2 #
-* Added Extract Query, uses SOLR's capability to index Document Formats as PDF, DOC, etc.
+The format is based on [Keep a Changelog](http://keepachangelog.com/)
+and this project adheres to [Semantic Versioning](http://semver.org/).
 
-# 3.1 #
-* Added SolrDataCollector to show request send from debug toolbar
+## [Unreleased]
+### Added|Changed|Deprecated|Removed|Fixed|Security
+Nothing so far
 
-# 3.0 #
+## 3.3.0 - 2019-09-05
+### Added
+- Added Solr Entity Manager to better manage updates of entities and their related entities
 
-* Dependency on Solarium was removed
-* New Client wrapper 
-* Mapping is now done using an array containing all fields in stead of a Solarium Document object. This means that the API of the `mapDocument()` was changed such that it now must return an array containing key/value pairs for all fields. The document as the second parameter was dropped.
-* `updateFieldValues()` in SolrManager was moved to `Client` and renamed to `update` 
-* Several useful parameters were added to the `zicht:solr:select` 
-* `zicht:solr:set` was renamed to `zicht:solr:update`
-* `zicht:solr:purge` was renamed to `zicht:solr:delete`. For backwards compatibility, the `zicht:solr:purge` was kept as an alias for `zicht:solr:delete`
+## 3.2.x - 2017-10-04
+### Added
+- Added Extract Query, uses SOLR's capability to index Document Formats as PDF, DOC, etc.
+
+## 3.1.x - 2016-09-19
+### Added
+- Added SolrDataCollector to show request send from debug toolbar
+
+## 3.0.x - 2016-06-29
+- Dependency on Solarium was removed
+- New Client wrapper 
+- Mapping is now done using an array containing all fields in stead of a Solarium Document object. This means that the API of the `mapDocument()` was changed such that it now must return an array containing key/value pairs for all fields. The document as the second parameter was dropped.
+- `updateFieldValues()` in SolrManager was moved to `Client` and renamed to `update` 
+- Several useful parameters were added to the `zicht:solr:select` 
+- `zicht:solr:set` was renamed to `zicht:solr:update`
+- `zicht:solr:purge` was renamed to `zicht:solr:delete`. For backwards compatibility, the `zicht:solr:purge` was kept as an alias for `zicht:solr:delete`
+
+## 2.x and before - 2013-2018
+No changelog was kept in these versions
 
