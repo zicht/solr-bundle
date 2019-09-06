@@ -64,6 +64,17 @@ class Client
         return $this->doRequest($update);
     }
 
+    /**
+     * Do an extract query
+     *
+     * @param QueryBuilder\Extract $extract
+     * @return mixed
+     */
+    public function extract(QueryBuilder\Extract $extract)
+    {
+        return $this->doRequest($extract);
+    }
+
 
     /**
      * Do the request and return the response.

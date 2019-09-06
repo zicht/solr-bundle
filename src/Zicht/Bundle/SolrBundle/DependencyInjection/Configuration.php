@@ -29,8 +29,16 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('host')->end()
                 ->scalarNode('path')->defaultValue('/solr')->end()
                 ->scalarNode('core')->end()
-            ->end()
-        ;
+                ->arrayNode('manager')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->enumNode('type')
+                            ->values(['default', 'entity'])
+                            ->defaultValue('default')
+                        ->end()
+                    ->end()
+                ->end()
+            ->end();
 
         return $treeBuilder;
     }
