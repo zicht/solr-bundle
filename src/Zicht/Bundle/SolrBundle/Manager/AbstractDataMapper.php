@@ -7,6 +7,8 @@
 namespace Zicht\Bundle\SolrBundle\Manager;
 
 use Zicht\Bundle\SolrBundle\Solr\Client;
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Extract;
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Interfaces\Extractable;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 
 /**
@@ -19,9 +21,30 @@ abstract class AbstractDataMapper implements DataMapperInterface
     protected $classNames = array();
 
     /**
+     * Extract the specified entity
+     *
+     * @param Extract $extract
+     * @param Extractable $entity
+     */
+    public function extract(Extract $extract, $entity)
+    {
+        if (!($entity instanceof Extractable)) {
+            throw new \BadFunctionCallException('Extract is called for a wrong entity type. Check your configuration');
+        }
+
+        $params = [];
+        if (($boost = $this->getBoost($entity))) {
+            $params['boost'] = $boost;
+        }
+        $id = $this->generateObjectIdentity($entity);
+        $doc = $this->mapDocument($entity);
+        $extract->extract($id, $doc, $params, $entity->getFileResource());
+    }
+
+    /**
      * Update the specified entity
      *
-     * @param Client $update
+     * @param Update $update
      * @param mixed $entity
      * @return void
      */

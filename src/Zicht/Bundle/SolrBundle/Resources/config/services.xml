@@ -7,19 +7,25 @@
     <parameters>
         <parameter key="zicht_solr.doctrine.subscriber.class">Zicht\Bundle\SolrBundle\Manager\Doctrine\Subscriber</parameter>
         <parameter key="zicht_solr.manager.class">Zicht\Bundle\SolrBundle\Manager\SolrManager</parameter>
+        <parameter key="zicht_solr.entity_manager.class">Zicht\Bundle\SolrBundle\Manager\SolrEntityManager</parameter>
         <parameter key="zicht_solr.solr.class">Zicht\Bundle\SolrBundle\Solr\Client</parameter>
         <parameter key="zicht_solr.http_client.class">GuzzleHttp\Client</parameter>
         <parameter key="zicht_solr.data_collector.class">Zicht\Bundle\SolrBundle\DataCollector\SolrDataCollector</parameter>
     </parameters>
 
     <services>
-        <service id="zicht_solr.manager" class="%zicht_solr.manager.class%">
+        <!-- "zicht_solr.manager" service will be created in \Zicht\Bundle\SolrBundle\DependencyInjection\ZichtSolrExtension from
+             either the zicht_solr.manager.default_manager or zicht_solr.manager.entity_manager definition -->
+        <service id="zicht_solr.manager.default_manager" class="%zicht_solr.manager.class%">
             <argument type="service" id="zicht_solr.solr"/>
         </service>
+        <service id="zicht_solr.manager.entity_manager" class="%zicht_solr.entity_manager.class%" parent="zicht_solr.manager.default_manager" />
+
         <service id="zicht_solr.doctrine.subscriber" class="%zicht_solr.doctrine.subscriber.class%">
             <argument type="service" id="service_container"/>
             <tag name="doctrine.event_subscriber"/>
         </service>
+
         <service id="zicht_solr.solr" class="%zicht_solr.solr.class%">
             <argument type="service" id="zicht_solr.http_client"/>
         </service>
