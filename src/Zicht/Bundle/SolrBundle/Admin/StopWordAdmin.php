@@ -19,7 +19,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 class StopWordAdmin extends AbstractAdmin
 {
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function configureRoutes(RouteCollection $collection)
     {
@@ -32,7 +32,7 @@ class StopWordAdmin extends AbstractAdmin
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function configureDatagridFilters(DatagridMapper $datagridMapper)
     {
@@ -43,7 +43,7 @@ class StopWordAdmin extends AbstractAdmin
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function configureListFields(ListMapper $listMapper)
     {
@@ -63,7 +63,7 @@ class StopWordAdmin extends AbstractAdmin
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function configureFormFields(FormMapper $formMapper)
     {
@@ -76,6 +76,9 @@ class StopWordAdmin extends AbstractAdmin
         ;
     }
 
+    /**
+     * @return array
+     */
     private function getManagedFieldOptions()
     {
         return [

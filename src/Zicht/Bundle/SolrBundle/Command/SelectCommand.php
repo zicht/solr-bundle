@@ -14,7 +14,7 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 class SelectCommand extends AbstractCommand
 {
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function configure()
     {
@@ -67,7 +67,7 @@ class SelectCommand extends AbstractCommand
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {

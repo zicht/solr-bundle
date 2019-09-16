@@ -1,8 +1,5 @@
 <?php
 /**
- * @author Gerard van Helden <gerard@zicht.nl>
- * @author Rik van der Kemp <rik@zicht.nl>
- *
  * @copyright Zicht Online <http://zicht.nl>
  */
 

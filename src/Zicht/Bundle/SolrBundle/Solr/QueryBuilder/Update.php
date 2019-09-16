@@ -130,7 +130,7 @@ class Update extends AbstractQueryBuilder
 
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     public function createRequest(Client $httpClient)
     {

@@ -43,7 +43,7 @@ class Synonym
     /**
      * @return int
      */
-    public function getId(): int
+    public function getId()
     {
         return $this->id;
     }
@@ -51,7 +51,7 @@ class Synonym
     /**
      * @return string|null
      */
-    public function getIdentifier(): ?string
+    public function getIdentifier()
     {
         return $this->identifier;
     }
@@ -59,7 +59,7 @@ class Synonym
     /**
      * @param string|null $identifier
      */
-    public function setIdentifier(?string $identifier): void
+    public function setIdentifier($identifier)
     {
         $this->identifier = $identifier;
     }
@@ -67,7 +67,7 @@ class Synonym
     /**
      * @return string|null
      */
-    public function getValue(): ?string
+    public function getValue()
     {
         return $this->value;
     }
@@ -75,7 +75,7 @@ class Synonym
     /**
      * @param string|null $value
      */
-    public function setValue(?string $value): void
+    public function setValue($value)
     {
         $this->value = $value;
     }
@@ -83,7 +83,7 @@ class Synonym
     /**
      * @return string|null
      */
-    public function getManaged(): ?string
+    public function getManaged()
     {
         return $this->managed;
     }
@@ -91,7 +91,7 @@ class Synonym
     /**
      * @param string|null $managed
      */
-    public function setManaged(?string $managed): void
+    public function setManaged($managed)
     {
         $this->managed = $managed;
     }

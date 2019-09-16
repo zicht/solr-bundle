@@ -36,7 +36,7 @@ class StopWord
     /**
      * @return int
      */
-    public function getId(): int
+    public function getId()
     {
         return $this->id;
     }
@@ -44,7 +44,7 @@ class StopWord
     /**
      * @return string|null
      */
-    public function getValue(): ?string
+    public function getValue()
     {
         return $this->value;
     }
@@ -52,7 +52,7 @@ class StopWord
     /**
      * @param string|null $value
      */
-    public function setValue(?string $value): void
+    public function setValue($value)
     {
         $this->value = $value;
     }
@@ -60,7 +60,7 @@ class StopWord
     /**
      * @return string|null
      */
-    public function getManaged(): ?string
+    public function getManaged()
     {
         return $this->managed;
     }
@@ -68,7 +68,7 @@ class StopWord
     /**
      * @param string|null $managed
      */
-    public function setManaged(?string $managed): void
+    public function setManaged($managed)
     {
         $this->managed = $managed;
     }

@@ -67,7 +67,7 @@ class Subscriber implements EventSubscriber
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     public function getSubscribedEvents()
     {

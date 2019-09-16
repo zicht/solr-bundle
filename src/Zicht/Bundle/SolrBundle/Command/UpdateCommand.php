@@ -14,7 +14,7 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 class UpdateCommand extends AbstractCommand
 {
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function configure()
     {
@@ -28,7 +28,7 @@ class UpdateCommand extends AbstractCommand
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {

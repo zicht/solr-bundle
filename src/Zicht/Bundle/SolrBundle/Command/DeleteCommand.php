@@ -15,7 +15,7 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 class DeleteCommand extends AbstractCommand
 {
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function configure()
     {
@@ -28,7 +28,7 @@ class DeleteCommand extends AbstractCommand
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {

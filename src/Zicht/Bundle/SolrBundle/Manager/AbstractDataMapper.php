@@ -131,7 +131,7 @@ abstract class AbstractDataMapper implements DataMapperInterface
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     public function supports($entity)
     {

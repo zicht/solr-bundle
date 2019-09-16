@@ -65,7 +65,7 @@ class StopWordSubscriber implements EventSubscriber
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     public function getSubscribedEvents()
     {

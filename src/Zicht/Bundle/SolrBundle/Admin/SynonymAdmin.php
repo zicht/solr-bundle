@@ -20,7 +20,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 class SynonymAdmin extends AbstractAdmin
 {
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function configureRoutes(RouteCollection $collection)
     {
@@ -33,7 +33,7 @@ class SynonymAdmin extends AbstractAdmin
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function configureDatagridFilters(DatagridMapper $datagridMapper)
     {
@@ -45,7 +45,7 @@ class SynonymAdmin extends AbstractAdmin
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function configureListFields(ListMapper $listMapper)
     {
@@ -68,7 +68,7 @@ class SynonymAdmin extends AbstractAdmin
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function configureFormFields(FormMapper $formMapper)
     {
@@ -86,6 +86,9 @@ class SynonymAdmin extends AbstractAdmin
         ]);
     }
 
+    /**
+     * @return array
+     */
     private function getManagedFieldOptions()
     {
         return [

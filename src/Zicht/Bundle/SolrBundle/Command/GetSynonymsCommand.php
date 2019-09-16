@@ -27,7 +27,7 @@ class GetSynonymsCommand extends AbstractCommand
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function configure()
     {
@@ -39,7 +39,7 @@ class GetSynonymsCommand extends AbstractCommand
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {

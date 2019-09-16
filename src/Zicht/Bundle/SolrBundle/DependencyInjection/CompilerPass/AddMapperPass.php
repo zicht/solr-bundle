@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\Reference;
 class AddMapperPass implements CompilerPassInterface
 {
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     public function process(ContainerBuilder $container)
     {

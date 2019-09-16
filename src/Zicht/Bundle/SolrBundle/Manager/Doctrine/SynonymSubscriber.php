@@ -67,7 +67,7 @@ class SynonymSubscriber implements EventSubscriber
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     public function getSubscribedEvents()
     {
