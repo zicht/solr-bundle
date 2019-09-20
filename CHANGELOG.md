@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added Extract query (through merging in v3.2)
 - Added Solr Entity Manager (through merging in v3.3)
 
+## 4.1.0 - 2019-09-20
+### Added
+
+- Ability to manage stopwords and synonyms from the CMS itself.
+
 ## 4.0.2 - 2019-08-27
 ### Added
 - Reindex all enities when no entity class is passed to the reindex command
