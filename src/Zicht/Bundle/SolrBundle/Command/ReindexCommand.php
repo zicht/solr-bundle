@@ -65,7 +65,7 @@ class ReindexCommand extends AbstractCommand
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function configure()
     {
@@ -94,7 +94,7 @@ class ReindexCommand extends AbstractCommand
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {

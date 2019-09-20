@@ -14,7 +14,7 @@ use Zicht\Bundle\SolrBundle\Pager\SolrPageable;
 trait DefaultPager
 {
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function initPager($query)
     {

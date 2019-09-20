@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service id="zicht_bundle_solr.admin.stop_word_admin" class="Zicht\Bundle\SolrBundle\Admin\StopWordAdmin">
+            <tag name="sonata.admin" manager_type="orm" group="Overig" label="Stop words" label_translator_strategy="sonata.admin.label.strategy.underscore"/>
+            <argument/>
+            <argument>Zicht\Bundle\SolrBundle\Entity\StopWord</argument>
+            <argument>ZichtAdminBundle:CRUD</argument>
+            <call method="setTranslationDomain">
+                <argument>admin</argument>
+            </call>
+        </service>
+
+        <service id="zicht_bundle_solr.admin.synonym_admin" class="Zicht\Bundle\SolrBundle\Admin\SynonymAdmin">
+            <tag name="sonata.admin" manager_type="orm" group="Overig" label="Synonyms" label_translator_strategy="sonata.admin.label.strategy.underscore"/>
+            <argument/>
+            <argument>Zicht\Bundle\SolrBundle\Entity\Synonym</argument>
+            <argument>ZichtAdminBundle:CRUD</argument>
+            <call method="setTranslationDomain">
+                <argument>admin</argument>
+            </call>
+        </service>
+    </services>
+</container>

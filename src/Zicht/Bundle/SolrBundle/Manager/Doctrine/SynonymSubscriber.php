@@ -1,6 +1,5 @@
 <?php
 /**
- * @author    Rik van der Kemp <rik@zicht.nl>
  * @copyright Zicht Online <http://zicht.nl>
  */
 
@@ -10,31 +9,31 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Zicht\Bundle\SolrBundle\Entity\StopWord;
+use Zicht\Bundle\SolrBundle\Entity\Synonym;
+use Zicht\Bundle\SolrBundle\Manager\StopWordManager;
+use Zicht\Bundle\SolrBundle\Manager\SynonymManager;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Interfaces\Extractable;
 
 /**
- * Class Subscriber
+ * Class SynonymSubscriber
  */
-class Subscriber implements EventSubscriber
+class SynonymSubscriber implements EventSubscriber
 {
     /**
-     * @var ContainerInterface
+     * @var SynonymManager
      */
-    private $container;
+    private $manager;
 
     /**
-     * Construct the subscriber
-     *
-     * @param ContainerInterface $container
+     * @param SynonymManager $container
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(SynonymManager $manager)
     {
-        $this->container = $container;
+        $this->manager = $manager;
     }
 
     /**
-     * Triggers an update in the solrmanager
-     *
      * @param LifecycleEventArgs $event
      * @return void
      */
@@ -45,8 +44,6 @@ class Subscriber implements EventSubscriber
 
 
     /**
-     * Triggers an update in the solrmanager
-     *
      * @param LifecycleEventArgs $event
      * @return void
      */
@@ -56,14 +53,17 @@ class Subscriber implements EventSubscriber
     }
 
     /**
-     * Triggers a deletein the solrmanager
-     *
      * @param LifecycleEventArgs $event
      * @return void
      */
     public function preRemove(LifecycleEventArgs $event)
     {
-        $this->container->get('zicht_solr.manager')->delete($event->getEntity());
+        if (!$event->getEntity() instanceof Synonym) {
+            return;
+        }
+
+        $this->manager->removeSynonym($event->getEntity());
+        $this->manager->getClient()->reload();
     }
 
     /**
@@ -79,19 +79,15 @@ class Subscriber implements EventSubscriber
     }
 
     /**
-     * Calls the proper method in the Solr Manager to update or extract the document
-     *
      * @param LifecycleEventArgs $event
      */
     private function callUpdate(LifecycleEventArgs $event)
     {
-        $entity = $event->getEntity();
-        if ($entity instanceof Extractable && is_resource($entity->getFileResource())) {
-            $this->container->get('zicht_solr.manager')->extract($entity);
-
+        if (!$event->getEntity() instanceof Synonym) {
             return;
         }
 
-        $this->container->get('zicht_solr.manager')->update($entity);
+        $this->manager->addSynonym($event->getEntity());
+        $this->manager->getClient()->reload();
     }
 }

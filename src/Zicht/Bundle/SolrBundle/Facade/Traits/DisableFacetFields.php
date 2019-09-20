@@ -12,7 +12,7 @@ namespace Zicht\Bundle\SolrBundle\Facade\Traits;
 trait DisableFacetFields
 {
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     public function getFacetFields()
     {

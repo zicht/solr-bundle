@@ -14,7 +14,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 class ZichtSolrBundle extends Bundle
 {
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     public function build(ContainerBuilder $container)
     {
