@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+## 3.4.0 - 2019-09-20
+### Added
+
+Ability to manage stopwords and synonyms from the CMS itself.
+
 ## 3.3.0 - 2019-09-05
 ### Added
 - Added Solr Entity Manager to better manage updates of entities and their related entities
