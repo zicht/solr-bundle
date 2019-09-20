@@ -12,12 +12,12 @@ use Zicht\Bundle\SolrBundle\Solr\Client;
 /**
  * Base class for commands interacting with the solr implementation
  */
-class AbstractCommand extends Command
+abstract class AbstractCommand extends Command
 {
     /**
      * @var Client
      */
-    protected $solr;
+    public $solr;
 
     /**
      * Construct the command with the solr service

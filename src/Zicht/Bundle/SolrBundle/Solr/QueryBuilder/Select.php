@@ -118,7 +118,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     public function createRequest(ClientInterface $httpClient)
     {
@@ -126,7 +126,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     public function handle(Response $response)
     {

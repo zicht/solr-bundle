@@ -1,0 +1,19 @@
+breadcrumb:
+    link_synonym_list: Synonyms
+    link_synonym_create: Create synonym
+    link_stop_word_list: Stop words
+    link_stop_word_create: Create stop word
+
+form:
+    label_managed: Managed
+    label_identifier: Word
+    label_value: Synonyms
+
+list:
+    label_identifier: Word
+    label_value: Word
+    label_managed: Managed
+    label_synonyms: Synonyms
+
+help:
+    synonyms: Enter multiple synonyms on new lines.

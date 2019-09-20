@@ -1,0 +1,19 @@
+breadcrumb:
+    link_synonym_list: Synoniemen
+    link_synonym_create: Synoniem aanmaken
+    link_stop_word_list: Stopwoorden
+    link_stop_word_create: Stopwoord aanmaken
+
+form:
+    label_managed: Managed
+    label_identifier: Woord
+    label_value: Synoniemen
+
+list:
+    label_identifier: Woord
+    label_value: Woord
+    label_managed: Managed
+    label_synonyms: Synonyms
+
+help:
+    synonyms: Voer meerdere synoniemen in over meerdere regels.

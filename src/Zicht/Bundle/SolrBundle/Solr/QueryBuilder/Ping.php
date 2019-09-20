@@ -15,7 +15,7 @@ use GuzzleHttp\Psr7\Request;
 class Ping implements RequestBuilderInterface
 {
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     public function createRequest(ClientInterface $httpClient)
     {

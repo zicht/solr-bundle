@@ -15,7 +15,7 @@ use Zicht\Bundle\SolrBundle\Pager\GroupedSolrPageable;
 trait GroupedPager
 {
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function initPager($query)
     {

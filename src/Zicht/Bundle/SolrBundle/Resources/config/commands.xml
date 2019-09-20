@@ -21,6 +21,15 @@
             <tag name="console.command"/>
         </service>
 
+        <service id="zicht_solr.command.stop_words" class="Zicht\Bundle\SolrBundle\Command\GetStopWordsCommand" parent="zicht_solr.command.abstract">
+            <argument type="service" id="zicht_solr.stop_word_manager" />
+            <tag name="console.command"/>
+        </service>
+        <service id="zicht_solr.command.synonyms" class="Zicht\Bundle\SolrBundle\Command\GetSynonymsCommand" parent="zicht_solr.command.abstract">
+            <argument type="service" id="zicht_solr.synonym_manager" />
+            <tag name="console.command"/>
+        </service>
+
         <service id="zicht_solr.command.reindex" class="Zicht\Bundle\SolrBundle\Command\ReindexCommand" parent="zicht_solr.command.abstract">
             <argument type="service" id="zicht_solr.manager" />
             <argument type="service" id="doctrine" />

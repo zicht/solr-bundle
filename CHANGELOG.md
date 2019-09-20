@@ -23,6 +23,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 - v4 is based on v3.1, so no Extract query support and no Entity Manager
 
+## 3.4.0 - 2019-09-20
+### Added
+
+Ability to manage stopwords and synonyms from the CMS itself.
+
 ## 3.3.0 - 2019-09-05
 ### Added
 - Added Solr Entity Manager to better manage updates of entities and their related entities

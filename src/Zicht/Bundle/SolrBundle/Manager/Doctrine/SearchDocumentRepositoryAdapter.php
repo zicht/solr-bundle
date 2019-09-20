@@ -25,7 +25,7 @@ class SearchDocumentRepositoryAdapter implements SearchDocumentRepository
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     public function findIndexableDocuments($where = null, $limit = null, $offset = null)
     {

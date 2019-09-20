@@ -12,7 +12,7 @@ namespace Zicht\Bundle\SolrBundle\Facade\Traits;
 trait DisablePager
 {
     /**
-     * @{inheritDoc}
+     * {@inheritDoc}
      */
     protected function initPager($query)
     {
