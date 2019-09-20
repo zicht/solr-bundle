@@ -5,7 +5,7 @@
 
 namespace Zicht\Bundle\SolrBundle\Admin;
 
-use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Admin\Admin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
@@ -16,7 +16,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 /**
  * Class StopWordAdmin
  */
-class StopWordAdmin extends AbstractAdmin
+class StopWordAdmin extends Admin
 {
     /**
      * {@inheritDoc}
@@ -69,7 +69,7 @@ class StopWordAdmin extends AbstractAdmin
     {
         $formMapper
             ->tab('admin.tab.general')
-                ->add('managed', ChoiceType::class, $this->getManagedFieldOptions())
+                ->add('managed', 'choice', $this->getManagedFieldOptions())
                 ->add('value')
                 ->end()
             ->end()
