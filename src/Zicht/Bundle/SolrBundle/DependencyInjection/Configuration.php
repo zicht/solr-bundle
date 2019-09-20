@@ -30,7 +30,6 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('path')->defaultValue('/solr')->end()
                 ->scalarNode('core')->end()
                 ->arrayNode('managed')->defaultValue([])
-                    ->beforeNormalization()->castToArray()->end()
                     ->prototype('scalar')->end()
                 ->end()
                 ->arrayNode('manager')

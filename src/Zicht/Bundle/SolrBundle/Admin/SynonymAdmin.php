@@ -5,7 +5,7 @@
 
 namespace Zicht\Bundle\SolrBundle\Admin;
 
-use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Admin\Admin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
@@ -17,7 +17,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 /**
  * Class SynonymAdmin
  */
-class SynonymAdmin extends AbstractAdmin
+class SynonymAdmin extends Admin
 {
     /**
      * {@inheritDoc}
@@ -74,9 +74,9 @@ class SynonymAdmin extends AbstractAdmin
     {
         $formMapper
             ->tab('admin.tab.general')
-                ->add('managed', ChoiceType::class, $this->getManagedFieldOptions())
+                ->add('managed', 'choice', $this->getManagedFieldOptions())
                 ->add('identifier')
-                ->add('value', TextareaType::class)
+                ->add('value', 'textarea')
                 ->end()
             ->end()
         ;
