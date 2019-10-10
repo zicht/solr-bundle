@@ -544,7 +544,30 @@ abstract class SearchFacade
         return false;
     }
 
+    /**
+     * Find highlighting by trying multiple fields
+     *
+     * @param string $docId
+     * @param string[] $fields
+     * @return string[]|null
+     */
+    public function getHighlightedFieldFromFieldList($docId, $fields)
+    {
+        foreach ($fields as $field) {
+            $highlight = $this->getHighlightedField($docId, $field);
+            if (null !== $highlight) {
+                return $highlight;
+            }
+        }
 
+        return null;
+    }
+
+    /**
+     * @param string $docId
+     * @param string $field
+     * @return string[]|null
+     */
     public function getHighlightedField($docId, $field)
     {
         if (isset($this->response->highlighting->{$docId}->{$field})) {

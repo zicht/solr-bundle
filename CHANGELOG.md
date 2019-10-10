@@ -8,9 +8,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+## 3.4.2 - 2019-10-10
+### Added
+- Method on SearchFacade to try multiple fields for highlighting.
+
+## 3.4.1 - 2019-09-20
+### Fixed
+- Symfony 2.x support of stopwords and synonyms management from the CMS itself (introduced in 3.4.0)
+
 ## 3.4.0 - 2019-09-20
 ### Added
-
 Ability to manage stopwords and synonyms from the CMS itself.
 
 ## 3.3.0 - 2019-09-05
