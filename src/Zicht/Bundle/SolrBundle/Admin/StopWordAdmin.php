@@ -38,7 +38,7 @@ class StopWordAdmin extends Admin
     {
         $datagridMapper
             ->add('managed')
-            ->add('value')
+            ->add('value', null, ['label' => 'filter.label_stop_word'])
         ;
     }
 
@@ -48,7 +48,7 @@ class StopWordAdmin extends Admin
     protected function configureListFields(ListMapper $listMapper)
     {
         $listMapper
-            ->addIdentifier('value')
+            ->addIdentifier('value', null, ['label' => 'list.label_stop_word'])
             ->add('managed')
             ->add(
                 '_action',
@@ -70,7 +70,7 @@ class StopWordAdmin extends Admin
         $formMapper
             ->tab('admin.tab.general')
                 ->add('managed', 'choice', $this->getManagedFieldOptions())
-                ->add('value')
+                ->add('value', null, ['label' => 'form.label_stop_word'])
                 ->end()
             ->end()
         ;
@@ -83,7 +83,10 @@ class StopWordAdmin extends Admin
     {
         return [
             'choices' => $this->getConfigurationPool()->getContainer()->getParameter('zicht_solr.managed'),
-            'choice_label' => function($k, $v) { return $k; }
+            'choice_label' => function($k, $v) {
+                return 'choice.managed_stop_words.' . $k;
+            },
+            'choice_translation_domain' => 'admin',
         ];
     }
 }
