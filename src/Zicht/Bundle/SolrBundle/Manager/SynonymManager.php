@@ -68,7 +68,7 @@ class SynonymManager
      */
     public function addSynonym(Synonym $synonym)
     {
-        $data = explode(PHP_EOL, $synonym->getValue());
+        $data = explode(PHP_EOL, str_replace("\r", '', $synonym->getValue()));
         $request =  $this->client->getHttpClient()->createRequest(
             'PUT',
             sprintf('schema/analysis/synonyms/%s', $synonym->getManaged()),
