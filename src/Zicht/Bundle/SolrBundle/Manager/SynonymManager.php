@@ -6,9 +6,7 @@
 namespace Zicht\Bundle\SolrBundle\Manager;
 
 use Zicht\Bundle\SolrBundle\Entity\Synonym;
-use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
 use Zicht\Bundle\SolrBundle\Solr\Client;
-use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
 /**
  * Manages the synonym's registered in SOLR.
@@ -18,7 +16,7 @@ class SynonymManager
     /**
      * @var Client
      */
-    protected $client = null;
+    protected $client;
 
     /**
      * Constructor
@@ -64,7 +62,7 @@ class SynonymManager
      * Adds an synonym
      *
      * @param Synonym $synonym
-     * @return \GuzzleHttp\Message\FutureResponse|\GuzzleHttp\Message\ResponseInterface|\GuzzleHttp\Ring\Future\FutureInterface|null
+     * @return bool
      */
     public function addSynonym(Synonym $synonym)
     {
@@ -78,6 +76,50 @@ class SynonymManager
         );
 
         return 200 === $this->client->request($request)->getStatusCode();
+    }
+
+    /**
+     * Adds multiple synonyms at once
+     *
+     * @param Synonym[] $synonyms
+     * @return bool
+     */
+    public function addSynonyms($synonyms)
+    {
+        $dataPerManaged = [];
+        foreach ($synonyms as $synonym) {
+            if (!$synonym instanceof Synonym) {
+                throw new \UnexpectedValueException(
+                    sprintf(
+                        'Synonyms array elements must be of type %s. Got %s',
+                        Synonym::class,
+                        is_object($synonym) ? get_class($synonym) : gettype($synonym)
+                    )
+                );
+            }
+            if (!array_key_exists($synonym->getManaged(), $dataPerManaged)) {
+                $dataPerManaged[$synonym->getManaged()] = [];
+            }
+            $dataPerManaged[$synonym->getManaged()][$synonym->getIdentifier()] = explode(PHP_EOL, str_replace("\r", '', $synonym->getValue()));
+        }
+
+        $result = array_map(
+            function ($managed, $data) {
+                $request = $this->client->getHttpClient()->createRequest(
+                    'PUT',
+                    sprintf('schema/analysis/synonyms/%s', $managed),
+                    [
+                        'body' => \json_encode($data)
+                    ]
+                );
+
+                return 200 === $this->client->request($request)->getStatusCode();
+            },
+            array_keys($dataPerManaged),
+            $dataPerManaged
+        );
+
+        return !in_array(false, $result, true);
     }
 
     /**
