@@ -19,6 +19,11 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Interfaces\Extractable;
 class StopWordSubscriber implements EventSubscriber
 {
     /**
+     * @var bool
+     */
+    private $enabled = true;
+
+    /**
      * @var StopWordManager
      */
     private $manager;
@@ -29,6 +34,14 @@ class StopWordSubscriber implements EventSubscriber
     public function __construct(StopWordManager $manager)
     {
         $this->manager = $manager;
+    }
+
+    /**
+     * @param bool $enabled
+     */
+    public function setEnabled($enabled)
+    {
+        $this->enabled = $enabled;
     }
 
     /**
@@ -56,7 +69,7 @@ class StopWordSubscriber implements EventSubscriber
      */
     public function preRemove(LifecycleEventArgs $event)
     {
-        if (!$event->getEntity() instanceof StopWord) {
+        if (!$this->enabled || !$event->getEntity() instanceof StopWord) {
             return;
         }
 
@@ -81,7 +94,7 @@ class StopWordSubscriber implements EventSubscriber
      */
     private function callUpdate(LifecycleEventArgs $event)
     {
-        if (!$event->getEntity() instanceof StopWord) {
+        if (!$this->enabled || !$event->getEntity() instanceof StopWord) {
             return;
         }
 

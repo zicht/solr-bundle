@@ -21,12 +21,24 @@
             <tag name="console.command"/>
         </service>
 
-        <service id="zicht_solr.command.stop_words" class="Zicht\Bundle\SolrBundle\Command\GetStopWordsCommand" parent="zicht_solr.command.abstract">
+        <service id="zicht_solr.command.managed.stop_words_list" class="Zicht\Bundle\SolrBundle\Command\Managed\StopWordsListCommand" parent="zicht_solr.command.abstract">
             <argument type="service" id="zicht_solr.stop_word_manager" />
             <tag name="console.command"/>
         </service>
-        <service id="zicht_solr.command.synonyms" class="Zicht\Bundle\SolrBundle\Command\GetSynonymsCommand" parent="zicht_solr.command.abstract">
+        <service id="zicht_solr.command.managed.stop_words_add" class="Zicht\Bundle\SolrBundle\Command\Managed\StopWordsAddCommand" parent="zicht_solr.command.abstract">
+            <argument type="service" id="zicht_solr.stop_word_manager" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="zicht_bundle_solr.manager_doctrine.stop_word_subscriber" />
+            <tag name="console.command"/>
+        </service>
+        <service id="zicht_solr.command.managed.synonyms_list" class="Zicht\Bundle\SolrBundle\Command\Managed\SynonymsListCommand" parent="zicht_solr.command.abstract">
             <argument type="service" id="zicht_solr.synonym_manager" />
+            <tag name="console.command"/>
+        </service>
+        <service id="zicht_solr.command.managed.synonyms_add" class="Zicht\Bundle\SolrBundle\Command\Managed\SynonymsAddCommand" parent="zicht_solr.command.abstract">
+            <argument type="service" id="zicht_solr.synonym_manager" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="zicht_bundle_solr.manager_doctrine.synonym_subscriber" />
             <tag name="console.command"/>
         </service>
 
