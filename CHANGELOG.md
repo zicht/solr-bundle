@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+## 3.4.3 - 2019-10-28
+### Added
+- Synonym and stop words add commands
+### Fixed
+- Strip slash-r from synonym list
+- Managed stop words and synonyms translation messages
+- Solr bundle should require Sonata Admin now that it contains "admins"
+
 ## 3.4.2 - 2019-10-10
 ### Added
 - Method on SearchFacade to try multiple fields for highlighting.
