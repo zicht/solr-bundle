@@ -15,6 +15,7 @@ Nothing so far
 - Strip slash-r from synonym list
 - Managed stop words and synonyms translation messages
 - Solr bundle should require Sonata Admin now that it contains "admins"
+- Cleaned up composer.json
 
 ## 3.4.2 - 2019-10-10
 ### Added
