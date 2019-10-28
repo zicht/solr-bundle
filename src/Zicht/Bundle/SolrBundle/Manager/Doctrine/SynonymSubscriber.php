@@ -21,6 +21,11 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Interfaces\Extractable;
 class SynonymSubscriber implements EventSubscriber
 {
     /**
+     * @var bool
+     */
+    private $enabled = true;
+
+    /**
      * @var SynonymManager
      */
     private $manager;
@@ -31,6 +36,14 @@ class SynonymSubscriber implements EventSubscriber
     public function __construct(SynonymManager $manager)
     {
         $this->manager = $manager;
+    }
+
+    /**
+     * @param bool $enabled
+     */
+    public function setEnabled($enabled)
+    {
+        $this->enabled = $enabled;
     }
 
     /**
@@ -58,7 +71,7 @@ class SynonymSubscriber implements EventSubscriber
      */
     public function preRemove(LifecycleEventArgs $event)
     {
-        if (!$event->getEntity() instanceof Synonym) {
+        if (!$this->enabled || !$event->getEntity() instanceof Synonym) {
             return;
         }
 
@@ -83,7 +96,7 @@ class SynonymSubscriber implements EventSubscriber
      */
     private function callUpdate(LifecycleEventArgs $event)
     {
-        if (!$event->getEntity() instanceof Synonym) {
+        if (!$this->enabled || !$event->getEntity() instanceof Synonym) {
             return;
         }
 

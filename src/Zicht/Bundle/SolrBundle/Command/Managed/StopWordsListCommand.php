@@ -3,21 +3,15 @@
  * @copyright Zicht Online <http://zicht.nl>
  */
 
-namespace Zicht\Bundle\SolrBundle\Command;
+namespace Zicht\Bundle\SolrBundle\Command\Managed;
 
 use Symfony\Component\Console;
-use Zicht\Bundle\SolrBundle\Entity\StopWord;
+use Zicht\Bundle\SolrBundle\Command\AbstractCommand;
 use Zicht\Bundle\SolrBundle\Manager\StopWordManager;
 use Zicht\Bundle\SolrBundle\Solr\Client;
 
-/**
- * Class GetStopWordsCommand
- */
-class GetStopWordsCommand extends AbstractCommand
+class StopWordsListCommand extends AbstractCommand
 {
-    /**
-     * @param Client $solr
-     */
     public function __construct(Client $solr, StopWordManager $manager)
     {
         parent::__construct($solr);
@@ -31,7 +25,7 @@ class GetStopWordsCommand extends AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('zicht:solr:list-stop-words')
+            ->setName('zicht:solr:stop-words-list')
             ->setDescription('List solr stop words')
             ->addArgument('managed', Console\Input\InputArgument::REQUIRED, 'Specify the managed prefix')
         ;

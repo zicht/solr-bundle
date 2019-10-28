@@ -3,22 +3,18 @@
  * @copyright Zicht Online <http://zicht.nl>
  */
 
-namespace Zicht\Bundle\SolrBundle\Command;
+namespace Zicht\Bundle\SolrBundle\Command\Managed;
 
 use Symfony\Component\Console;
-use Zicht\Bundle\SolrBundle\Entity\Synonym;
-use Zicht\Bundle\SolrBundle\Manager\StopWordManager;
+use Zicht\Bundle\SolrBundle\Command\AbstractCommand;
 use Zicht\Bundle\SolrBundle\Manager\SynonymManager;
 use Zicht\Bundle\SolrBundle\Solr\Client;
 
-/**
- * Class GetSynonymsCommand
- */
-class GetSynonymsCommand extends AbstractCommand
+class SynonymsListCommand extends AbstractCommand
 {
-    /**
-     * @param Client $solr
-     */
+    /** @var SynonymManager */
+    protected $manager;
+
     public function __construct(Client $solr, SynonymManager $manager)
     {
         parent::__construct($solr);
@@ -32,7 +28,7 @@ class GetSynonymsCommand extends AbstractCommand
     protected function configure()
     {
         $this
-            ->setName('zicht:solr:list-synonyms')
+            ->setName('zicht:solr:synonyms-list')
             ->setDescription('List solr synonyms')
             ->addArgument('managed', Console\Input\InputArgument::REQUIRED, 'Specify the managed prefix')
         ;

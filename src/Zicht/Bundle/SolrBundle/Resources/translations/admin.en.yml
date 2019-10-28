@@ -4,15 +4,31 @@ breadcrumb:
     link_stop_word_list: Stop words
     link_stop_word_create: Create stop word
 
+choice:
+    managed_stop_words:
+        en: English
+        nl: Dutch
+    managed_synonyms:
+        en: English
+        nl: Dutch
+
+filter:
+    label_identifier: Word
+    label_managed: Managed
+    label_stop_word: Stop word
+    label_synonyms: Synonyms
+
 form:
     label_managed: Managed
     label_identifier: Word
+    label_stop_word: Stop word
     label_value: Synonyms
 
 list:
     label_identifier: Word
     label_value: Word
     label_managed: Managed
+    label_stop_word: Stop word
     label_synonyms: Synonyms
 
 help:
