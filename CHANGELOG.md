@@ -6,13 +6,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
-- Added Extract query (through merging in v3.2)
-- Added Solr Entity Manager (through merging in v3.3)
+Nothing so far
+
+## 4.2.0 - 2019-10-28
+### Added
+- Synonym and stop words add commands (through merging in v3.4.3)
+- Method on SearchFacade to try multiple fields for highlighting. (through merging in v3.4.2)
+### Fixed
+- Strip slash-r from synonym list (through merging in v3.4.3)
+- Managed stop words and synonyms translation messages (through merging in v3.4.3)
+- Solr bundle should require Sonata Admin now that it contains "admins" (through merging in v3.4.3)
+- Cleaned up composer.json (through merging in v3.4.3)
 
 ## 4.1.0 - 2019-09-20
 ### Added
-
 - Ability to manage stopwords and synonyms from the CMS itself.
+- Added Extract query (through merging in v3.2)
+- Added Solr Entity Manager (through merging in v3.3)
 
 ## 4.0.2 - 2019-08-27
 ### Added
@@ -28,9 +38,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 - v4 is based on v3.1, so no Extract query support and no Entity Manager
 
+## 3.4.3 - 2019-10-28
+### Added
+- Synonym and stop words add commands
+### Fixed
+- Strip slash-r from synonym list
+- Managed stop words and synonyms translation messages
+- Solr bundle should require Sonata Admin now that it contains "admins"
+- Cleaned up composer.json
+
+## 3.4.2 - 2019-10-10
+### Added
+- Method on SearchFacade to try multiple fields for highlighting.
+
+## 3.4.1 - 2019-09-20
+### Fixed
+- Symfony 2.x support of stopwords and synonyms management from the CMS itself (introduced in 3.4.0)
+
 ## 3.4.0 - 2019-09-20
 ### Added
-
 Ability to manage stopwords and synonyms from the CMS itself.
 
 ## 3.3.0 - 2019-09-05

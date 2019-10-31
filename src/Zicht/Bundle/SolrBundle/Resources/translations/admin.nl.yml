@@ -4,16 +4,32 @@ breadcrumb:
     link_stop_word_list: Stopwoorden
     link_stop_word_create: Stopwoord aanmaken
 
+choice:
+    managed_stop_words:
+        en: Engels
+        nl: Nederlands
+    managed_synonyms:
+        en: Engels
+        nl: Nederlands
+
+filter:
+    label_identifier: Woord
+    label_managed: Managed
+    label_stop_word: Stopwoord
+    label_synonyms: Synoniemen
+
 form:
     label_managed: Managed
     label_identifier: Woord
+    label_stop_word: Stopwoord
     label_value: Synoniemen
 
 list:
     label_identifier: Woord
     label_value: Woord
     label_managed: Managed
-    label_synonyms: Synonyms
+    label_stop_word: Stopwoord
+    label_synonyms: Synoniemen
 
 help:
     synonyms: Voer meerdere synoniemen in over meerdere regels.

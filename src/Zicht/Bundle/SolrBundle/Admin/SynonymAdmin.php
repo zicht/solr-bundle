@@ -40,7 +40,7 @@ class SynonymAdmin extends Admin
         $datagridMapper
             ->add('managed')
             ->add('identifier')
-            ->add('value')
+            ->add('value', null, ['label' => 'filter.label_synonyms'])
         ;
     }
 
@@ -51,9 +51,7 @@ class SynonymAdmin extends Admin
     {
         $listMapper
             ->addIdentifier('identifier')
-            ->add('value', null, [
-                'label' => 'list.label_synonyms'
-            ])
+            ->add('value', null, ['label' => 'list.label_synonyms'])
             ->add('managed')
             ->add(
                 '_action',
@@ -93,7 +91,10 @@ class SynonymAdmin extends Admin
     {
         return [
             'choices' => $this->getConfigurationPool()->getContainer()->getParameter('zicht_solr.managed'),
-            'choice_label' => function($k, $v) { return $k; }
+            'choice_label' => function($k, $v) {
+                return 'choice.managed_synonyms.' . $k;
+            },
+            'choice_translation_domain' => 'admin',
         ];
     }
 }
