@@ -51,4 +51,9 @@ class SolrDataCollector extends DataCollector
     {
         return 'zicht_solr.data_collector';
     }
+
+    public function reset()
+    {
+        $this->data = [];
+    }
 }

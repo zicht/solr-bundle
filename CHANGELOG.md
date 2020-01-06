@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+## 5.0.0 - 2020-05-18
+### Added
+- Support for Symfony 4.x
+### Removed
+- Support for Symfony 2.x
+- Support for PHP 5.6 and 7.0
+- Support for Sonata Admin Bundle v2
+
 ## 4.2.8 - 2020-05-18
 ### Changed
 - Switched from PSR-0 to PSR-4 autoloading (from v3.4.10)
