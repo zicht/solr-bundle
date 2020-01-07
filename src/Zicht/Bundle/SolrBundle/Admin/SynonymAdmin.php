@@ -51,7 +51,14 @@ class SynonymAdmin extends Admin
     {
         $listMapper
             ->addIdentifier('identifier')
-            ->add('value', null, ['label' => 'list.label_synonyms'])
+            ->add(
+                'value',
+                null,
+                [
+                    'label' => 'list.label_synonyms',
+                    'template' => 'ZichtSolrBundle:CRUD:list_multiline-multivalue.html.twig',
+                ]
+            )
             ->add('managed')
             ->add(
                 '_action',

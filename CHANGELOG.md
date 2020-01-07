@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+## 3.4.4 - 2020-01-17
+### Fixed
+- Dsiplaying of synonyms in admin list
+
 ## 3.4.3 - 2019-10-28
 ### Added
 - Synonym and stop words add commands
