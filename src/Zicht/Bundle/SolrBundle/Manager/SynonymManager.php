@@ -66,7 +66,7 @@ class SynonymManager
      */
     public function addSynonym(Synonym $synonym)
     {
-        $data = explode(PHP_EOL, str_replace("\r", '', $synonym->getValue()));
+        $data = $this->prepareSynonymData($synonym);
         $request =  $this->client->getHttpClient()->createRequest(
             'PUT',
             sprintf('schema/analysis/synonyms/%s', $synonym->getManaged()),
@@ -100,7 +100,7 @@ class SynonymManager
             if (!array_key_exists($synonym->getManaged(), $dataPerManaged)) {
                 $dataPerManaged[$synonym->getManaged()] = [];
             }
-            $dataPerManaged[$synonym->getManaged()][$synonym->getIdentifier()] = explode(PHP_EOL, str_replace("\r", '', $synonym->getValue()));
+            $dataPerManaged[$synonym->getManaged()][$synonym->getIdentifier()] = $this->prepareSynonymData($synonym);
         }
 
         $result = array_map(
@@ -152,5 +152,21 @@ class SynonymManager
         );
 
         return 200 === $this->client->request($request)->getStatusCode();
+    }
+
+    /**
+     * @param Synonym $synonym
+     * @return array
+     */
+    protected function prepareSynonymData(Synonym $synonym)
+    {
+        $data = explode(PHP_EOL, str_replace("\r", '', $synonym->getValue()));
+
+        // Fix to trick Solr into keeping the original word in the tokens
+        if (!in_array($synonym->getIdentifier(), $data)) {
+            array_unshift($data, $synonym->getIdentifier());
+        }
+
+        return $data;
     }
 }

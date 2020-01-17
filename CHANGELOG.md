@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+## 4.2.1 - 2020-01-17
+### Fixed
+- Merged v3.4.4 into v4.x:
+  - Fixed: Displaying of synonyms in admin list
+  - Fixed: Cleaning up synonyms on persist
+  - Fixed: Add original word to sysnonyms to keep it in
+
 ## 4.2.0 - 2019-10-28
 ### Added
 - Synonym and stop words add commands (through merging in v3.4.3)
@@ -37,6 +44,12 @@ Nothing so far
 - Upgraded Guzzle from v5 to v6
 ### Removed
 - v4 is based on v3.1, so no Extract query support and no Entity Manager
+
+## 3.4.4 - 2020-01-17
+### Fixed
+- Displaying of synonyms in admin list
+- Cleaning up synonyms on persist
+- Add original word to sysnonyms to keep it in
 
 ## 3.4.3 - 2019-10-28
 ### Added
