@@ -10,7 +10,9 @@ Nothing so far
 
 ## 3.4.4 - 2020-01-17
 ### Fixed
-- Dsiplaying of synonyms in admin list
+- Displaying of synonyms in admin list
+- Cleaning up synonyms on persist
+- Add original word to sysnonyms to keep it in
 
 ## 3.4.3 - 2019-10-28
 ### Added

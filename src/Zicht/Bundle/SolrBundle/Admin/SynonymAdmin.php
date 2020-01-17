@@ -13,6 +13,7 @@ use Sonata\AdminBundle\Route\RouteCollection;
 use Sonata\AdminBundle\Show\ShowMapper;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Zicht\Bundle\SolrBundle\Entity\Synonym;
 
 /**
  * Class SynonymAdmin
@@ -103,5 +104,18 @@ class SynonymAdmin extends Admin
             },
             'choice_translation_domain' => 'admin',
         ];
+    }
+
+    /**
+     * @param Synonym $synonym
+     */
+    public function prePersist($synonym)
+    {
+        if ($synonym->getValue()) {
+            $cleanValues = array_filter(array_map('trim', explode("\n", $synonym->getValue())));
+            $synonym->setValue(implode("\n", $cleanValues));
+        }
+
+        parent::prePersist($synonym);
     }
 }
