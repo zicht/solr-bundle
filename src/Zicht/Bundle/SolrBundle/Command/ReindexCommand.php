@@ -85,11 +85,16 @@ class ReindexCommand extends AbstractCommand
     {
         if ($entity = $input->getArgument('entity')) {
             $this->entities[] = $entity;
+
+            $output->writeln(sprintf('<comment>One single entity specified</comment>', $entity));
         } else {
-            foreach ($this->solrManager->getMappers() as $mapper) {
+            $mappers = $this->solrManager->getMappers();
+            foreach ($mappers as $mapper) {
                 $this->entities = array_merge($this->entities, $mapper->getClassNames());
             }
             $this->entities = array_unique($this->entities);
+
+            $output->writeln(sprintf('<comment>%d entities found to index (through %s mappers)</comment>', count($this->entities), count($mappers)));
         }
     }
 
@@ -98,15 +103,12 @@ class ReindexCommand extends AbstractCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        /** @var $solrManager \Zicht\Bundle\SolrBundle\Manager\SolrManager */
-
-        $output->writeln('Preparing entities ...');
         foreach($this->entities as $entity) {
-
             $em = $this->doctrine->getManager($input->getOption('em'));
 
             $reflection = $em->getClassMetadata($entity)->getReflectionClass();
             $entity = $reflection->name;
+            $output->writeln(['', sprintf('<info>%s</info>', $entity)]);
 
             if (null !== ($repos = $this->solrManager->getRepository($entity))) {
                 if ($repos instanceof WrappedSearchDocumentRepository) {

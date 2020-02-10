@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+## 4.2.2 - 2020-02-10
+### Changed
+- Improved reindex command info output
+
 ## 4.2.1 - 2020-01-17
 ### Fixed
 - Merged v3.4.4 into v4.x:
