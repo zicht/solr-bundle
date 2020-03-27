@@ -10,9 +10,6 @@ use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollection;
-use Sonata\AdminBundle\Show\ShowMapper;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Zicht\Bundle\SolrBundle\Entity\Synonym;
 
 /**
@@ -28,6 +25,7 @@ class SynonymAdmin extends Admin
         $collection->clearExcept([
             'create',
             'list',
+            'edit',
             'delete'
         ]);
         parent::configureRoutes($collection);
@@ -66,6 +64,7 @@ class SynonymAdmin extends Admin
                 'actions',
                 [
                     'actions' => [
+                        'edit' => [],
                         'delete' => [],
                     ],
                 ]
@@ -111,11 +110,24 @@ class SynonymAdmin extends Admin
      */
     public function prePersist($synonym)
     {
+        $this->cleanUpSynonymValue($synonym);
+        parent::prePersist($synonym);
+    }
+
+    /**
+     * @param Synonym $synonym
+     */
+    public function preUpdate($synonym)
+    {
+        $this->cleanUpSynonymValue($synonym);
+        parent::prePersist($synonym);
+    }
+
+    private function cleanUpSynonymValue(Synonym $synonym)
+    {
         if ($synonym->getValue()) {
             $cleanValues = array_filter(array_map('trim', explode("\n", $synonym->getValue())));
             $synonym->setValue(implode("\n", $cleanValues));
         }
-
-        parent::prePersist($synonym);
     }
 }
