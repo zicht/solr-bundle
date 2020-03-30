@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
-Nothing so far
+- Ability to edit synonyms
 
 ## 4.2.2 - 2020-02-10
 ### Changed
