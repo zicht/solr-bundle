@@ -570,7 +570,9 @@ abstract class SearchFacade
      */
     public function getHighlightedField($docId, $field)
     {
-        if (isset($this->response->highlighting->{$docId}->{$field})) {
+        if (isset($this->response->highlighting->{$docId}->{$field})
+            && is_array($this->response->highlighting->{$docId}->{$field})
+            && count($this->response->highlighting->{$docId}->{$field}) > 0) {
             return $this->response->highlighting->{$docId}->{$field};
         }
 

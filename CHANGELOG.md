@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+## 3.4.6 - 2020-04-09
+### Fixed
+- Fixed checks on retrieving highlighted field for Unified Highlighter (Solr >=6.4)
+
 ## 3.4.5 - 2020-03-30
 ### Added
 - Ability to edit synonyms
