@@ -8,10 +8,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
-## 3.4.5 - 2020-03-30
-### Added
-- Ability to edit synonyms
-
 ## 4.2.2 - 2020-02-10
 ### Changed
 - Improved reindex command info output
@@ -52,6 +48,14 @@ Nothing so far
 - Upgraded Guzzle from v5 to v6
 ### Removed
 - v4 is based on v3.1, so no Extract query support and no Entity Manager
+
+## 3.4.6 - 2020-04-09
+### Fixed
+- Fixed checks on retrieving highlighted field for Unified Highlighter (Solr >=6.4)
+
+## 3.4.5 - 2020-03-30
+### Added
+- Ability to edit synonyms
 
 ## 3.4.4 - 2020-01-17
 ### Fixed
