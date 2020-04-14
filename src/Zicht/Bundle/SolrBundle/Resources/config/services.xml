@@ -10,6 +10,13 @@
         <service id="zicht_solr.manager.default_manager" class="Zicht\Bundle\SolrBundle\Manager\SolrManager">
             <argument type="service" id="zicht_solr.solr"/>
         </service>
+        <service id="zicht_solr.manager.entity_manager" class="Zicht\Bundle\SolrBundle\Manager\SolrEntityManager" parent="zicht_solr.manager.default_manager" />
+
+        <service id="zicht_solr.manager.index_status_manager" class="Zicht\Bundle\SolrBundle\Manager\IndexStatusManager">
+            <argument>%solr_core%</argument>
+            <argument>%kernel.cache_dir%/zicht/solr</argument>
+            <argument>%kernel.debug%</argument>
+        </service>
 
         <service id="zicht_solr.stop_word_manager" class="Zicht\Bundle\SolrBundle\Manager\StopWordManager">
             <argument type="service" id="zicht_solr.solr"/>
@@ -18,8 +25,6 @@
         <service id="zicht_solr.synonym_manager" class="Zicht\Bundle\SolrBundle\Manager\SynonymManager">
             <argument type="service" id="zicht_solr.solr"/>
         </service>
-
-        <service id="zicht_solr.manager.entity_manager" class="Zicht\Bundle\SolrBundle\Manager\SolrEntityManager" parent="zicht_solr.manager.default_manager" />
 
         <service id="zicht_solr.doctrine.subscriber" class="Zicht\Bundle\SolrBundle\Manager\Doctrine\Subscriber">
             <argument type="service" id="service_container"/>
@@ -35,7 +40,6 @@
             <argument type="service" id="zicht_solr.stop_word_manager"/>
             <tag name="doctrine.event_subscriber" />
         </service>
-
 
         <service id="zicht_solr.solr" class="Zicht\Bundle\SolrBundle\Solr\Client">
             <argument type="service" id="_zicht_solr.http_client" />

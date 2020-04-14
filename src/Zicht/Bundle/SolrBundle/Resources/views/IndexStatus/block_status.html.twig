@@ -1,0 +1,35 @@
+{% extends sonata_block.templates.block_base %}
+
+{% block block %}
+    {# @var statuses array<string, bool> #}
+    {% set translation_domain = block_context.settings.translation_domain %}
+    <div class="box">
+        <div class="box-header">
+            <h3 class="box-title">{{ 'dashboard.index_status.block_title'|trans({}, translation_domain) }}</h3>
+        </div>
+        <div class="box-body">
+            <table class="table table-hover">
+                <tbody>
+                {% for key, status in statuses %}
+                    <tr>
+                        <td class="sonata-ba-list-label" width="40%">
+                            {{ 'dashboard.index_status.%s'|format(key)|trans({}, translation_domain) }}
+                        </td>
+                        <td>
+                            {{ 'dashboard.index_status.status_%s'|format(status ? 'true' : 'false')|trans({}, translation_domain) }}
+                        </td>
+                        {# @todo: render actions #}
+{#                        <td>#}
+{#                            <div class="btn-group">#}
+{#                                {% for action in admin.dashboardActions %}#}
+{#                                    {% include action.template|default('@SonataAdmin/CRUD/dashboard__action.html.twig') with {'action': action} %}#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        </td>#}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

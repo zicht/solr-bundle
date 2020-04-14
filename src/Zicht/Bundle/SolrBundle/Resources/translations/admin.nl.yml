@@ -12,6 +12,16 @@ choice:
         en: Engels
         nl: Nederlands
 
+dashboard:
+    index_status:
+        block_title: Zoekindex status
+        is_reindexing: Herindexeren bezig
+        is_reloading: Hetladen bezig
+        needs_reindex: Herindexeren nodig
+        needs_reload: Herladen nodig
+        status_false: Nee
+        status_true: Ja
+
 filter:
     label_identifier: Woord
     label_managed: Managed

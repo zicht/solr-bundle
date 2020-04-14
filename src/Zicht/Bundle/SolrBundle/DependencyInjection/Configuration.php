@@ -41,6 +41,15 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->arrayNode('index_management')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->enumNode('mode')
+                            ->values(['none', 'manual', 'automatic'])
+                            ->defaultValue('default')
+                    ->end()
+                    ->end()
+                ->end()
             ->end();
 
         return $treeBuilder;

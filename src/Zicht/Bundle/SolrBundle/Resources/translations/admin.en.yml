@@ -1,3 +1,11 @@
+admin:
+    index_status:
+        # @todo: Add references to the status page where reloading and reindexing can be initiated/followed
+        # @todo: Should variations be added for no/manual/automatic index status management?
+        message_needs_reindex: The website content needs to be reindexed into the serach engine for your changes to take effect.
+        message_needs_reload: The search index needs to be reloaded for your changes to take effect.
+        message_needs_reload_and_reindex: The search index needs to be reloaded and the website content needs to be reindexed for your changes to take effect.
+
 breadcrumb:
     link_synonym_list: Synonyms
     link_synonym_create: Create synonym
@@ -11,6 +19,16 @@ choice:
     managed_synonyms:
         en: English
         nl: Dutch
+
+dashboard:
+    index_status:
+        block_title: Search index status
+        is_reindexing: Is reindexing
+        is_reloading: Is reloading
+        needs_reindex: Needs reindex
+        needs_reload: Needs reindex
+        status_false: No
+        status_true: Yes
 
 filter:
     label_identifier: Word

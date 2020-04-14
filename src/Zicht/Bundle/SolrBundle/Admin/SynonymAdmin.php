@@ -11,12 +11,24 @@ use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollection;
 use Zicht\Bundle\SolrBundle\Entity\Synonym;
+use Zicht\Bundle\SolrBundle\Manager\IndexStatusManager;
 
 /**
  * Class SynonymAdmin
  */
 class SynonymAdmin extends Admin
 {
+    /** @var IndexStatusManager */
+    private $indexStatusManager;
+
+    /**
+     * @param IndexStatusManager $indexStatusManager
+     */
+    public function setIndexStatusManager(IndexStatusManager $indexStatusManager)
+    {
+        $this->indexStatusManager = $indexStatusManager;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -128,6 +140,53 @@ class SynonymAdmin extends Admin
         if ($synonym->getValue()) {
             $cleanValues = array_filter(array_map('trim', explode("\n", $synonym->getValue())));
             $synonym->setValue(implode("\n", $cleanValues));
+        }
+    }
+
+    /**
+     * @param Synonym $synonym
+     */
+    public function postPersist($synonym)
+    {
+        parent::postPersist($synonym);
+        $this->detectNeedReindexOrReload();
+    }
+
+    /**
+     * @param Synonym $synonym
+     */
+    public function postUpdate($synonym)
+    {
+        parent::postUpdate($synonym);
+        $this->detectNeedReindexOrReload();
+    }
+
+    /**
+     * @param Synonym $synonym
+     */
+    public function postRemove($synonym)
+    {
+        parent::postRemove($synonym);
+        $this->detectNeedReindexOrReload();
+    }
+
+    private function detectNeedReindexOrReload()
+    {
+        $message = '';
+        if ($this->indexStatusManager->getIndexStatus()->getNeedsReload()) {
+            $message = 'message_needs_reload';
+        }
+        if ($this->indexStatusManager->getIndexStatus()->getNeedsReindex()) {
+            $message .= ($message === '' ? 'message_needs_reindex' : '_and_reindex');
+        }
+// @todo: Add references to the status page where reloading and reindexing can be initiated/followed
+// @todo: Should variations be added for no/manual/automatic index status management?
+// @todo: Should message be added for currently running reload/reindex processes (no 'need', but already pending = getIsReloading / getIsReindexing)?
+        if ($message !== '') {
+            $this->getRequest()->getSession()->getFlashBag()->add(
+                'warning',
+                $this->trans('', [], 'admin')
+            );
         }
     }
 }
