@@ -46,12 +46,9 @@
         </service>
 
         <service id="zicht_solr.solr" class="%zicht_solr.solr.class%">
-            <argument type="service" id="zicht_solr.http_client"/>
-            <argument>%zicht_solr.absolute_base_url%</argument>
-            <argument>%solr_core%</argument>
+            <argument type="collection"/>
+            <argument>%zicht_solr.http_client.class%</argument>
         </service>
-
-        <service id="zicht_solr.http_client" public="false" class="%zicht_solr.http_client.class%"/>
 
         <service id="zicht_solr.data_collector" class="%zicht_solr.data_collector.class%" public="false">
             <tag name="data_collector" template="@ZichtSolr/DataCollector/data_collector.html.twig" id="zicht_solr.data_collector"/>

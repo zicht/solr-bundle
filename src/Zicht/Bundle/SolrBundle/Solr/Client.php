@@ -10,6 +10,7 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Request;
 use Psr\Http\Message\ResponseInterface;
+use Zicht\Bundle\SolrBundle\Exception\ConfigurationException;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
 /**
@@ -40,18 +41,10 @@ class Client
      */
     public $logs = [];
 
-    /**
-     * Setup the client
-     *
-     * @param ClientInterface $client
-     * @param string $absoluteBaseUrl
-     * @param string $core
-     */
-    public function __construct(ClientInterface $client, $absoluteBaseUrl, $core)
+    public function __construct(array $options, string $clientClass)
     {
-        $this->http = $client;
-        $this->absoluteBaseUrl = $absoluteBaseUrl;
-        $this->core = $core;
+        [$this->absoluteBaseUrl, $this->core] = $this->parseSolrUrlFromOptions($options);
+        $this->http = new $clientClass(['base_uri' => sprintf('%s%s/', $this->absoluteBaseUrl, $this->core)]);
     }
 
     /**
@@ -238,5 +231,52 @@ class Client
     public function getLastResponse()
     {
         return $this->lastResponse;
+    }
+
+    /**
+     * @param array $options
+     * @return string[]
+     */
+    private function parseSolrUrlFromOptions(array $options): array
+    {
+        if (!array_key_exists('url', $options)) {
+            throw new ConfigurationException('Solr url is missing from configuration options');
+        }
+        if ($options['url'] === null || (string)$options['url'] === '') {
+            throw new ConfigurationException('Solr url is empty in configuration options');
+        }
+        if (!is_string($options['url'])) {
+            throw new ConfigurationException(sprintf('Solr url should be a string in configuration options, %s given', gettype($options['url'])));
+        }
+        if (strpos($options['url'], '://') === false) {
+            $options['url'] = 'http://' . $options['url'];
+        }
+
+        $url = parse_url($options['url']);
+        if ($url === false) {
+            throw new ConfigurationException('Could not parse configured Solr url');
+        }
+
+        if (!isset($url['host']) || $url['host'] === '') {
+            throw new ConfigurationException('Could not parse host from configured Solr url. Please configure a full URL');
+        }
+        if (!isset($url['scheme']) || $url['scheme'] !== 'http') {
+            throw new ConfigurationException('No schema or an unsupported schema was configured for Solr url. Only http is supported');
+        }
+
+        $core = null;
+        if (isset($url['query'])) {
+            parse_str($url['query'], $query);
+            if (isset($query['core'])) {
+                $core = $query['core'];
+            }
+        }
+        if ((string)$core === '') {
+            throw new ConfigurationException('Solr core was not configured through Solr url in configuration options');
+        }
+
+        $baseUrl = sprintf('%s://%s%s/%s/', $url['scheme'], $url['host'], (isset($url['port']) ? ':' . $url['port'] : ''), ($url['path'] ? trim($url['path'], '/') : ''));
+
+        return [$baseUrl, $core];
     }
 }
