@@ -9,12 +9,9 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Events;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Zicht\Bundle\SolrBundle\Entity\StopWord;
 use Zicht\Bundle\SolrBundle\Entity\Synonym;
-use Zicht\Bundle\SolrBundle\Manager\StopWordManager;
+use Zicht\Bundle\SolrBundle\Exception\NotFoundException;
 use Zicht\Bundle\SolrBundle\Manager\SynonymManager;
-use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Interfaces\Extractable;
 
 /**
  * Class SynonymSubscriber
@@ -51,6 +48,19 @@ class SynonymSubscriber implements EventSubscriber
      * @param LifecycleEventArgs $event
      * @return void
      */
+    public function prePersist(LifecycleEventArgs $event)
+    {
+        if (!$event->getEntity() instanceof Synonym) {
+            return;
+        }
+
+        $this->prepareSynonym($event->getEntity());
+    }
+
+    /**
+     * @param LifecycleEventArgs $event
+     * @return void
+     */
     public function postPersist(LifecycleEventArgs $event)
     {
         $this->callUpdate($event);
@@ -62,6 +72,11 @@ class SynonymSubscriber implements EventSubscriber
      */
     public function preUpdate(LifecycleEventArgs $event)
     {
+        if (!$event->getEntity() instanceof Synonym) {
+            return;
+        }
+
+        $this->prepareSynonym($event->getEntity());
         $this->callUpdate($event);
     }
 
@@ -75,8 +90,12 @@ class SynonymSubscriber implements EventSubscriber
             return;
         }
 
-        $this->manager->removeSynonym($event->getEntity());
-        $this->manager->getClient()->reload();
+        try {
+            $this->manager->removeSynonym($event->getEntity());
+            $this->manager->getClient()->reload();
+        } catch (NotFoundException $e) {
+            // Synonym was not found, so isn't already there. Nothing to be done...
+        }
     }
 
     /**
@@ -85,6 +104,7 @@ class SynonymSubscriber implements EventSubscriber
     public function getSubscribedEvents()
     {
         return array(
+            Events::prePersist,
             Events::postPersist,
             Events::preUpdate,
             Events::preRemove
@@ -109,10 +129,23 @@ class SynonymSubscriber implements EventSubscriber
             $oldEntity = clone $event->getEntity();
             $oldEntity->setIdentifier($event->hasChangedField('identifier') ? $event->getOldValue('identifier') : $oldEntity->getIdentifier());
             $oldEntity->setManaged($event->hasChangedField('managed') ? $event->getOldValue('managed') : $oldEntity->getManaged());
-            $this->manager->removeSynonym($oldEntity);
+            try {
+                $this->manager->removeSynonym($oldEntity);
+            } catch (NotFoundException $e) {
+                // Synonym was not found, so isn't already there. Do nothing, proceed with adding it below...
+            }
         }
 
         $this->manager->addSynonym($event->getEntity());
         $this->manager->getClient()->reload();
+    }
+
+    /**
+     * @param Synonym $synonym
+     */
+    private function prepareSynonym(Synonym $synonym)
+    {
+        $synonym->setIdentifier(strtolower(trim($synonym->getIdentifier())));
+        $synonym->setValue(strtolower(trim($synonym->getValue())));
     }
 }

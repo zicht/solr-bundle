@@ -7,6 +7,7 @@
 namespace Zicht\Bundle\SolrBundle\Solr;
 
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Message\Request;
 use GuzzleHttp\Message\ResponseInterface;
@@ -20,6 +21,11 @@ class Client
 {
     private $lastRequest = null;
     private $lastResponse = null;
+
+    /**
+     * @var ClientInterface
+     */
+    private $http;
 
     /**
      * @var string
@@ -47,7 +53,7 @@ class Client
         $this->absoluteBaseUrl = $absoluteBaseUrl;
         $this->core = $core;
     }
-    
+
     /**
      * Selects documents based on the specified query.
      *
@@ -81,7 +87,7 @@ class Client
     {
         return $this->doRequest($extract);
     }
-    
+
     /**
      * Do the request and return the response.
      *
@@ -159,7 +165,7 @@ class Client
             throw new Exception($e->getMessage(), null, $e);
         }
     }
-    
+
     public function reload()
     {
         $request = new Request('GET', $this->absoluteBaseUrl . 'admin/cores?action=RELOAD&core=' . $this->core);

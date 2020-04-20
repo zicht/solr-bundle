@@ -8,10 +8,9 @@ namespace Zicht\Bundle\SolrBundle\Manager\Doctrine;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Zicht\Bundle\SolrBundle\Entity\StopWord;
+use Zicht\Bundle\SolrBundle\Exception\NotFoundException;
 use Zicht\Bundle\SolrBundle\Manager\StopWordManager;
-use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Interfaces\Extractable;
 
 /**
  * Class StopWordSubscriber
@@ -29,7 +28,7 @@ class StopWordSubscriber implements EventSubscriber
     private $manager;
 
     /**
-     * @param StopWordManager $container
+     * @param StopWordManager $manager
      */
     public function __construct(StopWordManager $manager)
     {
@@ -48,11 +47,23 @@ class StopWordSubscriber implements EventSubscriber
      * @param LifecycleEventArgs $event
      * @return void
      */
+    public function prePersist(LifecycleEventArgs $event)
+    {
+        if (!$event->getEntity() instanceof StopWord) {
+            return;
+        }
+
+        $this->prepareStopword($event->getEntity());
+    }
+
+    /**
+     * @param LifecycleEventArgs $event
+     * @return void
+     */
     public function postPersist(LifecycleEventArgs $event)
     {
         $this->callUpdate($event);
     }
-
 
     /**
      * @param LifecycleEventArgs $event
@@ -60,6 +71,11 @@ class StopWordSubscriber implements EventSubscriber
      */
     public function preUpdate(LifecycleEventArgs $event)
     {
+        if (!$event->getEntity() instanceof StopWord) {
+            return;
+        }
+
+        $this->prepareStopword($event->getEntity());
         $this->callUpdate($event);
     }
 
@@ -73,8 +89,12 @@ class StopWordSubscriber implements EventSubscriber
             return;
         }
 
-        $this->manager->removeStopWord($event->getEntity());
-        $this->manager->getClient()->reload();
+        try {
+            $this->manager->removeStopWord($event->getEntity());
+            $this->manager->getClient()->reload();
+        } catch (NotFoundException $e) {
+            // Stopword was not found, so isn't already there. Nothing to be done...
+        }
     }
 
     /**
@@ -83,6 +103,7 @@ class StopWordSubscriber implements EventSubscriber
     public function getSubscribedEvents()
     {
         return array(
+            Events::prePersist,
             Events::postPersist,
             Events::preUpdate,
             Events::preRemove
@@ -100,5 +121,13 @@ class StopWordSubscriber implements EventSubscriber
 
         $this->manager->addStopWord($event->getEntity());
         $this->manager->getClient()->reload();
+    }
+
+    /**
+     * @param StopWord $stopWord
+     */
+    private function prepareStopword(StopWord $stopWord)
+    {
+        $stopWord->setValue(strtolower(trim($stopWord->getValue())));
     }
 }
