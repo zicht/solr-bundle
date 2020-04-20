@@ -57,6 +57,11 @@ Nothing so far
 ### Removed
 - v4 is based on v3.1, so no Extract query support and no Entity Manager
 
+## 3.4.7 - 2020-04-20
+### Fixed
+- Catch NotFound exceptions when deleting Synonyms or stopwords
+- Some minor cleanups
+
 ## 3.4.6 - 2020-04-09
 ### Fixed
 - Fixed checks on retrieving highlighted field for Unified Highlighter (Solr >=6.4)

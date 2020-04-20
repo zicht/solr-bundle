@@ -21,6 +21,11 @@ class Client
     private $lastResponse = null;
 
     /**
+     * @var ClientInterface
+     */
+    private $http;
+
+    /**
      * @var string
      */
     private $absoluteBaseUrl;
@@ -34,11 +39,6 @@ class Client
      * @var array
      */
     public $logs = [];
-
-    /**
-     * @var ClientInterface
-     */
-    protected $http;
 
     /**
      * Setup the client
