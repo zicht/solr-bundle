@@ -19,16 +19,20 @@
         <service id="zicht_solr.manager.default_manager" class="%zicht_solr.manager.class%">
             <argument type="service" id="zicht_solr.solr"/>
         </service>
+        <service id="Zicht\Bundle\SolrBundle\Manager\SolrManager" alias="zicht_solr.manager.default_manager"/>
 
-        <service id="zicht_solr.stop_word_manager" class="Zicht\Bundle\SolrBundle\Manager\StopWordManager">
+        <service id="Zicht\Bundle\SolrBundle\Manager\StopWordManager">
             <argument type="service" id="zicht_solr.solr"/>
         </service>
+        <service id="zicht_solr.stop_word_manager" alias="Zicht\Bundle\SolrBundle\Manager\StopWordManager"/>
 
-        <service id="zicht_solr.synonym_manager" class="Zicht\Bundle\SolrBundle\Manager\SynonymManager">
+        <service id="Zicht\Bundle\SolrBundle\Manager\SynonymManager">
             <argument type="service" id="zicht_solr.solr"/>
         </service>
+        <service id="zicht_solr.synonym_manager" alias="Zicht\Bundle\SolrBundle\Manager\SynonymManager"/>
 
         <service id="zicht_solr.manager.entity_manager" class="%zicht_solr.entity_manager.class%" parent="zicht_solr.manager.default_manager" />
+        <service id="Zicht\Bundle\SolrBundle\Manager\SolrEntityManager" alias="zicht_solr.manager.entity_manager"/>
 
         <service id="zicht_solr.doctrine.subscriber" class="%zicht_solr.doctrine.subscriber.class%">
             <argument type="service" id="service_container"/>
@@ -49,6 +53,7 @@
             <argument type="collection"/>
             <argument>%zicht_solr.http_client.class%</argument>
         </service>
+        <service id="Zicht\Bundle\SolrBundle\Solr\Client" alias="zicht_solr.solr"/>
 
         <service id="zicht_solr.data_collector" class="%zicht_solr.data_collector.class%" public="false">
             <tag name="data_collector" template="@ZichtSolr/DataCollector/data_collector.html.twig" id="zicht_solr.data_collector"/>
