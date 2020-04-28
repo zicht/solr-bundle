@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+## 4.2.6 - 2020-04-28
+### Fixed
+- Changed use of Guzzle base_url config parameter into the official base_uri parameter
+
 ## 4.2.5 - 2020-04-20
 ### Fixed
 - Merged in v3.4.6: Catch NotFound exceptions when deleting Synonyms or stopwords and some minor cleanups

@@ -122,7 +122,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      */
     public function createRequest(ClientInterface $httpClient)
     {
-        return new Request('GET', sprintf('%sselect?%s', $httpClient->getConfig('base_url'), $this->createQueryString($this->params)));
+        return new Request('GET', sprintf('%sselect?%s', $httpClient->getConfig('base_uri'), $this->createQueryString($this->params)));
     }
 
     /**

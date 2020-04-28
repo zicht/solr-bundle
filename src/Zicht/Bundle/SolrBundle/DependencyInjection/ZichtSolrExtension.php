@@ -32,7 +32,7 @@ class ZichtSolrExtension extends Extension
         }
 
         $container->getDefinition('zicht_solr.http_client')->setArguments([
-            ['base_url' => sprintf('http://%s:%d%s/%s/', $config['host'], $config['port'], $config['path'], $config['core'])],
+            ['base_uri' => sprintf('http://%s:%d%s/%s/', $config['host'], $config['port'], $config['path'], $config['core'])],
         ]);
         $container->setParameter('zicht_solr.managed', $config['managed']);
         $container->setParameter('zicht_solr.absolute_base_url', sprintf('http://%s:%d%s/', $config['host'], $config['port'], $config['path']));
