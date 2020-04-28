@@ -35,7 +35,7 @@
         <service id="Zicht\Bundle\SolrBundle\Manager\SolrEntityManager" alias="zicht_solr.manager.entity_manager"/>
 
         <service id="zicht_solr.doctrine.subscriber" class="%zicht_solr.doctrine.subscriber.class%">
-            <argument type="service" id="service_container"/>
+            <argument type="service" id="zicht_solr.manager"/>
             <tag name="doctrine.event_subscriber"/>
         </service>
 

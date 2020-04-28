@@ -10,6 +10,8 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Zicht\Bundle\SolrBundle\Manager\SolrEntityManager;
+use Zicht\Bundle\SolrBundle\Manager\SolrManager;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Interfaces\Extractable;
 
 /**
@@ -18,18 +20,18 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Interfaces\Extractable;
 class Subscriber implements EventSubscriber
 {
     /**
-     * @var ContainerInterface
+     * @var SolrManager|SolrEntityManager
      */
-    protected $container;
+    protected $manager;
 
     /**
      * Construct the subscriber
      *
-     * @param ContainerInterface $container
+     * @param SolrManager|SolrEntityManager $manager
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(SolrManager $manager)
     {
-        $this->container = $container;
+        $this->manager = $manager;
     }
 
     /**
@@ -63,7 +65,7 @@ class Subscriber implements EventSubscriber
      */
     public function preRemove(LifecycleEventArgs $event)
     {
-        $this->container->get('zicht_solr.manager')->delete($event->getEntity());
+        $this->manager->delete($event->getEntity());
     }
 
     /**
@@ -87,11 +89,11 @@ class Subscriber implements EventSubscriber
     {
         $entity = $event->getEntity();
         if ($entity instanceof Extractable && is_resource($entity->getFileResource())) {
-            $this->container->get('zicht_solr.manager')->extract($entity);
+            $this->manager->extract($entity);
 
             return;
         }
 
-        $this->container->get('zicht_solr.manager')->update($entity);
+        $this->manager->update($entity);
     }
 }
