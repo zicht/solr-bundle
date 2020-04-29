@@ -140,7 +140,7 @@ class Update extends AbstractQueryBuilder
         fseek($this->stream, 0);
         return new Request(
             'POST',
-            sprintf('%supdate', $httpClient->getConfig('base_url')),
+            sprintf('%supdate', $httpClient->getConfig('base_uri')),
             ['Content-Type' => 'application/json'],
             \GuzzleHttp\Psr7\stream_for($this->stream)
         );
