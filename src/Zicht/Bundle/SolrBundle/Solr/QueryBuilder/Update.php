@@ -38,7 +38,7 @@ class Update extends AbstractQueryBuilder
             'add',
             ['doc' => array_map(
                 function ($v) {
-                    if ($v instanceof \DateTime) {
+                    if ($v instanceof \DateTimeInterface) {
                         $v = DateHelper::formatDate($v);
                     }
 
