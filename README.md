@@ -35,5 +35,4 @@ TODO: Write documentation about mapping documents to SOLR
 TODO: Write documentation about using SOLR for searching purposes.
 
 # Maintainers
-* Boudewijn Schoon <boudewijn@zicht.nl>
-* Philip Bergman <philip@zicht>
+* Jochem Klaver <jochem@zicht.nl>
