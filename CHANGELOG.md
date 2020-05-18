@@ -13,6 +13,8 @@ Nothing so far
 - Support for Symfony 2.x
 - Support for PHP 5.6 and 7.0
 - Support for Sonata Admin Bundle v2
+### Changed
+- Removed Zicht/Bundle/SolrBundle/ directory depth: moved all code up directly into src/
 
 ## 4.2.8 - 2020-05-18
 ### Changed

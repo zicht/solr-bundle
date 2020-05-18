@@ -17,7 +17,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Zicht\\Bundle\\SolrBundle\\": "src/Zicht/Bundle/SolrBundle/"
+            "Zicht\\Bundle\\SolrBundle\\": "src/"
         }
     }
 }
