@@ -1,6 +1,4 @@
-# Change Log
 All notable changes to this project will be documented in this file.
-
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
@@ -64,6 +62,18 @@ Nothing so far
 - Upgraded Guzzle from v5 to v6
 ### Removed
 - v4 is based on v3.1, so no Extract query support and no Entity Manager
+
+## 3.4.10 - 2020-05-18
+### Changed
+- Switched from PSR-0 to PSR-4 autoloading
+
+## 3.4.9 - 2020-05-14
+### Changed
+- Allow solr-bundle to have either sonata major 2 or 3
+
+## 3.4.8 - 2020-05-14
+### Fixed
+- Fixes bug when receiving instances of a \DateTimeImmutable object.
 
 ## 3.4.7 - 2020-04-20
 ### Fixed
