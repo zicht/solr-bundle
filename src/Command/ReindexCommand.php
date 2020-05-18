@@ -159,6 +159,8 @@ class ReindexCommand extends AbstractCommand
             $em->clear();
             gc_collect_cycles();
         }
+
+        return 0;
     }
 
     /**

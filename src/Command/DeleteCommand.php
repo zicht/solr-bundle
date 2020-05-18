@@ -43,5 +43,7 @@ class DeleteCommand extends AbstractCommand
         } else {
             $output->writeln('SOLR NOT purged');
         }
+
+        return 0;
     }
 }

@@ -42,6 +42,9 @@ class UpdateCommand extends AbstractCommand
             $update->commit();
             $this->solr->update($update);
         }
+
         $output->writeln(sprintf('%d document(s) updated', $i));
+
+        return 0;
     }
 }

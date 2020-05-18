@@ -98,5 +98,7 @@ class SelectCommand extends AbstractCommand
         foreach ($results as $doc) {
             $output->writeln(json_encode($doc, JSON_PRETTY_PRINT));
         }
+
+        return 0;
     }
 }

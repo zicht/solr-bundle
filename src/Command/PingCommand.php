@@ -30,5 +30,7 @@ class PingCommand extends AbstractCommand
     protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {
         $this->solr->ping();
+
+        return 0;
     }
 }
