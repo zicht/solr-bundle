@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+## 4.2.8 - 2020-05-18
+### Changed
+- Switched from PSR-0 to PSR-4 autoloading (from v3.4.10)
+
+## 4.2.7 - 2020-05-14
+### Changed
+- Allow solr-bundle to have either sonata major 2 or 3 (from v3.4.9)
+### Fixed
+- Fixes bug when receiving instances of a \DateTimeImmutable object (from v3.4.8).
+
 ## 4.2.6 - 2020-04-28
 ### Fixed
 - Changed use of Guzzle base_url config parameter into the official base_uri parameter
