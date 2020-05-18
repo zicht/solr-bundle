@@ -10,6 +10,7 @@ use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollection;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 /**
  * Class StopWordAdmin
@@ -67,7 +68,7 @@ class StopWordAdmin extends Admin
     {
         $formMapper
             ->tab('admin.tab.general')
-                ->add('managed', 'choice', $this->getManagedFieldOptions())
+                ->add('managed', ChoiceType::class, $this->getManagedFieldOptions())
                 ->add('value', null, ['label' => 'form.label_stop_word'])
                 ->end()
             ->end()

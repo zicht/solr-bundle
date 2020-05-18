@@ -10,6 +10,8 @@ use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollection;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Zicht\Bundle\SolrBundle\Entity\Synonym;
 
 /**
@@ -79,9 +81,9 @@ class SynonymAdmin extends Admin
     {
         $formMapper
             ->tab('admin.tab.general')
-                ->add('managed', 'choice', $this->getManagedFieldOptions())
+                ->add('managed', ChoiceType::class, $this->getManagedFieldOptions())
                 ->add('identifier')
-                ->add('value', 'textarea')
+                ->add('value', TextareaType::class)
                 ->end()
             ->end()
         ;

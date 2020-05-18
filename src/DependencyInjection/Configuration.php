@@ -25,10 +25,7 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->scalarNode('port')->end()
-                ->scalarNode('host')->end()
-                ->scalarNode('path')->defaultValue('/solr')->end()
-                ->scalarNode('core')->end()
+                ->scalarNode('url')->isRequired()->end()
                 ->arrayNode('managed')->defaultValue([])
                     ->prototype('scalar')->end()
                 ->end()

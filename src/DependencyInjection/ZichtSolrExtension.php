@@ -31,10 +31,10 @@ class ZichtSolrExtension extends Extension
             $container->setDefinition('zicht_solr.manager', clone $container->getDefinition('zicht_solr.manager.entity_manager'));
         }
 
-        $container->getDefinition('zicht_solr.http_client')->setArguments([
-            ['base_uri' => sprintf('http://%s:%d%s/%s/', $config['host'], $config['port'], $config['path'], $config['core'])],
-        ]);
+        $solrArguments = $container->getDefinition('zicht_solr.solr')->getArguments();
+        $solrArguments[0] = $config;
+        $container->getDefinition('zicht_solr.solr')->setArguments($solrArguments);
+
         $container->setParameter('zicht_solr.managed', $config['managed']);
-        $container->setParameter('zicht_solr.absolute_base_url', sprintf('http://%s:%d%s/', $config['host'], $config['port'], $config['path']));
     }
 }
