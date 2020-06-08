@@ -4,7 +4,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
-Nothing so far
+- Nothing so far
+
+## 3.5.0 - 2020-06-08
+### Added
+- Added DeleteIndexableRelationsInterface to be able to delete related entities in solr
 
 ## 3.4.10 - 2020-05-18
 ### Changed
