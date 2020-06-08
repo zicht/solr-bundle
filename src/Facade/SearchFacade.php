@@ -51,7 +51,7 @@ abstract class SearchFacade
     protected $pager;
 
     /**
-     * @var int
+     * @var int override to 0 to keep facets displayed at all times.
      */
     protected $facetMinimumCount = 1;
 
@@ -204,7 +204,7 @@ abstract class SearchFacade
     {
         $query
             ->setParam('facet', 'true')
-            ->setParam('facet.mincount', 1)
+            ->setParam('facet.mincount', $this->facetMinimumCount)
         ;
 
         foreach ($this->getFacetFields() as $field) {

@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+### 5.0.1 - 2020-06-08
+### Changed
+- `SearchFacade::prepareFacetSet` internally uses already defined property `facetMinimumCount` to determine the
+minimal count of results for facets to be shown.
+
 ## 5.0.0 - 2020-05-18
 ### Added
 - Support for Symfony 4.x
