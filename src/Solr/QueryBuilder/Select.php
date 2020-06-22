@@ -188,12 +188,12 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
     /**
      * Sets the sort parameter
      *
-     * @param string $string
+     * @param string|array $value
      * @return $this
      */
-    public function setSort($string)
+    public function setSort($value)
     {
-        $this->setParam('sort', $string);
+        $this->setParam('sort', $value);
 
         return $this;
     }
