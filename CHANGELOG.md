@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+### 5.0.2 - 2020-06-22
+### Fixed
+- `Select::setSort` allows for both `string` and `array` values.
+
 ### 5.0.1 - 2020-06-08
 ### Changed
 - `SearchFacade::prepareFacetSet` internally uses already defined property `facetMinimumCount` to determine the
