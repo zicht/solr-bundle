@@ -11,6 +11,7 @@ use \Symfony\Component\Console\Input\InputArgument;
 use \Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use \Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use \Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepositoryAdapter;
 use \Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
 
@@ -42,6 +43,8 @@ class ReindexCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $output = new SymfonyStyle($input, $output);
+
         /** @var $solr \Zicht\Bundle\SolrBundle\Manager\SolrManager */
         $solr = $this->getContainer()->get('zicht_solr.manager');
         $solr->disableTimeout();
