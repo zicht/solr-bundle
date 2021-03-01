@@ -1,30 +1,28 @@
 <?php
 /**
- * @author Gerard van Helden <gerard@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Manager;
 
-use Zicht\Bundle\SolrBundle\Solr\Client;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Extract;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Interfaces\Extractable;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 
 /**
  * Provides a Template Method object to implement several different parts of the update process.
- *
  * Typically, you would only implement mapDocument() to return the values for the passed entity to index.
+ *
+ * @template T of object
+ * @implements DataMapperInterface<T>
  */
 abstract class AbstractDataMapper implements DataMapperInterface
 {
-    protected $classNames = array();
+    /** @var array<mixed, class-string<T>> */
+    protected $classNames = [];
 
     /**
-     * Extract the specified entity
-     *
-     * @param Extract $extract
-     * @param Extractable $entity
+     * {@inheritDoc}
      */
     public function extract(Extract $extract, $entity)
     {
@@ -42,37 +40,23 @@ abstract class AbstractDataMapper implements DataMapperInterface
     }
 
     /**
-     * Update the specified entity
-     *
-     * @param Update $update
-     * @param mixed $entity
-     * @return void
+     * {@inheritDoc}
      */
     public function update(Update $update, $entity)
     {
         $this->addUpdateDocument($update, $entity);
     }
 
-
     /**
-     * Delete the specified entity from the database
-     *
-     * @param Update $update
-     * @param mixed $entity
-     * @return void
+     * {@inheritDoc}
      */
     public function delete(Update $update, $entity)
     {
         $update->deleteOne($this->generateObjectIdentity($entity));
     }
 
-
     /**
-     * Maps the data to an indexable document for Solr
-     *
-     * @param Update $update
-     * @param mixed $entity
-     * @return void
+     * {@inheritDoc}
      */
     public function addUpdateDocument(Update $update, $entity)
     {
@@ -85,24 +69,18 @@ abstract class AbstractDataMapper implements DataMapperInterface
         $update->add($doc, $params);
     }
 
-
     /**
-     * Adds a delete instruction
-     *
-     * @param Update $update
-     * @param mixed $entity
-     * @return void
+     * {@inheritDoc}
      */
     public function addDeleteDocument(Update $update, $entity)
     {
         $update->deleteOne($this->generateObjectIdentity($entity));
     }
 
-
     /**
      * Stub that can be overwritten to returns a boost value for the specified entity
      *
-     * @param mixed $entity
+     * @param T $entity
      * @return float
      */
     protected function getBoost($entity)
@@ -113,7 +91,7 @@ abstract class AbstractDataMapper implements DataMapperInterface
     /**
      * Return an object id.
      *
-     * @param mixed $entity
+     * @param T $entity
      * @return string
      *
      * @throws \UnexpectedValueException
@@ -162,8 +140,8 @@ abstract class AbstractDataMapper implements DataMapperInterface
     /**
      * Map document data
      *
-     * @param mixed $entity
-     * @return mixed
+     * @param T $entity
+     * @return array
      */
     abstract protected function mapDocument($entity);
 }

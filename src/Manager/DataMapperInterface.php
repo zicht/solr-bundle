@@ -1,7 +1,6 @@
 <?php
 /**
- * @author Gerard van Helden <gerard@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Manager;
@@ -10,7 +9,7 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Extract;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 
 /**
- * Class DataMapperInterface
+ * @template T of object
  */
 interface DataMapperInterface
 {
@@ -18,7 +17,7 @@ interface DataMapperInterface
      * Request an extract for the specified entity
      *
      * @param Extract $extract
-     * @param mixed $entity
+     * @param T $entity
      */
     public function extract(Extract $extract, $entity);
 
@@ -26,8 +25,7 @@ interface DataMapperInterface
      * Request an update for the specified entity
      *
      * @param Update $update
-     * @param mixed $entity
-     * @return mixed
+     * @param T $entity
      */
     public function update(Update $update, $entity);
 
@@ -35,8 +33,7 @@ interface DataMapperInterface
      * Request an update for the specified entity
      *
      * @param Update $update
-     * @param mixed $entity
-     * @return mixed
+     * @param T $entity
      */
     public function delete(Update $update, $entity);
 
@@ -44,8 +41,7 @@ interface DataMapperInterface
      * Add an update to the query
      *
      * @param Update $update
-     * @param mixed $entity
-     * @return mixed
+     * @param T $entity
      */
     public function addUpdateDocument(Update $update, $entity);
 
@@ -53,29 +49,27 @@ interface DataMapperInterface
      * Add a delete to the update query
      *
      * @param Update $update
-     * @param mixed $entity
-     * @return mixed
+     * @param T $entity
      */
     public function addDeleteDocument(Update $update, $entity);
 
     /**
      * Whether or not the mapper supports the passed entity.
      *
-     * @param mixed $entity
-     * @return mixed
+     * @param T|object $entity
+     * @return bool
      */
     public function supports($entity);
 
     /**
      * Set a list of classnames that are supported by this mapper.
      *
-     * @param array $classNames
-     * @return void
+     * @param array<mixed, class-string<T>> $classNames
      */
     public function setClassNames($classNames);
 
     /**
-     * @return DataMapperInterface[]
+     * @return array<mixed, class-string<T>>
      */
     public function getClassNames();
 }

@@ -1,8 +1,8 @@
 <?php
 /**
- * @author Gerard van Helden <gerard@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
+
 namespace Zicht\Bundle\SolrBundle\Facade;
 
 use Psr\Http\Message\ResponseInterface;
@@ -10,13 +10,7 @@ use Zicht\Bundle\FrameworkExtraBundle\Pager\Pager;
 use Zicht\Bundle\SolrBundle\Solr\Client;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Select;
 use Zicht\Bundle\UrlBundle\Url\Params\Params;
-use Zicht\Bundle\SolrBundle\Pager\SolrPageable;
 
-/**
- * Class SearchFacade
- *
- * @package Zicht\Bundle\SolrBundle\Facade
- */
 abstract class SearchFacade
 {
     protected static $defaultParameterWhitelist = array('keywords', 'page', 'type', 'perpage');
@@ -46,7 +40,8 @@ abstract class SearchFacade
     protected $urlTemplate = null;
 
     /**
-     * @var Pager
+     * @var Pager|null
+     * @psalm-suppress PropertyNotSetInConstructor
      */
     protected $pager;
 
@@ -296,7 +291,7 @@ abstract class SearchFacade
         }
         $facet = $this->response->facet_counts->facet_fields->{$facetName};
 
-        foreach (array_chunk($facet, 2) as list($facetValue, $facetCount)) {
+        foreach (array_chunk($facet, 2) as [$facetValue, $facetCount]) {
             if ((string)$facetValue === (string)$value) {
                 $count = $facetCount;
                 break;
@@ -321,7 +316,7 @@ abstract class SearchFacade
         $ret = array();
         foreach ($this->getFacetFields() as $facetName) {
             if (!in_array($facetName, $blacklist)) {
-                foreach (array_chunk($this->response->facet_counts->facet_fields->{$facetName}, 2) as list($value, $count)) {
+                foreach (array_chunk($this->response->facet_counts->facet_fields->{$facetName}, 2) as [$value, $count]) {
                     $ret[$facetName][$value] = $this->getFacetMetaData($facetName, $value, $count);
                 }
             }
@@ -430,7 +425,7 @@ abstract class SearchFacade
     }
 
     /**
-     * @return \Zicht\Bundle\FrameworkExtraBundle\Pager\Pager
+     * @return Pager|null
      */
     public function getPager()
     {
@@ -507,7 +502,7 @@ abstract class SearchFacade
      * Initialize the pager.
      *
      * @param Select $query
-     * @return Pager
+     * @return Pager|null
      */
     abstract protected function initPager($query);
 
