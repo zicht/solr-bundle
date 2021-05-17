@@ -1,7 +1,6 @@
 <?php
 /**
- * @author Gerard van Helden <gerard@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Solr;
@@ -157,7 +156,7 @@ class Client
         try {
             $this->lastRequest = $request;
             $this->lastResponse = $response = $this->http->send($request);
-            $this->logs[] = ['response' => $response, 'requestUri' => $request->getUrl()];
+            $this->logs[] = ['response' => $response, 'requestUri' => $request->getUri()];
 
             return $response;
         } catch (BadResponseException $e) {

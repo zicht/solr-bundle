@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+## 5.0.4 - 2021-05-17
+### Fixed
+- Changed left overs of Guzzle 5 into Guzzle 6 in Synonym and Stopword code
+
 ## 5.0.3 - 2021-03-01
 ### Added
 - Added support for Psalm static analysis
