@@ -1,10 +1,11 @@
 <?php
 /**
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Manager;
 
+use GuzzleHttp\Psr7\Request;
 use Zicht\Bundle\SolrBundle\Entity\StopWord;
 use Zicht\Bundle\SolrBundle\Solr\Client;
 
@@ -44,7 +45,7 @@ class StopWordManager
      */
     public function findAll($managed)
     {
-        $request = $this->client->getHttpClient()->createRequest('GET', sprintf('schema/analysis/stopwords/%s', $managed));
+        $request = new Request('GET', sprintf('%sschema/analysis/stopwords/%s', $this->client->getHttpClient()->getConfig('base_uri'), $managed));
         $response = $this->client->request($request);
 
         if (200 === $response->getStatusCode()) {
@@ -66,12 +67,11 @@ class StopWordManager
      */
     public function addStopWord(StopWord $stopWord)
     {
-        $request =  $this->client->getHttpClient()->createRequest(
+        $request = new Request(
             'PUT',
-            sprintf('schema/analysis/stopwords/%s', $stopWord->getManaged()),
-            [
-                'body' => \json_encode([$stopWord->getValue()])
-            ]
+            sprintf('%sschema/analysis/stopwords/%s', $this->client->getHttpClient()->getConfig('base_uri'), $stopWord->getManaged()),
+            [],
+            \json_encode([$stopWord->getValue()])
         );
 
         return 200 === $this->client->request($request)->getStatusCode();
@@ -104,12 +104,11 @@ class StopWordManager
 
         $result = array_map(
             function ($managed, $data) {
-                $request =  $this->client->getHttpClient()->createRequest(
+                $request = new Request(
                     'PUT',
-                    sprintf('schema/analysis/stopwords/%s', $managed),
-                    [
-                        'body' => \json_encode($data)
-                    ]
+                    sprintf('%sschema/analysis/stopwords/%s', $this->client->getHttpClient()->getConfig('base_uri'), $managed),
+                    [],
+                    \json_encode($data)
                 );
 
                 return 200 === $this->client->request($request)->getStatusCode();
@@ -129,9 +128,9 @@ class StopWordManager
      */
     public function hasStopWord(StopWord $stopWord)
     {
-        $request =  $this->client->getHttpClient()->createRequest(
+        $request = new Request(
             'GET',
-            sprintf('schema/analysis/stopwords/%s/%s', $stopWord->getManaged(), $stopWord->getValue())
+            sprintf('%sschema/analysis/stopwords/%s/%s', $this->client->getHttpClient()->getConfig('base_uri'), $stopWord->getManaged(), $stopWord->getValue())
         );
 
         return 200 === $this->client->request($request)->getStatusCode();
@@ -145,9 +144,9 @@ class StopWordManager
      */
     public function removeStopWord(StopWord $stopWord)
     {
-        $request =  $this->client->getHttpClient()->createRequest(
+        $request = new Request(
             'DELETE',
-            sprintf('schema/analysis/stopwords/%s/%s', $stopWord->getManaged(), $stopWord->getValue())
+            sprintf('%sschema/analysis/stopwords/%s/%s', $this->client->getHttpClient()->getConfig('base_uri'), $stopWord->getManaged(), $stopWord->getValue())
         );
 
         return 200 === $this->client->request($request)->getStatusCode();

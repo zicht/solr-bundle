@@ -1,10 +1,11 @@
 <?php
 /**
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Manager;
 
+use GuzzleHttp\Psr7\Request;
 use Zicht\Bundle\SolrBundle\Entity\Synonym;
 use Zicht\Bundle\SolrBundle\Solr\Client;
 
@@ -44,7 +45,7 @@ class SynonymManager
      */
     public function findAll($managed)
     {
-        $request = $this->client->getHttpClient()->createRequest('GET', sprintf('schema/analysis/synonyms/%s', $managed));
+        $request = new Request('GET', sprintf('%sschema/analysis/synonyms/%s', $this->client->getHttpClient()->getConfig('base_uri'), $managed));
         $response = $this->client->request($request);
 
         if (200 === $response->getStatusCode()) {
@@ -67,12 +68,12 @@ class SynonymManager
     public function addSynonym(Synonym $synonym)
     {
         $data = $this->prepareSynonymData($synonym);
-        $request =  $this->client->getHttpClient()->createRequest(
+
+        $request = new Request(
             'PUT',
-            sprintf('schema/analysis/synonyms/%s', $synonym->getManaged()),
-            [
-                'body' => \json_encode([$synonym->getIdentifier() => $data])
-            ]
+            sprintf('%sschema/analysis/synonyms/%s', $this->client->getHttpClient()->getConfig('base_uri'), $synonym->getManaged()),
+            [],
+            \json_encode([$synonym->getIdentifier() => $data])
         );
 
         return 200 === $this->client->request($request)->getStatusCode();
@@ -105,12 +106,11 @@ class SynonymManager
 
         $result = array_map(
             function ($managed, $data) {
-                $request = $this->client->getHttpClient()->createRequest(
+                $request = new Request(
                     'PUT',
-                    sprintf('schema/analysis/synonyms/%s', $managed),
-                    [
-                        'body' => \json_encode($data)
-                    ]
+                    sprintf('%sschema/analysis/synonyms/%s', $this->client->getHttpClient()->getConfig('base_uri'), $managed),
+                    [],
+                    \json_encode($data)
                 );
 
                 return 200 === $this->client->request($request)->getStatusCode();
@@ -130,9 +130,9 @@ class SynonymManager
      */
     public function hasSynonym(Synonym $synonym)
     {
-        $request =  $this->client->getHttpClient()->createRequest(
+        $request =  new Request(
             'GET',
-            sprintf('schema/analysis/synonyms/%s/%s', $synonym->getManaged(), $synonym->getIdentifier())
+            sprintf('%sschema/analysis/synonyms/%s/%s', $this->client->getHttpClient()->getConfig('base_uri'), $synonym->getManaged(), $synonym->getIdentifier())
         );
 
         return 200 === $this->client->request($request)->getStatusCode();
@@ -146,9 +146,9 @@ class SynonymManager
      */
     public function removeSynonym(Synonym $synonym)
     {
-        $request =  $this->client->getHttpClient()->createRequest(
+        $request =  new Request(
             'DELETE',
-            sprintf('schema/analysis/synonyms/%s/%s', $synonym->getManaged(), $synonym->getIdentifier())
+            sprintf('%sschema/analysis/synonyms/%s/%s', $this->client->getHttpClient()->getConfig('base_uri'), $synonym->getManaged(), $synonym->getIdentifier())
         );
 
         return 200 === $this->client->request($request)->getStatusCode();
