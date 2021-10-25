@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+## 5.0.5 - 2021-10-25
+### Fixed
+- Added an override of generateObjectIdentity() to the EntityMapper to fix classnames when the entity is a Doctrine proxy
+
 ## 5.0.4 - 2021-05-17
 ### Fixed
 - Changed left overs of Guzzle 5 into Guzzle 6 in Synonym and Stopword code
