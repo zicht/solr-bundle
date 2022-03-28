@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+## 5.0.6 - 2022-03-30
+### Fixed
+- Fixed use of old/deprecated Sensio Route and Doctrine Registry
+### Changed
+- Misc changes in routes/status controller
+
 ## 5.0.5 - 2021-10-25
 ### Fixed
 - Added an override of generateObjectIdentity() to the EntityMapper to fix classnames when the entity is a Doctrine proxy
