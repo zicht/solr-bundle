@@ -1,14 +1,13 @@
 <?php
 /**
- * @author Gerard van Helden <gerard@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Command;
 
-use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Logging\EchoSQLLogger;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -33,35 +32,25 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Interfaces\Extractable;
  */
 class ReindexCommand extends AbstractCommand
 {
-    /**
-     * @var SolrManager
-     */
+    /** @var SolrManager */
     private $solrManager;
 
-    /**
-     * @var Registry
-     */
+    /** @var ManagerRegistry */
     private $doctrine;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     private $entities;
 
     /**
      * Setup the reindex command
-     *
-     * @param Client $solr
-     * @param SolrManager $solrManager
-     * @param Registry $doctrine
      */
-    public function __construct(Client $solr, SolrManager $solrManager, Registry $doctrine)
+    public function __construct(Client $solr, SolrManager $solrManager, ManagerRegistry $doctrine)
     {
         parent::__construct($solr);
 
         $this->solrManager = $solrManager;
         $this->doctrine = $doctrine;
-        $this->entities = array();
+        $this->entities = [];
     }
 
     /**
@@ -197,7 +186,7 @@ class ReindexCommand extends AbstractCommand
             (bool)$input->getOption('delete-first')
         );
 
-        return array($n, $i);
+        return [$n, $i];
     }
 
     /**
@@ -233,7 +222,7 @@ class ReindexCommand extends AbstractCommand
             }
         );
 
-        return array($n, $i);
+        return [$n, $i];
     }
 
     /**
