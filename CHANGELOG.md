@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+## 5.0.7 - 2022-05-12
+### Fixed
+- Point Solr Manager FQCN service aliases to the `zicht_solr.manager` service after having determined which Manager to use
+
 ## 5.0.6 - 2022-03-30
 ### Fixed
 - Fixed use of old/deprecated Sensio Route and Doctrine Registry
