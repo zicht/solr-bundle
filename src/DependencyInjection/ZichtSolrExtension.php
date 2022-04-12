@@ -9,13 +9,12 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use Zicht\Bundle\SolrBundle\Manager\SolrEntityManager;
+use Zicht\Bundle\SolrBundle\Manager\SolrManager;
 
 class ZichtSolrExtension extends Extension
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
@@ -29,7 +28,11 @@ class ZichtSolrExtension extends Extension
             $container->setDefinition('zicht_solr.manager', clone $container->getDefinition('zicht_solr.manager.default_manager'));
         } else {
             $container->setDefinition('zicht_solr.manager', clone $container->getDefinition('zicht_solr.manager.entity_manager'));
+            $container->removeAlias(SolrEntityManager::class);
+            $container->setAlias(SolrEntityManager::class, 'zicht_solr.manager');
         }
+        $container->removeAlias(SolrManager::class);
+        $container->setAlias(SolrManager::class, 'zicht_solr.manager');
 
         $solrArguments = $container->getDefinition('zicht_solr.solr')->getArguments();
         $solrArguments[0] = $config;
