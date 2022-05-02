@@ -92,8 +92,10 @@ class SelectCommand extends AbstractCommand
             $select->setStart($start);
         }
         $results = $this->solr->select($select)->response->docs;
-        if ($output->getVerbosity() > 0) {
-            $output->writeln($this->solr->getLastResponse()->getEffectiveUrl() . PHP_EOL. PHP_EOL);
+        if ($output->getVerbosity() >= Console\Output\OutputInterface::VERBOSITY_VERBOSE) {
+            $output->writeln(sprintf('<info>%s %s</info>', $this->solr->getLastResponse()->getReasonPhrase(), $this->solr->getLastRequest()->getUri()));
+            $output->writeln(sprintf('<info>%d result(s)</info>', count($results)));
+            $output->writeln('');
         }
         foreach ($results as $doc) {
             $output->writeln(json_encode($doc, JSON_PRETTY_PRINT));
