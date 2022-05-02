@@ -10,15 +10,27 @@
         }
     ],
     "require": {
-        "php": "^7.1",
+        "php": "^7.4 || ^8",
         "doctrine/common": "^2.2 || ^3",
         "guzzlehttp/guzzle": "^6.3",
         "sonata-project/admin-bundle": "^3.74",
-        "symfony/console": "^3.4 || ^4.4"
+        "symfony/console": "^4.4",
+        "symfony/framework-bundle": "^4.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
     },
     "autoload": {
         "psr-4": {
             "Zicht\\Bundle\\SolrBundle\\": "src/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Zicht\\Bundle\\SolrBundle\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
     }
 }

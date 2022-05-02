@@ -10,7 +10,6 @@ class StopWord
 {
     /**
      * @var int
-     *
      * @ORM\Column(type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -19,7 +18,6 @@ class StopWord
 
     /**
      * @var string|null
-     *
      * @ORM\Column(type="text", nullable=false)
      */
     private $value;
@@ -28,7 +26,6 @@ class StopWord
      * Maps within the rest API to the "identifier" of the collection.
      *
      * @var string|null
-     *
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private $managed;

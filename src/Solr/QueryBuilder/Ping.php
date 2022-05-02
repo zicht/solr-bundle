@@ -1,7 +1,6 @@
 <?php
 /**
- * @author Gerard van Helden <gerard@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
@@ -14,9 +13,7 @@ use GuzzleHttp\Psr7\Request;
  */
 class Ping implements RequestBuilderInterface
 {
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public function createRequest(ClientInterface $httpClient)
     {
         return new Request('GET', sprintf('%sadmin/ping', $httpClient->getConfig('base_uri')));

@@ -1,7 +1,6 @@
 <?php
 /**
- * @author    Rik van der Kemp <rik@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Manager\Doctrine;
@@ -45,7 +44,6 @@ class Subscriber implements EventSubscriber
         $this->callUpdate($event);
     }
 
-
     /**
      * Triggers an update in the solrmanager
      *
@@ -68,9 +66,7 @@ class Subscriber implements EventSubscriber
         $this->manager->delete($event->getEntity());
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public function getSubscribedEvents()
     {
         return array(

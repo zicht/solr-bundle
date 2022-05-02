@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright Zicht Online <http://www.zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
@@ -45,7 +45,6 @@ class Extract extends AbstractQueryBuilder
      * @param array $values
      * @param array $params
      * @param resource $file
-     *
      * @return self
      */
     public function extract($id, array $values, array $params, $file)
@@ -89,7 +88,6 @@ class Extract extends AbstractQueryBuilder
      * Create an HTTP request that needs to be sent to SOLR.
      *
      * @param Client $httpClient
-     *
      * @return RequestInterface
      */
     public function createRequest(Client $httpClient)

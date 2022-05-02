@@ -1,7 +1,6 @@
 <?php
 /**
- * @author Rik van der Kemp <rik@zicht.nl>
- * @copyright Zicht Online <http://www.zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Solr;

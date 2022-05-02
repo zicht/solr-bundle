@@ -9,6 +9,8 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use Zicht\Bundle\SolrBundle\DependencyInjection\CompilerPass\AddMapperPass;
+use Zicht\Bundle\SolrBundle\Manager\Doctrine\EntityMapper;
 use Zicht\Bundle\SolrBundle\Manager\SolrEntityManager;
 use Zicht\Bundle\SolrBundle\Manager\SolrManager;
 
@@ -39,5 +41,8 @@ class ZichtSolrExtension extends Extension
         $container->getDefinition('zicht_solr.solr')->setArguments($solrArguments);
 
         $container->setParameter('zicht_solr.managed', $config['managed']);
+
+        $container->registerForAutoconfiguration(EntityMapper::class)
+            ->addTag(AddMapperPass::MAPPER_TAG);
     }
 }

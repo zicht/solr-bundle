@@ -53,9 +53,7 @@ class ReindexCommand extends AbstractCommand
         $this->entities = [];
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function configure()
     {
         $this
@@ -87,9 +85,7 @@ class ReindexCommand extends AbstractCommand
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         foreach($this->entities as $entity) {

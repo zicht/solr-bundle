@@ -1,33 +1,39 @@
 <?php
 /**
- * @copyright Zicht online <https://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Zicht\Bundle\SolrBundle\Solr\Client;
 
 /**
  * A controller that shows a status; useful for monitoring purposes.
  */
-class StatusController extends Controller
+class StatusController extends AbstractController
 {
+    private Client $client;
+
+    public function __construct(Client $client)
+    {
+        $this->client = $client;
+    }
+
     /**
      * Reports a 503 if SOLR's ping query does not succeed.
      *
      * @return Response
-     *
      * @Route("solr")
      */
     public function statusAction()
     {
-        $response = new Response('', 200, array('Content-Type' => 'text/plain'));
+        $response = new Response('', 200, ['Content-Type' => 'text/plain']);
 
-        $client = $this->get('zicht_solr.solr');
         try {
-            $client->ping();
+            $this->client->ping();
 
             $response->setContent('ping succeeded');
         } catch (\Exception $e) {

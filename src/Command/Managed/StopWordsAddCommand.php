@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Command\Managed;
@@ -48,9 +48,7 @@ class StopWordsAddCommand extends AbstractCommand
         $this->stopWordSubscriber = $stopWordSubscriber;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function configure()
     {
         $name = 'zicht:solr:stop-words-add';
@@ -86,9 +84,7 @@ HELP
             );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function execute(Input\InputInterface $input, Output\OutputInterface $output)
     {
         $output->writeln('Adding stop words to SOLR');
@@ -132,6 +128,8 @@ HELP
 
         $this->manager->addStopWords($data);
         $this->manager->getClient()->reload();
+
+        return 0;
     }
 
     /**

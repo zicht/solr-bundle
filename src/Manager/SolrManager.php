@@ -1,9 +1,6 @@
 <?php
 /**
- * @author Gerard van Helden <gerard@zicht.nl>
- * @author Rik van der Kemp <rik@zicht.nl>
- *
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Manager;
@@ -33,10 +30,7 @@ class SolrManager
     protected $mappers = [];
     private $repositories;
 
-
     /**
-     * Constructor
-     *
      * @param Client $client
      */
     public function __construct(Client $client)
@@ -45,12 +39,10 @@ class SolrManager
         $this->mappers = [];
     }
 
-
     /**
      * Adds a data mapper
      *
      * @param DataMapperInterface $dataMapper
-     *
      * @return void
      */
     public function addMapper($dataMapper)
@@ -71,7 +63,6 @@ class SolrManager
      *
      * @param string $class
      * @param SearchDocumentRepository $repository
-     *
      * @return void
      */
     public function addRepository($class, $repository)
@@ -79,12 +70,10 @@ class SolrManager
         $this->repositories[ $class ] = $repository;
     }
 
-
     /**
      * Get a class-specific repository implementation
      *
      * @param string $entityClass
-     *
      * @return SearchDocumentRepository|null
      */
     public function getRepository($entityClass)
@@ -96,7 +85,6 @@ class SolrManager
         return $this->repositories[ $entityClass ];
     }
 
-
     /**
      * Updates as batch.
      *
@@ -104,7 +92,6 @@ class SolrManager
      * @param callable|null $incrementCallback
      * @param callable|null $errorCallback
      * @param bool $deleteFirst
-     *
      * @return array
      */
     public function updateBatch($records, $incrementCallback = null, $errorCallback = null, $deleteFirst = false)
@@ -147,7 +134,6 @@ class SolrManager
      * @param array $records
      * @param callable|null $incrementCallback
      * @param callable|null $errorCallback
-     *
      * @return array
      */
     public function extractBatch($records, $incrementCallback = null, $errorCallback = null)
@@ -181,12 +167,10 @@ class SolrManager
         return [$n, $i];
     }
 
-
     /**
      * Update an entity
      *
      * @param mixed $entity
-     *
      * @return bool
      */
     public function update($entity)
@@ -211,7 +195,6 @@ class SolrManager
      * Extract an entity
      *
      * @param object $entity
-     *
      * @return bool
      */
     public function extract($entity)
@@ -231,12 +214,10 @@ class SolrManager
         return false;
     }
 
-
     /**
      * Delete an entity
      *
      * @param mixed $entity
-     *
      * @return bool
      */
     public function delete($entity)
@@ -257,12 +238,10 @@ class SolrManager
         return false;
     }
 
-
     /**
      * Enables or disabled the solr manager.
      *
      * @param boolean $enabled
-     *
      * @return void
      */
     public function setEnabled($enabled)
@@ -270,12 +249,10 @@ class SolrManager
         $this->enabled = $enabled;
     }
 
-
     /**
      * Returns a mapper based on the entity's type.
      *
      * @param mixed $entity
-     *
      * @return DataMapperInterface
      */
     protected function getMapper($entity)

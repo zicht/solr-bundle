@@ -1,8 +1,8 @@
 <?php
 /**
- * @author Gerard van Helden <gerard@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
+
 namespace Zicht\Bundle\SolrBundle\Facade\Traits;
 
 use Zicht\Bundle\FrameworkExtraBundle\Pager\Pager;
@@ -13,9 +13,7 @@ use Zicht\Bundle\SolrBundle\Pager\SolrPageable;
  */
 trait DefaultPager
 {
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function initPager($query)
     {
         $currentPage = $this->searchParams->getOne('page', 0);

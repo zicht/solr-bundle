@@ -1,8 +1,8 @@
 <?php
 /**
- * @author Gerard van Helden <gerard@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
+
 namespace Zicht\Bundle\SolrBundle\Command;
 
 use Symfony\Component\Console;
@@ -13,9 +13,7 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
  */
 class SelectCommand extends AbstractCommand
 {
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function configure()
     {
         $this
@@ -66,9 +64,7 @@ class SelectCommand extends AbstractCommand
         ;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {
         $select = new QueryBuilder\Select();

@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Admin;
@@ -19,10 +19,7 @@ use Zicht\Bundle\SolrBundle\Entity\Synonym;
  */
 class SynonymAdmin extends AbstractAdmin
 {
-    /**
-     * {@inheritDoc}
-     */
-    protected function configureRoutes(RouteCollection $collection)
+    protected function configureRoutes(RouteCollection $collection): void
     {
         $collection->clearExcept([
             'create',
@@ -33,24 +30,18 @@ class SynonymAdmin extends AbstractAdmin
         parent::configureRoutes($collection);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function configureDatagridFilters(DatagridMapper $datagridMapper)
+    protected function configureDatagridFilters(DatagridMapper $filter): void
     {
-        $datagridMapper
+        $filter
             ->add('managed')
             ->add('identifier')
             ->add('value', null, ['label' => 'filter.label_synonyms'])
         ;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function configureListFields(ListMapper $listMapper)
+    protected function configureListFields(ListMapper $list): void
     {
-        $listMapper
+        $list
             ->addIdentifier('identifier')
             ->add(
                 'value',
@@ -74,12 +65,9 @@ class SynonymAdmin extends AbstractAdmin
         ;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function configureFormFields(FormMapper $formMapper)
+    protected function configureFormFields(FormMapper $form): void
     {
-        $formMapper
+        $form
             ->tab('admin.tab.general')
                 ->add('managed', ChoiceType::class, $this->getManagedFieldOptions())
                 ->add('identifier')
@@ -89,10 +77,7 @@ class SynonymAdmin extends AbstractAdmin
         ;
     }
 
-    /**
-     * @return array
-     */
-    private function getManagedFieldOptions()
+    private function getManagedFieldOptions(): array
     {
         return [
             'choices' => $this->getConfigurationPool()->getContainer()->getParameter('zicht_solr.managed'),
@@ -121,7 +106,7 @@ class SynonymAdmin extends AbstractAdmin
         parent::prePersist($synonym);
     }
 
-    private function cleanUpSynonymValue(Synonym $synonym)
+    private function cleanUpSynonymValue(Synonym $synonym): void
     {
         if ($synonym->getValue()) {
             $cleanValues = array_filter(array_map('trim', explode("\n", $synonym->getValue())));

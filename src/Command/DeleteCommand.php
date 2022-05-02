@@ -1,7 +1,6 @@
 <?php
 /**
- * @author Rik van der Kemp <rik@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Command;
@@ -14,9 +13,7 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
  */
 class DeleteCommand extends AbstractCommand
 {
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function configure()
     {
         $this
@@ -27,9 +24,7 @@ class DeleteCommand extends AbstractCommand
         ;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {
         $update = new Update();
