@@ -1,10 +1,10 @@
-{% extends 'WebProfilerBundle:Profiler:layout.html.twig' %}
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
 
 {% block toolbar %}
     {% set icon %}
         <a href="{{ path('_profiler', { 'token': token, 'panel': name }) }}">
             <span>
-                <span class="icon">{{ include('@ZichtSolrBundle/Resources/public/images/solr_icon.svg') }}</span>
+                <span class="icon"><img src="{{ asset('bundles/zichtsolr/images/solr_icon.svg') }}" /></span>
                 <span class="sf-toolbar-status">{{ collector.requests|length }}</span>
             </span>
         </a>
@@ -26,9 +26,7 @@
 {% block menu %}
     {# This left-hand menu appears when using the full-screen profiler. #}
     <span class="label">
-        <span class="icon">
-            {{ include('@ZichtSolrBundle/Resources/public/images/solr_icon.svg') }}
-        </span>
+        <span class="icon"><img src="{{ asset('bundles/zichtsolr/images/solr_icon.svg') }}" /></span>
         <strong>Solr Requests</strong><span class="count">{{ collector.requests|length }}</span>
     </span>
 {% endblock %}

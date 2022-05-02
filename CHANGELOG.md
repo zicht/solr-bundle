@@ -6,7 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
-## 5.0.7 - 2022-05-12
+## 5.0.8 - 2022-05-02
+### Fixed
+- Changed use of deprecated Sonata Admin class into AbstractAdmin class
+- Fixed usage of deprecated Twig template colon path and changed into modern path
+- Fixed select command
+- Changed use of deprecated `->setHelps()` to setting `'help'` on the field itself for the
+  Sonata Synonym admin
+
+## 5.0.7 - 2022-04-12
 ### Fixed
 - Point Solr Manager FQCN service aliases to the `zicht_solr.manager` service after having determined which Manager to use
 

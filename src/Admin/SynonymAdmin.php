@@ -5,7 +5,7 @@
 
 namespace Zicht\Bundle\SolrBundle\Admin;
 
-use Sonata\AdminBundle\Admin\Admin;
+use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
@@ -15,9 +15,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Zicht\Bundle\SolrBundle\Entity\Synonym;
 
 /**
- * Class SynonymAdmin
+ * @extends AbstractAdmin<Synonym>
  */
-class SynonymAdmin extends Admin
+class SynonymAdmin extends AbstractAdmin
 {
     /**
      * {@inheritDoc}
@@ -57,7 +57,7 @@ class SynonymAdmin extends Admin
                 null,
                 [
                     'label' => 'list.label_synonyms',
-                    'template' => 'ZichtSolrBundle:CRUD:list_multiline-multivalue.html.twig',
+                    'template' => '@ZichtSolr/CRUD/list_multiline-multivalue.html.twig',
                 ]
             )
             ->add('managed')
@@ -83,14 +83,10 @@ class SynonymAdmin extends Admin
             ->tab('admin.tab.general')
                 ->add('managed', ChoiceType::class, $this->getManagedFieldOptions())
                 ->add('identifier')
-                ->add('value', TextareaType::class)
+                ->add('value', TextareaType::class, ['help' => $this->trans('help.synonyms', [], 'admin')])
                 ->end()
             ->end()
         ;
-
-        $formMapper->setHelps([
-            'value' => $this->trans('help.synonyms', [], 'admin')
-        ]);
     }
 
     /**

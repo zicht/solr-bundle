@@ -13,7 +13,7 @@
         "php": "^7.1",
         "doctrine/common": "^2.2 || ^3",
         "guzzlehttp/guzzle": "^6.3",
-        "sonata-project/admin-bundle": "^3",
+        "sonata-project/admin-bundle": "^3.74",
         "symfony/console": "^3.4 || ^4.4"
     },
     "autoload": {
