@@ -1,22 +1,16 @@
 <?php
 /**
- * @author Rik van der Kemp <rik@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
+
 namespace Zicht\Bundle\SolrBundle;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-/**
- * Class ZichtSolrBundle
- */
 class ZichtSolrBundle extends Bundle
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function build(ContainerBuilder $container)
+    public function build(ContainerBuilder $container): void
     {
         parent::build($container);
 

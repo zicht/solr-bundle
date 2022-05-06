@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Manager\Doctrine;
@@ -98,9 +98,7 @@ class SynonymSubscriber implements EventSubscriber
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public function getSubscribedEvents()
     {
         return array(

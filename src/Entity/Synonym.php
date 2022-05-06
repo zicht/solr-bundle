@@ -10,7 +10,6 @@ class Synonym
 {
     /**
      * @var int
-     *
      * @ORM\Column(type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -19,14 +18,12 @@ class Synonym
 
     /**
      * @var string|null
-     *
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private $identifier;
 
     /**
      * @var string|null
-     *
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private $value;
@@ -35,7 +32,6 @@ class Synonym
      * Maps within the rest API to the "identifier" of the collection.
      *
      * @var string|null
-     *
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private $managed;

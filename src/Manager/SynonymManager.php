@@ -20,8 +20,6 @@ class SynonymManager
     protected $client;
 
     /**
-     * Constructor
-     *
      * @param Client $client
      */
     public function __construct(Client $client)

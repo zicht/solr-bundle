@@ -77,7 +77,6 @@ abstract class SearchFacade
         $this->defaultLimit = $defaultLimit;
     }
 
-
     /**
      * @param string $urlTemplate
      * @return void
@@ -86,7 +85,6 @@ abstract class SearchFacade
     {
         $this->urlTemplate = $urlTemplate;
     }
-
 
     /**
      * @param Params $params
@@ -104,7 +102,6 @@ abstract class SearchFacade
             }
         }
     }
-
 
     /**
      * @return Params
@@ -127,12 +124,10 @@ abstract class SearchFacade
         }
     }
 
-
     /**
      * Returns the GET url based on a POST search.
      *
      * @param array $postParams
-     *
      * @return string
      */
     public function getPostRedirect($postParams)
@@ -141,12 +136,10 @@ abstract class SearchFacade
         return $this->getUrl($this->searchParams);
     }
 
-
     /**
      * Adds a set of parameters to the baseUrlTemplate and returns the resultant URL
      *
      * @param Params $params
-     *
      * @return string
      */
     public function getUrl($params)
@@ -164,7 +157,6 @@ abstract class SearchFacade
     {
         return $this->getUrl($this->searchParams->with('page', $index, false));
     }
-
 
     /**
      * Execute the search
@@ -187,7 +179,6 @@ abstract class SearchFacade
         $this->pager = $this->initPager($query);
         $this->response = $this->execSearch($query);
     }
-
 
     /**
      * Adds the facet options to the query and apply filter queries if facets are selected.
@@ -221,7 +212,6 @@ abstract class SearchFacade
         }
     }
 
-
     /**
      * @param mixed $field
      * @return array
@@ -230,7 +220,6 @@ abstract class SearchFacade
     {
         return $this->searchParams->get($field);
     }
-
 
     /**
      * Returns currently enabled and active fields through params or uri
@@ -275,7 +264,6 @@ abstract class SearchFacade
     {
         return $this->response->response->numFound;
     }
-
 
     /**
      * @param string $name
@@ -345,7 +333,6 @@ abstract class SearchFacade
         }
         return $ret;
     }
-
 
     /**
      * Get facet data for use in the templates for one specific facet value
@@ -516,7 +503,6 @@ abstract class SearchFacade
     {
         return $this->client->select($query);
     }
-
 
     /**
      * Check user input against retrieved values

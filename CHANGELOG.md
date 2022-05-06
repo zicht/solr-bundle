@@ -6,6 +6,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 Nothing so far
 
+## 6.0.0 - 2022-05-02
+### Removed
+- Removed support for PHP 7.1, 7.2 and 7.3
+- Removed support for Symfony 3.4
+- Removed unused `z2.yml` and `phpunit.xml.dist` files
+### Fixed
+- Changed use of deprecated Symfony FrameworkBundle Controller class into AbstractController class and
+  inject the Solr Client into the constructor
+- Pass root name to TreeBuilder constructor and call `getRootNode` instead of deprecated `->root()`
+### Added
+- Added autotagging of the `zicht_solr.mapper` tag for classes extending the `EntityMapper` class. So no
+  _instanceof EntityMapper > tag zicht_solr.mapper_ like configuration is needed in the projects itself.
+- Added a first PHPUnit test for DataMapper (added PHPUnit 9.5 as dev requirement and added
+  PSR-4 dev autoloading for tests)
+- Added GitHub Actions to test Q&A on incoming pull requests
+### Changed
+- Overall cleanup of PHP docblocks and whitespace
+
 ## 5.0.8 - 2022-05-02
 ### Fixed
 - Changed use of deprecated Sonata Admin class into AbstractAdmin class

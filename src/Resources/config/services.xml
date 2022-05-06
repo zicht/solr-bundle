@@ -59,5 +59,9 @@
             <tag name="data_collector" template="@ZichtSolr/DataCollector/data_collector.html.twig" id="zicht_solr.data_collector"/>
             <argument type="service" id="zicht_solr.solr"/>
         </service>
+
+        <service id="Zicht\Bundle\SolrBundle\Controller\StatusController">
+            <argument type="service" id="zicht_solr.solr"/>
+        </service>
     </services>
 </container>

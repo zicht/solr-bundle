@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Command\Managed;
@@ -48,9 +48,7 @@ class SynonymsAddCommand extends AbstractCommand
         $this->synonymSubscriber = $synonymSubscriber;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function configure()
     {
         $name = 'zicht:solr:synonyms-add';
@@ -85,9 +83,7 @@ HELP
             );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function execute(Input\InputInterface $input, Output\OutputInterface $output)
     {
         $output->writeln('Adding synonyms to SOLR');
@@ -131,6 +127,8 @@ HELP
 
         $this->manager->addSynonyms($data);
         $this->manager->getClient()->reload();
+
+        return 0;
     }
 
     /**

@@ -1,8 +1,8 @@
 <?php
 /**
- * @author Rik van der Kemp <rik@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
+
 namespace Zicht\Bundle\SolrBundle\Pager;
 
 use Zicht\Bundle\FrameworkExtraBundle\Pager\Pageable;
@@ -28,7 +28,6 @@ class SolrPageable implements Pageable
         $this->client = $client;
         $this->query = $selectQuery;
     }
-
 
     /**
      * Returns the absolute total of the pageable set of elements.

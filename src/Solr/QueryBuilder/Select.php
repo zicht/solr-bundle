@@ -1,7 +1,6 @@
 <?php
 /**
- * @author Gerard van Helden <gerard@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
@@ -23,7 +22,6 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
         'q' => '*:*',
         'fl' => '*,score'
     ];
-
 
     /**
      * Set the 'q' parameter
@@ -47,7 +45,6 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
         return $this->setParam('fl', $fl);
     }
 
-
     /**
      * Sets the `start` parameter (the paging offset)
      *
@@ -61,7 +58,6 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
         return $this;
     }
 
-
     /**
      * Sets the `rows` parameter (number of rows to return)
      *
@@ -74,7 +70,6 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
 
         return $this;
     }
-
 
     /**
      * Set an arbitrary parameter value
@@ -103,7 +98,6 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
         return $this;
     }
 
-
     /**
      * Sets the `fq` (filter query) parameter. Clears any previously set filter query.
      *
@@ -117,17 +111,13 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
         return $this;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public function createRequest(ClientInterface $httpClient)
     {
         return new Request('GET', sprintf('%sselect?%s', $httpClient->getConfig('base_uri'), $this->createQueryString($this->params)));
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public function handle(Response $response)
     {
         $contentType = $response->getHeaderLine('Content-Type');
@@ -250,7 +240,6 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
         return $this;
     }
 
-
     /**
      * Set the `group.limit` field
      *
@@ -263,7 +252,6 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
 
         return $this;
     }
-
 
     /**
      * Set debugging on.

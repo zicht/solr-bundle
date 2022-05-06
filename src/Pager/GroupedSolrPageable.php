@@ -1,7 +1,6 @@
 <?php
 /**
- * @author Victor Moreno <victor@zicht.nl>
- * @copyright Zicht Online <http://www.zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Pager;
@@ -11,9 +10,7 @@ namespace Zicht\Bundle\SolrBundle\Pager;
  */
 class GroupedSolrPageable extends SolrPageable
 {
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public function getTotal()
     {
         if (!isset($this->total)) {

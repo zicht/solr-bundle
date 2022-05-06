@@ -12,9 +12,6 @@ use Psr\Http\Message\ResponseInterface;
 use Zicht\Bundle\SolrBundle\Exception\ConfigurationException;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
-/**
- * Class Client
- */
 class Client
 {
     private $lastRequest = null;
@@ -57,7 +54,6 @@ class Client
         return $this->doRequest($query);
     }
 
-
     /**
      * Do an update query
      *
@@ -85,12 +81,11 @@ class Client
      *
      * Throw an exception wrapping the internal exception if an error occurs.
      *
-     * @see https://lucene.apache.org/solr/5_0_0/solr-solrj/org/apache/solr/common/SolrException.html
-     * @see https://lucene.apache.org/solr/4_7_0/solr-solrj/org/apache/solr/common/SolrException.html
-     *
-     * @throws Exception
      * @param QueryBuilder\RequestBuilderInterface $handler
      * @return mixed
+     * @throws Exception
+     * @see https://solr.apache.org/docs/5_5_0/solr-solrj/org/apache/solr/common/SolrException.html
+     * @see https://solr.apache.org/docs/8_4_0/solr-solrj/org/apache/solr/common/SolrException.html
      */
     protected function doRequest(QueryBuilder\RequestBuilderInterface $handler)
     {
@@ -191,7 +186,6 @@ class Client
     {
         return $this->doRequest(new QueryBuilder\Ping());
     }
-
 
     /**
      * Get all document ids for the specified query.

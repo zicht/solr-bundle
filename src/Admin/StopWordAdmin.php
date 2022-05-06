@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Admin;
@@ -18,10 +18,7 @@ use Zicht\Bundle\SolrBundle\Entity\StopWord;
  */
 class StopWordAdmin extends AbstractAdmin
 {
-    /**
-     * {@inheritDoc}
-     */
-    protected function configureRoutes(RouteCollection $collection)
+    protected function configureRoutes(RouteCollection $collection): void
     {
         $collection->clearExcept([
             'create',
@@ -31,23 +28,17 @@ class StopWordAdmin extends AbstractAdmin
         parent::configureRoutes($collection);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function configureDatagridFilters(DatagridMapper $datagridMapper)
+    protected function configureDatagridFilters(DatagridMapper $filter): void
     {
-        $datagridMapper
+        $filter
             ->add('managed')
             ->add('value', null, ['label' => 'filter.label_stop_word'])
         ;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function configureListFields(ListMapper $listMapper)
+    protected function configureListFields(ListMapper $list): void
     {
-        $listMapper
+        $list
             ->addIdentifier('value', null, ['label' => 'list.label_stop_word'])
             ->add('managed')
             ->add(
@@ -62,12 +53,9 @@ class StopWordAdmin extends AbstractAdmin
         ;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function configureFormFields(FormMapper $formMapper)
+    protected function configureFormFields(FormMapper $form): void
     {
-        $formMapper
+        $form
             ->tab('admin.tab.general')
                 ->add('managed', ChoiceType::class, $this->getManagedFieldOptions())
                 ->add('value', null, ['label' => 'form.label_stop_word'])
@@ -76,10 +64,7 @@ class StopWordAdmin extends AbstractAdmin
         ;
     }
 
-    /**
-     * @return array
-     */
-    private function getManagedFieldOptions()
+    private function getManagedFieldOptions(): array
     {
         return [
             'choices' => $this->getConfigurationPool()->getContainer()->getParameter('zicht_solr.managed'),

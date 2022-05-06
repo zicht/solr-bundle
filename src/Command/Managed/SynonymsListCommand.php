@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Command\Managed;
@@ -22,9 +22,7 @@ class SynonymsListCommand extends AbstractCommand
         $this->manager = $manager;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function configure()
     {
         $this
@@ -34,9 +32,7 @@ class SynonymsListCommand extends AbstractCommand
         ;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {
         $output->writeln('Synonyms registered in SOLR:');
@@ -49,5 +45,7 @@ class SynonymsListCommand extends AbstractCommand
                 $output->writeln(sprintf('  - %s', $item));
             }
         }
+
+        return 0;
     }
 }

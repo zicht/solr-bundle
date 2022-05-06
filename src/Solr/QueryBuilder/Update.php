@@ -1,7 +1,6 @@
 <?php
 /**
- * @author Gerard van Helden <gerard@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
@@ -51,7 +50,6 @@ class Update extends AbstractQueryBuilder
 
         return $this;
     }
-
 
     /**
      * Add a commit to the update request
@@ -114,7 +112,6 @@ class Update extends AbstractQueryBuilder
         return $this;
     }
 
-
     /**
      * Add an instruction to the request.
      *
@@ -129,10 +126,7 @@ class Update extends AbstractQueryBuilder
         fwrite($this->stream, json_encode($type) . ':' . json_encode($value) . ',');
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public function createRequest(ClientInterface $httpClient)
     {
         fseek($this->stream, -1, SEEK_END);

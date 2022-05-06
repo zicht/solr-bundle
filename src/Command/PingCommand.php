@@ -1,7 +1,6 @@
 <?php
 /**
- * @author Rik van der Kemp <rik@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Command;
@@ -13,9 +12,7 @@ use Symfony\Component\Console;
  */
 class PingCommand extends AbstractCommand
 {
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function configure()
     {
         $this
@@ -24,9 +21,7 @@ class PingCommand extends AbstractCommand
         ;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {
         $this->solr->ping();

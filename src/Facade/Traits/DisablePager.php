@@ -1,7 +1,6 @@
 <?php
 /**
- * @author Gerard van Helden <gerard@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Facade\Traits;
@@ -11,9 +10,7 @@ namespace Zicht\Bundle\SolrBundle\Facade\Traits;
  */
 trait DisablePager
 {
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function initPager($query)
     {
         return null;

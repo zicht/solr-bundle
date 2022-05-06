@@ -1,8 +1,8 @@
 <?php
 /**
- * @author Gerard van Helden <gerard@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
+
 namespace Zicht\Bundle\SolrBundle\Manager\Doctrine;
 
 use Doctrine\ORM\EntityRepository;
@@ -24,9 +24,7 @@ class SearchDocumentRepositoryAdapter implements SearchDocumentRepository
         $this->repository = $repository;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public function findIndexableDocuments($where = null, $limit = null, $offset = null)
     {
         $qb = $this->repository->createQueryBuilder('d');

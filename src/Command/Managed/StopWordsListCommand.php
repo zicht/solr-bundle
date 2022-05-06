@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\Command\Managed;
@@ -19,9 +19,7 @@ class StopWordsListCommand extends AbstractCommand
         $this->manager = $manager;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function configure()
     {
         $this
@@ -31,9 +29,7 @@ class StopWordsListCommand extends AbstractCommand
         ;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
     {
         $output->writeln('Stopwords registered in SOLR:');
@@ -42,5 +38,7 @@ class StopWordsListCommand extends AbstractCommand
         foreach ($this->manager->findAll($input->getArgument('managed')) as $item) {
             $output->writeln(sprintf('- %s', $item));
         }
+
+        return 0;
     }
 }

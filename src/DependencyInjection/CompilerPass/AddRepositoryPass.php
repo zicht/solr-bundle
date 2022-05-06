@@ -1,7 +1,6 @@
 <?php
 /**
- * @author Gerard van Helden <gerard@zicht.nl>
- * @copyright Zicht Online <http://zicht.nl>
+ * @copyright Zicht Online <https://zicht.nl>
  */
 
 namespace Zicht\Bundle\SolrBundle\DependencyInjection\CompilerPass;
@@ -15,10 +14,7 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class AddRepositoryPass implements CompilerPassInterface
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $definition = $container->getDefinition('zicht_solr.manager');
         foreach ($container->findTaggedServiceIds('zicht_solr.repository') as $id => $tags) {
