@@ -12,8 +12,7 @@ use Zicht\Bundle\SolrBundle\Solr\Client;
 
 class SynonymsListCommand extends AbstractCommand
 {
-    /** @var SynonymManager */
-    protected $manager;
+    protected SynonymManager $manager;
 
     public function __construct(Client $solr, SynonymManager $manager)
     {

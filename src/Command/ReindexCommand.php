@@ -122,22 +122,23 @@ class ReindexCommand extends AbstractCommand
             );
 
             $total = count($records);
+            $output->writeln($total . ' documents found.');
 
-            $output->writeln('Reindexing records ...');
+            $output->writeln('Reindexing records...');
 
             if ($reflection->implementsInterface(Extractable::class)) {
                 list($extractableRecords, $updatableRecords) = $this->splitRecords($records);
-                list($n, $i) = $this->extractBatch($input, $output, $extractableRecords, $total);
+                list($n, $i) = $this->extractBatch($input, $output, $extractableRecords);
                 $output->write("\n");
                 $output->writeln(sprintf('Processed (Extracted) %s of %s items.', $i, $n));
 
                 if (count($updatableRecords)) {
-                    list($n, $i) = $this->updateBatch($input, $output, $updatableRecords, $total);
+                    list($n, $i) = $this->updateBatch($input, $output, $updatableRecords);
                     $output->write("\n");
                     $output->writeln(sprintf('Processed (Updated) %s of %s items.', $i, $n));
                 }
             } else {
-                list($n, $i) = $this->updateBatch($input, $output, $records, $total);
+                list($n, $i) = $this->updateBatch($input, $output, $records);
             }
             $output->write("\n");
             $output->writeln(sprintf('Processed %s of %s items. Peak mem usage: %2d Mb', $i, $n, memory_get_peak_usage() / 1024 / 1024));

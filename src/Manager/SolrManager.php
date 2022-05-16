@@ -104,9 +104,9 @@ class SolrManager
                 $i++;
                 try {
                     if ($deleteFirst) {
-                        $mapper->delete($update, $record, $update);
+                        $mapper->delete($update, $record);
                     }
-                    $mapper->update($update, $record, $update);
+                    $mapper->update($update, $record);
                 } catch (\Exception $e) {
                     if ($errorCallback) {
                         call_user_func($errorCallback, $record, $e);
@@ -253,7 +253,7 @@ class SolrManager
      * Returns a mapper based on the entity's type.
      *
      * @param mixed $entity
-     * @return DataMapperInterface
+     * @return DataMapperInterface|null
      */
     protected function getMapper($entity)
     {

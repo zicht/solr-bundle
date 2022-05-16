@@ -47,7 +47,7 @@ class StopWordManager
         $response = $this->client->request($request);
 
         if (200 === $response->getStatusCode()) {
-             $data = $response->json();
+             $data = \json_decode($response->getBody()->getContents(), true);
 
              if (array_key_exists('wordSet', $data) && array_key_exists('managedList', $data['wordSet'])) {
                  return $data['wordSet']['managedList'];

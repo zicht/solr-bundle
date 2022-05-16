@@ -116,7 +116,7 @@ class Update extends AbstractQueryBuilder
      * Add an instruction to the request.
      *
      * @param string $type
-     * @param array $value
+     * @param array|\stdClass|\JsonSerializable $value
      * @return void
      */
     protected function addInstruction($type, $value = [])

@@ -15,6 +15,11 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Select;
  */
 class SolrPageable implements Pageable
 {
+    protected Client $client;
+
+    protected Select $query;
+
+    /** @var int|null */
     protected $total = null;
 
     /**
@@ -42,7 +47,7 @@ class SolrPageable implements Pageable
             $countQuery->setRows(0);
             $response = $this->client->select($countQuery);
 
-            $this->total = $response->response->numFound;
+            $this->total = (int)$response->response->numFound;
         }
 
         return $this->total;
