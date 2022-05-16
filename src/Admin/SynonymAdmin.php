@@ -89,21 +89,21 @@ class SynonymAdmin extends AbstractAdmin
     }
 
     /**
-     * @param Synonym $synonym
+     * @param Synonym $object
      */
-    public function prePersist($synonym)
+    public function prePersist($object)
     {
-        $this->cleanUpSynonymValue($synonym);
-        parent::prePersist($synonym);
+        $this->cleanUpSynonymValue($object);
+        parent::prePersist($object);
     }
 
     /**
-     * @param Synonym $synonym
+     * @param Synonym $object
      */
-    public function preUpdate($synonym)
+    public function preUpdate($object)
     {
-        $this->cleanUpSynonymValue($synonym);
-        parent::prePersist($synonym);
+        $this->cleanUpSynonymValue($object);
+        parent::prePersist($object);
     }
 
     private function cleanUpSynonymValue(Synonym $synonym): void

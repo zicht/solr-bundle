@@ -19,7 +19,7 @@ class GroupedSolrPageable extends SolrPageable
             $countQuery->setRows(0);
             $response = $this->client->select($countQuery);
 
-            foreach ($response->grouped as $key => $group) {
+            foreach ($response->grouped as $group) {
                 $this->total = $group->ngroups;
             }
         }

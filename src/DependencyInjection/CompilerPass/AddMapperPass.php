@@ -19,7 +19,7 @@ class AddMapperPass implements CompilerPassInterface
     public function process(ContainerBuilder $container): void
     {
         $definition = $container->getDefinition('zicht_solr.manager');
-        foreach ($container->findTaggedServiceIds(self::MAPPER_TAG) as $id => $attributes) {
+        foreach (array_keys($container->findTaggedServiceIds(self::MAPPER_TAG)) as $id) {
             $definition->addMethodCall('addMapper', array(new Reference($id)));
         }
     }

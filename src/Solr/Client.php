@@ -104,30 +104,10 @@ class Client
             $this->logs[] = ['response' => $response, 'requestUri' => $request->getUri()];
         } catch (BadResponseException $be) {
             $this->lastResponse = $be->getResponse();
-            if ($be->getRequest()->getBody()) {
-                $be->getRequest()->getBody()->seek(0);
-            }
-            $content = $be->getResponse()->getBody()->getContents();
-            $contentType = $this->lastResponse->getHeaderLine('Content-Type');
-            $errorMsg = $be->getMessage();
-            if (preg_match('!^application/json!', $contentType) || preg_match('!^text/plain!', $contentType)) {
-                try {
-                    // possibly content is a json-string containing a SolrException.
-                    $solrException = \GuzzleHttp\json_decode($content);
-                    if (property_exists($solrException, 'error') && property_exists($solrException->error, 'msg')) {
-                        $errorMsg = $solrException->error->msg;
-                    }
-                } catch (\InvalidArgumentException $invalidArgumentException) {
-                    // we keep the original errorMsg. It still contains all the info we need.
-                }
-            }
-            if (defined('STDERR')) {
-                fwrite(STDERR, PHP_EOL . $errorMsg . PHP_EOL);
-                fwrite(STDERR, PHP_EOL . $content . PHP_EOL);
-            }
-            throw new Exception($errorMsg, null, $be);
+            $errorMsg = $this->processBadResponseException($be);
+            throw new Exception($errorMsg, 0, $be);
         } catch (\Exception $e) {
-            throw new Exception($e->getMessage(), null, $e);
+            throw new Exception($e->getMessage(), 0, $e);
         }
         return $response;
     }
@@ -144,7 +124,7 @@ class Client
      * Allows to pass guzzle requests straight to SOLR.
      *
      * @param Request $request
-     * @return \GuzzleHttp\Message\FutureResponse|ResponseInterface|\GuzzleHttp\Ring\Future\FutureInterface|null
+     * @return ResponseInterface|null
      */
     public function request(Request $request)
     {
@@ -154,20 +134,12 @@ class Client
             $this->logs[] = ['response' => $response, 'requestUri' => $request->getUri()];
 
             return $response;
-        } catch (BadResponseException $e) {
-            $this->lastResponse = $e->getResponse();
+        } catch (BadResponseException $be) {
+            $this->lastResponse = $be->getResponse();
 
-            if ($this->lastResponse->getStatusCode() === 404) {
-                $data = $e->getResponse()->json();
+            $errorMsg = $this->processBadResponseException($be);
 
-                throw new NotFoundException(sprintf('SOLR Error: %s', $data['error']['msg']));
-            }
-
-            if ($e->getRequest()->getBody()) {
-                $e->getRequest()->getBody()->seek(0);
-            }
-
-            throw new Exception($e->getMessage(), null, $e);
+            throw new Exception($errorMsg, 0, $be);
         }
     }
 
@@ -228,7 +200,7 @@ class Client
 
     /**
      * @param array $options
-     * @return string[]
+     * @return array{string, string|null}
      */
     private function parseSolrUrlFromOptions(array $options): array
     {
@@ -261,7 +233,7 @@ class Client
         if (isset($url['query'])) {
             parse_str($url['query'], $query);
             if (isset($query['core'])) {
-                $core = $query['core'];
+                $core = (string)$query['core'];
             }
         }
         if ((string)$core === '') {
@@ -271,5 +243,32 @@ class Client
         $baseUrl = sprintf('%s://%s%s/%s/', $url['scheme'], $url['host'], (isset($url['port']) ? ':' . $url['port'] : ''), ($url['path'] ? trim($url['path'], '/') : ''));
 
         return [$baseUrl, $core];
+    }
+
+    private function processBadResponseException(BadResponseException $be): string
+    {
+        if ($be->getRequest()->getBody()) {
+            $be->getRequest()->getBody()->seek(0);
+        }
+        $content = $be->getResponse()->getBody()->getContents();
+        $contentType = $be->getResponse()->getHeaderLine('Content-Type');
+        $errorMsg = $be->getMessage();
+        if (preg_match('!^application/json!', $contentType) || preg_match('!^text/plain!', $contentType)) {
+            try {
+                // possibly content is a json-string containing a SolrException.
+                $solrException = \GuzzleHttp\json_decode($content);
+                if (property_exists($solrException, 'error') && property_exists($solrException->error, 'msg')) {
+                    $errorMsg = $solrException->error->msg;
+                }
+            } catch (\InvalidArgumentException $invalidArgumentException) {
+                // we keep the original errorMsg. It still contains all the info we need.
+            }
+        }
+        if (defined('STDERR')) {
+            fwrite(STDERR, PHP_EOL . $errorMsg . PHP_EOL);
+            fwrite(STDERR, PHP_EOL . $content . PHP_EOL);
+        }
+
+        return $errorMsg;
     }
 }

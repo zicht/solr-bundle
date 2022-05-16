@@ -12,13 +12,17 @@
     "require": {
         "php": "^7.4 || ^8",
         "doctrine/common": "^2.2 || ^3",
+        "doctrine/orm": "^2.5",
         "guzzlehttp/guzzle": "^6.3",
         "sonata-project/admin-bundle": "^3.74",
         "symfony/console": "^4.4",
-        "symfony/framework-bundle": "^4.4"
+        "symfony/framework-bundle": "^4.4",
+        "zicht/framework-extra-bundle": "^9",
+        "zicht/url-bundle": "^5"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5"
+        "phpunit/phpunit": "^9.5",
+        "vimeo/psalm": "^4"
     },
     "autoload": {
         "psr-4": {
@@ -31,6 +35,7 @@
         }
     },
     "scripts": {
+        "analysis": "psalm",
         "test": "phpunit"
     }
 }

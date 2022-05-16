@@ -47,7 +47,7 @@ class SynonymManager
         $response = $this->client->request($request);
 
         if (200 === $response->getStatusCode()) {
-            $data = $response->json();
+            $data = \json_decode($response->getBody()->getContents(), true);
 
             if (array_key_exists('synonymMappings', $data) && array_key_exists('managedMap', $data['synonymMappings'])) {
                 return $data['synonymMappings']['managedMap'];
@@ -71,7 +71,7 @@ class SynonymManager
             'PUT',
             sprintf('%sschema/analysis/synonyms/%s', $this->client->getHttpClient()->getConfig('base_uri'), $synonym->getManaged()),
             [],
-            \json_encode([$synonym->getIdentifier() => $data])
+            \json_encode([(string)$synonym->getIdentifier() => $data])
         );
 
         return 200 === $this->client->request($request)->getStatusCode();

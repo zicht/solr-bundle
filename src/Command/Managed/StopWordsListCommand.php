@@ -12,6 +12,8 @@ use Zicht\Bundle\SolrBundle\Solr\Client;
 
 class StopWordsListCommand extends AbstractCommand
 {
+    private StopWordManager $manager;
+
     public function __construct(Client $solr, StopWordManager $manager)
     {
         parent::__construct($solr);

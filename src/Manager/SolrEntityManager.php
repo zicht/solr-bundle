@@ -48,7 +48,7 @@ class SolrEntityManager extends SolrManager
     }
 
     /** {@inheritDoc} */
-    public function updateBatch($entities, $incrementCallback = null, $errorCallback = null, $deleteFirst = false)
+    public function updateBatch($records, $incrementCallback = null, $errorCallback = null, $deleteFirst = false)
     {
         $update = new QueryBuilder\Update();
 
@@ -70,10 +70,10 @@ class SolrEntityManager extends SolrManager
                     $updatedCount++;
                     try {
                         if ($deleteFirst) {
-                            $mapper->delete($update, $entity, $update);
+                            $mapper->delete($update, $entity);
                             $this->deletedEntityHashes[] = spl_object_hash($entity);
                         }
-                        $mapper->update($update, $entity, $update);
+                        $mapper->update($update, $entity);
                         $this->updatedEntityHashes[] = spl_object_hash($entity);
                     } catch (\Exception $e) {
                         if ($errorCallback) {
@@ -92,7 +92,7 @@ class SolrEntityManager extends SolrManager
                 $totalCount++;
             }
         };
-        $innnerUpdateBatch($entities);
+        $innnerUpdateBatch($records);
 
         if ($incrementCallback) {
             call_user_func($incrementCallback, $totalCount);

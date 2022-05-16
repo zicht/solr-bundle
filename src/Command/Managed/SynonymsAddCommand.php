@@ -105,6 +105,9 @@ HELP
                 $data = \json_decode($data, true);
                 break;
             case self::TYPE_YAML:
+                if (!class_exists(Yaml::class, false)) {
+                    throw new \RuntimeException(sprintf('Could not find %s. Please require symfony/yaml.', Yaml::class));
+                }
                 $data = Yaml::parse($data);
                 break;
             default:

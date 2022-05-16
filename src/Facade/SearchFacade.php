@@ -28,7 +28,7 @@ abstract class SearchFacade
     /**
      * SOLR result document
      *
-     * @var array
+     * @var \stdClass
      */
     protected $response = null;
 
@@ -144,7 +144,7 @@ abstract class SearchFacade
      */
     public function getUrl($params)
     {
-        return rtrim(sprintf($this->urlTemplate, $params), '/');
+        return rtrim(sprintf($this->urlTemplate, (string)$params), '/');
     }
 
     /**
@@ -155,7 +155,7 @@ abstract class SearchFacade
      */
     public function getPagerUrl($index = 0)
     {
-        return $this->getUrl($this->searchParams->with('page', $index, false));
+        return $this->getUrl($this->searchParams->with('page', (string)$index, false));
     }
 
     /**
@@ -170,14 +170,15 @@ abstract class SearchFacade
         }
 
         if (!empty($_POST['search'])) {
-            $this->redirectPost($_POST['search']);
-            return null;
+            $this->redirectPost();
+            return;
         }
 
         $query = $this->createQueryBuilder();
         $this->prepareFacetSet($query);
         $this->pager = $this->initPager($query);
-        $this->response = $this->execSearch($query);
+        $searchResponse = $this->execSearch($query);
+        $this->response = $searchResponse instanceof \stdClass ? $searchResponse : null;
     }
 
     /**
@@ -196,14 +197,14 @@ abstract class SearchFacade
         foreach ($this->getFacetFields() as $field) {
             $query->addFacetField($field);
 
-            foreach ($this->searchParams->get($field) as $i => $value) {
+            foreach ($this->searchParams->get($field) as $value) {
                 $query->addFilterQuery(sprintf('%s:"%s"', $field, $value));
             }
         }
 
         foreach ($this->getFacetQueries() as $field => $queries) {
             foreach (array_keys($queries) as $i => $filterQuery) {
-                $query->addFacetQuery($query);
+                $query->addFacetQuery($filterQuery);
 
                 if ($this->searchParams->contains($field, $i)) {
                     $query->addFilterQuery($filterQuery);
@@ -312,22 +313,22 @@ abstract class SearchFacade
 
         foreach ($this->getFacetQueries() as $facetName => $facetQueries) {
             if (!in_array($facetName, $blacklist)) {
-                foreach (array_values($facetQueries) as $i => $facetLabel) {
+                foreach (array_values($facetQueries) as $_i => $_facetLabel) {
                     // This was not yet ported to the new Solarium-less implementation.
                     // It should be similar to the above implementation of the facets. Dump the response to find out
                     // dump($this->response)
 
                     throw new \Exception("not implemented yet: reading facet queries from response. Read source for info");
 
-                    $count = $this->getResponse()->getFacetSet()->getFacet($facetName . '-' . $i)->getValue();
-                    if ($count >= $this->facetMinimumCount) {
-                        $ret[$facetName][$i] = $this->getFacetMetaData(
-                            $facetName,
-                            $i,
-                            $count,
-                            $facetLabel
-                        );
-                    }
+//                    $count = $this->getResponse()->getFacetSet()->getFacet($facetName . '-' . $i)->getValue();
+//                    if ($count >= $this->facetMinimumCount) {
+//                        $ret[$facetName][$i] = $this->getFacetMetaData(
+//                            $facetName,
+//                            $i,
+//                            $count,
+//                            $facetLabel
+//                        );
+//                    }
                 }
             }
         }
@@ -369,7 +370,7 @@ abstract class SearchFacade
     public function decorateHierarchy(&$filters, $facetName, $depth = 3, $stack = array())
     {
         $ret = array();
-        foreach ($filters as $i => &$term) {
+        foreach ($filters as &$term) {
             $ret[]= $term['id'];
             $term += $this->getFacetMetaData($facetName, $term['id']);
 
@@ -399,7 +400,7 @@ abstract class SearchFacade
     }
 
     /**
-     * @return array
+     * @return \stdClass
      * @throws \LogicException
      */
     final public function getResponse()
@@ -497,7 +498,7 @@ abstract class SearchFacade
      * Execute the query.
      *
      * @param Select $query
-     * @return ResponseInterface
+     * @return mixed
      */
     protected function execSearch($query)
     {
@@ -516,7 +517,7 @@ abstract class SearchFacade
         $filters = $this->getFacetFilters();
 
         if (isset($filters[$field]) && sizeof($filters[$field])) {
-            foreach ($filters[$field] as $k => $details) {
+            foreach (array_keys($filters[$field]) as $k) {
                 if (strcmp(strtolower($userValue), strtolower(urlencode($k)))) {
                     return true;
                 }

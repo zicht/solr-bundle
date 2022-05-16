@@ -16,7 +16,7 @@ class DateHelper
      * Format date for SOLR
      *
      * @param \DateTime $dateTime
-     * @return string
+     * @return string|null
      */
     public static function formatDate($dateTime)
     {

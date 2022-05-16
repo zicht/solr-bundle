@@ -25,4 +25,6 @@ jobs:
             -   run: composer config -g github-oauth.github.com ${{ secrets.GITHUB_TOKEN }}
             -   run: composer install --prefer-dist --no-progress --no-scripts
             -   if: always()
+                run: composer run-script analysis -- --no-suggestions --output-format=github
+            -   if: always()
                 run: composer run-script test

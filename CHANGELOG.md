@@ -12,6 +12,7 @@ Nothing so far
 - Removed support for Symfony 3.4
 - Removed unused `z2.yml` and `phpunit.xml.dist` files
 ### Fixed
+- Added missing dependencies to composer.json of which this bundle is using classes of
 - Changed use of deprecated Symfony FrameworkBundle Controller class into AbstractController class and
   inject the Solr Client into the constructor
 - Pass root name to TreeBuilder constructor and call `getRootNode` instead of deprecated `->root()`
@@ -21,6 +22,7 @@ Nothing so far
 - Added a first PHPUnit test for DataMapper (added PHPUnit 9.5 as dev requirement and added
   PSR-4 dev autoloading for tests)
 - Added GitHub Actions to test Q&A on incoming pull requests
+- Added Vimeo Psalm (level 4) and fixed all errors
 ### Changed
 - Overall cleanup of PHP docblocks and whitespace
 

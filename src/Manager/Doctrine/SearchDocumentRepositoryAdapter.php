@@ -9,14 +9,12 @@ use Doctrine\ORM\EntityRepository;
 
 /**
  * Doctrine adapter for the SearchDocumentRepository interface
- *
- * @package Zicht\Bundle\SolrBundle\Manager\Doctrine
  */
 class SearchDocumentRepositoryAdapter implements SearchDocumentRepository
 {
+    private EntityRepository $repository;
+
     /**
-     * Create the SearchDocumentRepository
-     *
      * @param EntityRepository $repository
      */
     public function __construct(EntityRepository $repository)
