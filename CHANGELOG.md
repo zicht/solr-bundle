@@ -6,9 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
 
-## 3.5.0 - 2020-06-08
+## 4.3.0 - 2022-11-28
 ### Added
-- Added DeleteIndexableRelationsInterface to be able to delete related entities in solr
+- Forward merge of v3.5.0: Added DeleteIndexableRelationsInterface to be able to delete related entities in solr
 
 ## 4.2.8 - 2020-05-18
 ### Changed
@@ -76,6 +76,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Upgraded Guzzle from v5 to v6
 ### Removed
 - v4 is based on v3.1, so no Extract query support and no Entity Manager
+
+## 3.5.0 - 2020-06-08
+### Added
+- Added DeleteIndexableRelationsInterface to be able to delete related entities in solr
 
 ## 3.4.10 - 2020-05-18
 ### Changed
