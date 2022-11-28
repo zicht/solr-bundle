@@ -153,7 +153,16 @@ class SolrEntityManager extends SolrManager
         // Even if deletion failed (e.g. no mapper found) still update the relations
         if ($entity instanceof IndexableRelationsInterface) {
             foreach ($entity->getIndexableRelations() as $relation) {
+                if (in_array(spl_object_hash($entity), $this->deletedEntityHashes)) {
+                    continue;
+                }
                 $this->update($relation);
+            }
+        }
+
+        if ($entity instanceof DeleteIndexableRelationsInterface) {
+            foreach ($entity->getDeleteIndexableRelations() as $deleteRelation) {
+                $this->delete($deleteRelation);
             }
         }
 
