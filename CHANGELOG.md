@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
 
+## 6.1.0 - 2022-11-28
+### Added
+- Forward merge of v3.5.0: Added DeleteIndexableRelationsInterface to be able to delete related entities in solr
+
 ## 6.0.0 - 2022-05-02
 ### Removed
 - Removed support for PHP 7.1, 7.2 and 7.3
