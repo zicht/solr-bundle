@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
 
+## 5.1.0 - 2022-11-28
+### Added
+- Forward merge of v3.5.0: Added DeleteIndexableRelationsInterface to be able to delete related entities in solr
+
 ## 5.0.8 - 2022-05-02
 ### Fixed
 - Changed use of deprecated Sonata Admin class into AbstractAdmin class
