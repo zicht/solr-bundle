@@ -4,7 +4,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
-Nothing so far
+- Nothing so far
 
 ## 6.0.0 - 2022-05-02
 ### Removed
@@ -33,6 +33,10 @@ Nothing so far
 - Fixed select command
 - Changed use of deprecated `->setHelps()` to setting `'help'` on the field itself for the
   Sonata Synonym admin
+
+## 5.1.0 - 2022-11-28
+### Added
+- Forward merge of v3.5.0: Added DeleteIndexableRelationsInterface to be able to delete related entities in solr
 
 ## 5.0.7 - 2022-04-12
 ### Fixed
@@ -76,6 +80,10 @@ minimal count of results for facets to be shown.
 - Support for Sonata Admin Bundle v2
 ### Changed
 - Removed Zicht/Bundle/SolrBundle/ directory depth: moved all code up directly into src/
+
+## 4.3.0 - 2022-11-28
+### Added
+- Forward merge of v3.5.0: Added DeleteIndexableRelationsInterface to be able to delete related entities in solr
 
 ## 4.2.8 - 2020-05-18
 ### Changed
@@ -143,6 +151,10 @@ minimal count of results for facets to be shown.
 - Upgraded Guzzle from v5 to v6
 ### Removed
 - v4 is based on v3.1, so no Extract query support and no Entity Manager
+
+## 3.5.0 - 2020-06-08
+### Added
+- Added DeleteIndexableRelationsInterface to be able to delete related entities in solr
 
 ## 3.4.10 - 2020-05-18
 ### Changed
