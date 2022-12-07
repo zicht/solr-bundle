@@ -9,7 +9,7 @@ use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
-use Sonata\AdminBundle\Route\RouteCollection;
+use Sonata\AdminBundle\Route\RouteCollectionInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Zicht\Bundle\SolrBundle\Entity\Synonym;
@@ -19,7 +19,14 @@ use Zicht\Bundle\SolrBundle\Entity\Synonym;
  */
 class SynonymAdmin extends AbstractAdmin
 {
-    protected function configureRoutes(RouteCollection $collection): void
+    private array $managed = [];
+
+    public function setManaged(array $managed)
+    {
+        $this->managed = $managed;
+    }
+
+    protected function configureRoutes(RouteCollectionInterface $collection): void
     {
         $collection->clearExcept([
             'create',
@@ -71,7 +78,7 @@ class SynonymAdmin extends AbstractAdmin
             ->tab('admin.tab.general')
                 ->add('managed', ChoiceType::class, $this->getManagedFieldOptions())
                 ->add('identifier')
-                ->add('value', TextareaType::class, ['help' => $this->trans('help.synonyms', [], 'admin')])
+                ->add('value', TextareaType::class, ['help' => 'help.synonyms'])
                 ->end()
             ->end()
         ;
@@ -80,7 +87,7 @@ class SynonymAdmin extends AbstractAdmin
     private function getManagedFieldOptions(): array
     {
         return [
-            'choices' => $this->getConfigurationPool()->getContainer()->getParameter('zicht_solr.managed'),
+            'choices' => $this->managed,
             'choice_label' => function($k, $v) {
                 return 'choice.managed_synonyms.' . $k;
             },
@@ -91,7 +98,7 @@ class SynonymAdmin extends AbstractAdmin
     /**
      * @param Synonym $object
      */
-    public function prePersist($object)
+    public function prePersist(object $object): void
     {
         $this->cleanUpSynonymValue($object);
         parent::prePersist($object);
@@ -100,10 +107,10 @@ class SynonymAdmin extends AbstractAdmin
     /**
      * @param Synonym $object
      */
-    public function preUpdate($object)
+    public function preUpdate(object $object): void
     {
         $this->cleanUpSynonymValue($object);
-        parent::prePersist($object);
+        parent::preUpdate($object);
     }
 
     private function cleanUpSynonymValue(Synonym $synonym): void

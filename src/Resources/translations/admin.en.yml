@@ -19,6 +19,8 @@ filter:
     label_synonyms: Synonyms
 
 form:
+    group_stop words: Stop words
+    group_synonyms: Synonyms
     label_managed: Managed
     label_identifier: Word
     label_stop_word: Stop word

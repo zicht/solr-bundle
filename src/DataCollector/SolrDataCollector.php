@@ -32,9 +32,9 @@ class SolrDataCollector extends DataCollector
      *
      * @param Request    $request   A Request instance
      * @param Response   $response  A Response instance
-     * @param \Exception $exception An Exception instance
+     * @param \Throwable $exception An Exception instance
      */
-    public function collect(Request $request, Response $response, \Exception $exception = null)
+    public function collect(Request $request, Response $response, \Throwable $exception = null)
     {
         $this->data = array(
             'requests' => $this->client->logs,
