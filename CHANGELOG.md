@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Support for Symfony 5
 - Support for Sonata 4
+- Support for Guzzle 7
 ### Removed
 - Support for Symfony 4
 - Support for Sonata 3

@@ -13,7 +13,7 @@
         "php": "^7.4 || ^8",
         "doctrine/common": "^2.2 || ^3",
         "doctrine/orm": "^2.5",
-        "guzzlehttp/guzzle": "^6.3",
+        "guzzlehttp/guzzle": "^6.3 || ^7",
         "sonata-project/admin-bundle": "^4",
         "symfony/console": "^5.4",
         "symfony/framework-bundle": "^5.4",

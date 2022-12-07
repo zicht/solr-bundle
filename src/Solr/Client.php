@@ -269,6 +269,6 @@ class Client
             fwrite(STDERR, PHP_EOL . $content . PHP_EOL);
         }
 
-        return $errorMsg;
+        return (string)$errorMsg;
     }
 }
