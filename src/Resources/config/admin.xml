@@ -9,9 +9,12 @@
             <tag name="sonata.admin" manager_type="orm" group="Overig" label="Stop words" label_translator_strategy="sonata.admin.label.strategy.underscore"/>
             <argument/>
             <argument>Zicht\Bundle\SolrBundle\Entity\StopWord</argument>
-            <argument>ZichtAdminBundle:CRUD</argument>
+            <argument>Zicht\Bundle\AdminBundle\Controller\CRUDController</argument>
             <call method="setTranslationDomain">
                 <argument>admin</argument>
+            </call>
+            <call method="setManaged">
+                <argument>%zicht_solr.managed%</argument>
             </call>
         </service>
 
@@ -19,9 +22,12 @@
             <tag name="sonata.admin" manager_type="orm" group="Overig" label="Synonyms" label_translator_strategy="sonata.admin.label.strategy.underscore"/>
             <argument/>
             <argument>Zicht\Bundle\SolrBundle\Entity\Synonym</argument>
-            <argument>ZichtAdminBundle:CRUD</argument>
+            <argument>Zicht\Bundle\AdminBundle\Controller\CRUDController</argument>
             <call method="setTranslationDomain">
                 <argument>admin</argument>
+            </call>
+            <call method="setManaged">
+                <argument>%zicht_solr.managed%</argument>
             </call>
         </service>
     </services>

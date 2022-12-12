@@ -19,6 +19,8 @@ filter:
     label_synonyms: Synoniemen
 
 form:
+    group_stop words: Stopwoorden
+    group_synonyms: Synoniemen
     label_managed: Managed
     label_identifier: Woord
     label_stop_word: Stopwoord

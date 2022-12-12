@@ -7,6 +7,7 @@ namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Utils;
 use Zicht\Bundle\SolrBundle\Solr\DateHelper;
 
 /**
@@ -136,7 +137,7 @@ class Update extends AbstractQueryBuilder
             'POST',
             sprintf('%supdate', $httpClient->getConfig('base_uri')),
             ['Content-Type' => 'application/json'],
-            \GuzzleHttp\Psr7\stream_for($this->stream)
+            Utils::streamFor($this->stream)
         );
     }
 }
