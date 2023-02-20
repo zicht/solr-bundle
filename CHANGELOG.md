@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
 
+## 5.1.1 - 2023-02-20
+### Fixed
+- Forward merge of 4.3.1
+
 ## 5.1.0 - 2022-11-28
 ### Added
 - Forward merge of v3.5.0: Added DeleteIndexableRelationsInterface to be able to delete related entities in solr
@@ -60,6 +64,10 @@ minimal count of results for facets to be shown.
 - Support for Sonata Admin Bundle v2
 ### Changed
 - Removed Zicht/Bundle/SolrBundle/ directory depth: moved all code up directly into src/
+
+## 4.3.1 - 2023-02-20
+### Fixed
+- Race-condition in update/delete with same indexable relations
 
 ## 4.3.0 - 2022-11-28
 ### Added
