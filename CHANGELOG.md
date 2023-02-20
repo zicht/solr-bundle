@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
 
+## 4.3.1 - 2023-02-20
+### Fixed
+- Race-condition in update/delete with same indexable relations
+
 ## 4.3.0 - 2022-11-28
 ### Added
 - Forward merge of v3.5.0: Added DeleteIndexableRelationsInterface to be able to delete related entities in solr
