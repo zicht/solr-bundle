@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## 7.0.1 - 2023-02-20
 ### Fixed
 - Forward merge of 4.3.1
+### Removed
+- Logging queries in `ReindexCommand` with deprecated/removed EchoSQLLogger
 
 ## 7.0.0 - 2022-12-07
 ### Added

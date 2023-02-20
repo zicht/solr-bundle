@@ -107,12 +107,6 @@ class ReindexCommand extends AbstractCommand
                 }
             }
 
-            if ($input->getOption('debug')) {
-                $this->doctrine
-                    ->getConnection()
-                    ->getConfiguration()
-                    ->setSQLLogger(new EchoSQLLogger());
-            }
             $output->writeln('Finding indexable documents...');
 
             $records = $repos->findIndexableDocuments(
