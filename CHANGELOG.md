@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
 
+## 7.0.1 - 2023-02-20
+### Fixed
+- Forward merge of 4.3.1
+### Removed
+- Logging queries in `ReindexCommand` with deprecated/removed EchoSQLLogger
+
 ## 7.0.0 - 2022-12-07
 ### Added
 - Support for Symfony 5
@@ -14,6 +20,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 - Support for Symfony 4
 - Support for Sonata 3
+
+## 6.1.1 - 2023-02-20
+### Fixed
+- Forward merge of 4.3.1
 
 ## 6.1.0 - 2022-11-28
 ### Added
@@ -39,6 +49,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Overall cleanup of PHP docblocks and whitespace
 
+## 5.1.1 - 2023-02-20
+### Fixed
+- Forward merge of 4.3.1
+
+## 5.1.0 - 2022-11-28
+### Added
+- Forward merge of v3.5.0: Added DeleteIndexableRelationsInterface to be able to delete related entities in solr
+
 ## 5.0.8 - 2022-05-02
 ### Fixed
 - Changed use of deprecated Sonata Admin class into AbstractAdmin class
@@ -46,10 +64,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Fixed select command
 - Changed use of deprecated `->setHelps()` to setting `'help'` on the field itself for the
   Sonata Synonym admin
-
-## 5.1.0 - 2022-11-28
-### Added
-- Forward merge of v3.5.0: Added DeleteIndexableRelationsInterface to be able to delete related entities in solr
 
 ## 5.0.7 - 2022-04-12
 ### Fixed
@@ -93,6 +107,10 @@ minimal count of results for facets to be shown.
 - Support for Sonata Admin Bundle v2
 ### Changed
 - Removed Zicht/Bundle/SolrBundle/ directory depth: moved all code up directly into src/
+
+## 4.3.1 - 2023-02-20
+### Fixed
+- Race-condition in update/delete with same indexable relations
 
 ## 4.3.0 - 2022-11-28
 ### Added
