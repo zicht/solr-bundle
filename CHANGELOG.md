@@ -61,6 +61,10 @@ minimal count of results for facets to be shown.
 ### Changed
 - Removed Zicht/Bundle/SolrBundle/ directory depth: moved all code up directly into src/
 
+## 4.3.1 - 2023-02-20
+### Fixed
+- Race-condition in update/delete with same indexable relations
+
 ## 4.3.0 - 2022-11-28
 ### Added
 - Forward merge of v3.5.0: Added DeleteIndexableRelationsInterface to be able to delete related entities in solr
