@@ -150,19 +150,21 @@ class SolrEntityManager extends SolrManager
             $this->deletedEntityHashes[] = spl_object_hash($entity);
         }
 
-        // Even if deletion failed (e.g. no mapper found) still update the relations
-        if ($entity instanceof IndexableRelationsInterface) {
-            foreach ($entity->getIndexableRelations() as $relation) {
-                if (in_array(spl_object_hash($entity), $this->deletedEntityHashes)) {
-                    continue;
-                }
-                $this->update($relation);
+        $deleteRelations = [];
+        if ($entity instanceof DeleteIndexableRelationsInterface) {
+            foreach ($entity->getDeleteIndexableRelations() as $deleteRelation) {
+                $deleteRelations[] = $deleteRelation;
+                $this->delete($deleteRelation);
             }
         }
 
-        if ($entity instanceof DeleteIndexableRelationsInterface) {
-            foreach ($entity->getDeleteIndexableRelations() as $deleteRelation) {
-                $this->delete($deleteRelation);
+        // Even if deletion failed (e.g. no mapper found) still update the relations
+        if ($entity instanceof IndexableRelationsInterface) {
+            foreach ($entity->getIndexableRelations() as $relation) {
+                if (in_array(spl_object_hash($entity), $this->deletedEntityHashes) || \in_array($relation, $deleteRelations, true)) {
+                    continue;
+                }
+                $this->update($relation);
             }
         }
 
