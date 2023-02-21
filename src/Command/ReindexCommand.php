@@ -89,6 +89,10 @@ class ReindexCommand extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         foreach($this->entities as $entity) {
+            if (\function_exists('memory_reset_peak_usage')) {
+                \memory_reset_peak_usage();
+            }
+
             $em = $this->doctrine->getManager($input->getOption('em'));
 
             $reflection = $em->getClassMetadata($entity)->getReflectionClass();
@@ -113,7 +117,7 @@ class ReindexCommand extends AbstractCommand
                     ->getConfiguration()
                     ->setSQLLogger(new EchoSQLLogger());
             }
-            $output->writeln('Finding indexable documents...');
+            $output->writeln('Finding indexable items...');
 
             $records = $repos->findIndexableDocuments(
                 $input->getOption('where'),
@@ -122,10 +126,11 @@ class ReindexCommand extends AbstractCommand
             );
 
             $total = count($records);
-            $output->writeln($total . ' documents found.');
+            $output->writeln(sprintf('<comment>%s items found.</comment>', $total));
 
-            $output->writeln('Reindexing records...');
+            $output->writeln('Reindexing items...');
 
+            $startTime = microtime(true);
             if ($reflection->implementsInterface(Extractable::class)) {
                 list($extractableRecords, $updatableRecords) = $this->splitRecords($records);
                 list($n, $i) = $this->extractBatch($input, $output, $extractableRecords);
@@ -140,8 +145,8 @@ class ReindexCommand extends AbstractCommand
             } else {
                 list($n, $i) = $this->updateBatch($input, $output, $records);
             }
-            $output->write("\n");
-            $output->writeln(sprintf('Processed %s of %s items. Peak mem usage: %2d Mb', $i, $n, memory_get_peak_usage() / 1024 / 1024));
+            $duration = round($duration = microtime(true) - $startTime, $duration < 4 ? 2 : ($duration < 32 ? 1 : 0));
+            $output->writeln(sprintf('<comment>Processed %s of %s items in %s seconds. Peak mem usage: %2d Mb</comment>', $i, $n, $duration, \memory_get_peak_usage() / 1048576));
             $em->clear();
             gc_collect_cycles();
         }
@@ -167,10 +172,11 @@ class ReindexCommand extends AbstractCommand
             function ($n) use ($progress, $total, $output) {
                 $progress->setProgress($n);
 
-                if ($n == $total) {
+                if ($n === $total) {
                     $progress->finish();
                     $output->write("\n");
-                    $output->writeln('Flushing ...');
+                    $size = $this->solrManager->update->getQueryByteSize();
+                    $output->writeln(sprintf('Sending data (%s)...', $size >= 1048576 ? sprintf('%0.1f Mb', $size / 1048576) : sprintf('%0.2f Kb',$size / 1024)));
                 }
             },
             function ($record, $e) use ($input, $output) {
@@ -204,10 +210,9 @@ class ReindexCommand extends AbstractCommand
             function ($n) use ($progress, $total, $output) {
                 $progress->setProgress($n);
 
-                if ($n == $total) {
+                if ($n === $total) {
                     $progress->finish();
                     $output->write("\n");
-                    $output->writeln('Flushing ...');
                 }
             },
             function ($record, $e) use ($input, $output) {

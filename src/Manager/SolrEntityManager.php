@@ -7,7 +7,7 @@ namespace Zicht\Bundle\SolrBundle\Manager;
 
 use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
 use Zicht\Bundle\SolrBundle\Solr\Client;
-use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update as UpdateQuery;
 
 /**
  * As opposed to the regular SolrManager this SolrEntityManager keeps track of the handled objects to not handle the same
@@ -50,14 +50,14 @@ class SolrEntityManager extends SolrManager
     /** {@inheritDoc} */
     public function updateBatch($records, $incrementCallback = null, $errorCallback = null, $deleteFirst = false)
     {
-        $update = new QueryBuilder\Update();
+        $this->update = new UpdateQuery();
 
         $totalCount = $updatedCount = 0;
         /**
          * Recursive Closure to be able to travel deep into entity relations but
          * still keep updates in one single transaction ($update object)
          */
-        $innnerUpdateBatch = function (array $entities) use (&$innnerUpdateBatch, &$update, &$incrementCallback, &$errorCallback, $deleteFirst, &$totalCount, &$updatedCount) {
+        $innnerUpdateBatch = function (array $entities) use (&$innnerUpdateBatch, &$incrementCallback, &$errorCallback, $deleteFirst, &$totalCount, &$updatedCount) {
             foreach ($entities as $entity) {
                 self::validateEntity($entity);
 
@@ -70,10 +70,10 @@ class SolrEntityManager extends SolrManager
                     $updatedCount++;
                     try {
                         if ($deleteFirst) {
-                            $mapper->delete($update, $entity);
+                            $mapper->delete($this->update, $entity);
                             $this->deletedEntityHashes[] = spl_object_hash($entity);
                         }
-                        $mapper->update($update, $entity);
+                        $mapper->update($this->update, $entity);
                         $this->updatedEntityHashes[] = spl_object_hash($entity);
                     } catch (\Exception $e) {
                         if ($errorCallback) {
@@ -98,8 +98,9 @@ class SolrEntityManager extends SolrManager
             call_user_func($incrementCallback, $totalCount);
         }
 
-        $update->commit();
-        $this->client->update($update);
+        $this->update->commit();
+        $this->client->update($this->update);
+        $this->update = null;
 
         return [$totalCount, $updatedCount];
     }

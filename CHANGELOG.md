@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
 
+## 6.2.0 - 2023-02-22
+### Added
+- Reset PHP's memory peak usage in between reindexing of entities (PHP >= 8.2).
+- Duration time and byte size information in reindex command.
+- Added explicit max. memory of 50 Mb to the temp stream of the Solr update query,
+  instead of relying on the (2 Mb) default.
+### Fixed
+- Improved texts and text colors of reindex command output.
+
 ## 6.1.1 - 2023-02-20
 ### Fixed
 - Forward merge of 4.3.1
