@@ -6,8 +6,6 @@
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Interfaces;
 
 /**
- * Interface Extractable
- *
  * This interface is used to define an Entity to be Extractable by SOLR.
  * During the indexation process the Subscriber or the Reindex command desided whether to Extract or Update.
  * Also the getFileResource is nullable in the context of an optional file in an Entity.

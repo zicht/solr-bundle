@@ -12,8 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Duration time and byte size information in reindex command.
 - Added explicit max. memory of 50 Mb to the temp stream of the Solr update query,
   instead of relying on the (2 Mb) default.
+- Added PHP CS Fixer to lint the PHP code style.
 ### Fixed
 - Improved texts and text colors of reindex command output.
+- Fixed the PHP code style with Zicht Standards PHP first and then with the newly added PHP CS Fixer.
 
 ## 6.1.1 - 2023-02-20
 ### Fixed

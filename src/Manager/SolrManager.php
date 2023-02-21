@@ -19,29 +19,20 @@ class SolrManager
 
     public ?ExtractQuery $extract = null;
 
-    /**
-     * @var Client
-     */
-    protected $client = null;
+    /** @var Client */
+    protected $client;
 
-    /**
-     * @var bool
-     */
+    /** @var bool */
     protected $enabled = true;
 
-    /**
-     * @var DataMapperInterface[]
-     */
+    /** @var DataMapperInterface[] */
     protected $mappers = [];
+
     private $repositories;
 
-    /**
-     * @param Client $client
-     */
     public function __construct(Client $client)
     {
         $this->client = $client;
-        $this->mappers = [];
     }
 
     /**
@@ -72,7 +63,7 @@ class SolrManager
      */
     public function addRepository($class, $repository)
     {
-        $this->repositories[ $class ] = $repository;
+        $this->repositories[$class] = $repository;
     }
 
     /**
@@ -83,16 +74,14 @@ class SolrManager
      */
     public function getRepository($entityClass)
     {
-        if (!isset($this->repositories[ $entityClass ])) {
+        if (!isset($this->repositories[$entityClass])) {
             return null;
         }
 
-        return $this->repositories[ $entityClass ];
+        return $this->repositories[$entityClass];
     }
 
     /**
-     * Updates as batch.
-     *
      * @param array $records
      * @param callable|null $incrementCallback
      * @param callable|null $errorCallback
@@ -106,7 +95,7 @@ class SolrManager
         $n = $i = 0;
         foreach ($records as $record) {
             if ($mapper = $this->getMapper($record)) {
-                $i++;
+                ++$i;
                 try {
                     if ($deleteFirst) {
                         $mapper->delete($this->update, $record);
@@ -121,7 +110,7 @@ class SolrManager
                     call_user_func($incrementCallback, $n);
                 }
             }
-            $n++;
+            ++$n;
         }
         if ($incrementCallback) {
             call_user_func($incrementCallback, $n);
@@ -135,8 +124,6 @@ class SolrManager
     }
 
     /**
-     * Extracts as batch.
-     *
      * @param array $records
      * @param callable|null $incrementCallback
      * @param callable|null $errorCallback
@@ -151,7 +138,7 @@ class SolrManager
                 continue;
             }
 
-            $i++;
+            ++$i;
             try {
                 $this->extract = new ExtractQuery();
                 $mapper->extract($this->extract, $record);
@@ -167,7 +154,7 @@ class SolrManager
                 call_user_func($incrementCallback, $n);
             }
 
-            $n++;
+            ++$n;
         }
         call_user_func($incrementCallback, $n);
 
@@ -251,7 +238,7 @@ class SolrManager
     /**
      * Enables or disabled the solr manager.
      *
-     * @param boolean $enabled
+     * @param bool $enabled
      * @return void
      */
     public function setEnabled($enabled)

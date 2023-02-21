@@ -9,18 +9,12 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Request;
 use Zicht\Bundle\SolrBundle\Solr\DateHelper;
 
-/**
- * Class Update
- */
 class Update extends AbstractQueryBuilder
 {
     private const STREAM_MAX_MEMORY = 50 * 1048576; // 50 Mb, default is 2 Mb
 
-    private $stream = null;
+    private $stream;
 
-    /**
-     * Initialize the update request.
-     */
     public function __construct()
     {
         $this->stream = fopen(sprintf('php://temp/maxmemory:%s', self::STREAM_MAX_MEMORY), 'rw');
@@ -30,24 +24,15 @@ class Update extends AbstractQueryBuilder
     /**
      * Add a document to the update request
      *
-     * @param array[] $document
-     * @param array $params
-     * @return self
+     * @param array<string, mixed> $document
+     * @param array<string, mixed> $params
+     * @return $this
      */
     public function add($document, $params = [])
     {
         $this->addInstruction(
             'add',
-            ['doc' => array_map(
-                function ($v) {
-                    if ($v instanceof \DateTimeInterface) {
-                        $v = DateHelper::formatDate($v);
-                    }
-
-                    return $v;
-                },
-                $document
-            )] + $params
+            ['doc' => array_map(static fn ($v) => $v instanceof \DateTimeInterface ? DateHelper::formatDate($v) : $v, $document)] + $params
         );
 
         return $this;
@@ -60,7 +45,7 @@ class Update extends AbstractQueryBuilder
      */
     public function commit()
     {
-        $this->addInstruction('commit', new \stdClass);
+        $this->addInstruction('commit', new \stdClass());
 
         return $this;
     }
@@ -128,7 +113,6 @@ class Update extends AbstractQueryBuilder
         fwrite($this->stream, json_encode($type) . ':' . json_encode($value) . ',');
     }
 
-    /** {@inheritDoc} */
     public function createRequest(ClientInterface $httpClient)
     {
         fseek($this->stream, -1, SEEK_END);

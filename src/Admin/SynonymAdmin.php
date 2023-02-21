@@ -25,7 +25,7 @@ class SynonymAdmin extends AbstractAdmin
             'create',
             'list',
             'edit',
-            'delete'
+            'delete',
         ]);
         parent::configureRoutes($collection);
     }
@@ -35,8 +35,7 @@ class SynonymAdmin extends AbstractAdmin
         $filter
             ->add('managed')
             ->add('identifier')
-            ->add('value', null, ['label' => 'filter.label_synonyms'])
-        ;
+            ->add('value', null, ['label' => 'filter.label_synonyms']);
     }
 
     protected function configureListFields(ListMapper $list): void
@@ -61,8 +60,7 @@ class SynonymAdmin extends AbstractAdmin
                         'delete' => [],
                     ],
                 ]
-            )
-        ;
+            );
     }
 
     protected function configureFormFields(FormMapper $form): void
@@ -73,17 +71,14 @@ class SynonymAdmin extends AbstractAdmin
                 ->add('identifier')
                 ->add('value', TextareaType::class, ['help' => $this->trans('help.synonyms', [], 'admin')])
                 ->end()
-            ->end()
-        ;
+            ->end();
     }
 
     private function getManagedFieldOptions(): array
     {
         return [
             'choices' => $this->getConfigurationPool()->getContainer()->getParameter('zicht_solr.managed'),
-            'choice_label' => function($k, $v) {
-                return 'choice.managed_synonyms.' . $k;
-            },
+            'choice_label' => fn ($k, $v) => 'choice.managed_synonyms.' . $k,
             'choice_translation_domain' => 'admin',
         ];
     }

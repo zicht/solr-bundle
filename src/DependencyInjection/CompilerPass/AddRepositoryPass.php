@@ -19,7 +19,7 @@ class AddRepositoryPass implements CompilerPassInterface
         $definition = $container->getDefinition('zicht_solr.manager');
         foreach ($container->findTaggedServiceIds('zicht_solr.repository') as $id => $tags) {
             foreach ($tags as $attributes) {
-                $definition->addMethodCall('addRepository', array($attributes['class'], new Reference($id)));
+                $definition->addMethodCall('addRepository', [$attributes['class'], new Reference($id)]);
             }
         }
     }

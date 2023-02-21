@@ -10,7 +10,6 @@ namespace Zicht\Bundle\SolrBundle\Pager;
  */
 class GroupedSolrPageable extends SolrPageable
 {
-    /** {@inheritDoc} */
     public function getTotal()
     {
         if (!isset($this->total)) {

@@ -13,16 +13,8 @@ use Zicht\Bundle\SolrBundle\Solr\Client;
  */
 abstract class AbstractCommand extends Command
 {
-    /**
-     * @var Client
-     */
-    public $solr;
+    public Client $solr;
 
-    /**
-     * Construct the command with the solr service
-     *
-     * @param Client $solr
-     */
     public function __construct(Client $solr)
     {
         parent::__construct();

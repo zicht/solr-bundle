@@ -13,24 +13,12 @@ use Zicht\Bundle\SolrBundle\Entity\Synonym;
 use Zicht\Bundle\SolrBundle\Exception\NotFoundException;
 use Zicht\Bundle\SolrBundle\Manager\SynonymManager;
 
-/**
- * Class SynonymSubscriber
- */
 class SynonymSubscriber implements EventSubscriber
 {
-    /**
-     * @var bool
-     */
-    private $enabled = true;
+    private bool $enabled = true;
 
-    /**
-     * @var SynonymManager
-     */
-    private $manager;
+    private SynonymManager $manager;
 
-    /**
-     * @param SynonymManager $container
-     */
     public function __construct(SynonymManager $manager)
     {
         $this->manager = $manager;
@@ -45,7 +33,6 @@ class SynonymSubscriber implements EventSubscriber
     }
 
     /**
-     * @param LifecycleEventArgs $event
      * @return void
      */
     public function prePersist(LifecycleEventArgs $event)
@@ -58,7 +45,6 @@ class SynonymSubscriber implements EventSubscriber
     }
 
     /**
-     * @param LifecycleEventArgs $event
      * @return void
      */
     public function postPersist(LifecycleEventArgs $event)
@@ -67,7 +53,6 @@ class SynonymSubscriber implements EventSubscriber
     }
 
     /**
-     * @param LifecycleEventArgs $event
      * @return void
      */
     public function preUpdate(LifecycleEventArgs $event)
@@ -81,7 +66,6 @@ class SynonymSubscriber implements EventSubscriber
     }
 
     /**
-     * @param LifecycleEventArgs $event
      * @return void
      */
     public function preRemove(LifecycleEventArgs $event)
@@ -98,20 +82,16 @@ class SynonymSubscriber implements EventSubscriber
         }
     }
 
-    /** {@inheritDoc} */
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             Events::prePersist,
             Events::postPersist,
             Events::preUpdate,
-            Events::preRemove
-        );
+            Events::preRemove,
+        ];
     }
 
-    /**
-     * @param LifecycleEventArgs $event
-     */
     private function callUpdate(LifecycleEventArgs $event)
     {
         if (!$this->enabled || !$event->getEntity() instanceof Synonym) {
@@ -138,9 +118,6 @@ class SynonymSubscriber implements EventSubscriber
         $this->manager->getClient()->reload();
     }
 
-    /**
-     * @param Synonym $synonym
-     */
     private function prepareSynonym(Synonym $synonym)
     {
         $synonym->setIdentifier(strtolower(trim($synonym->getIdentifier())));

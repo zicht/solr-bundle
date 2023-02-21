@@ -16,7 +16,6 @@ interface ResponseHandlerInterface
     /**
      * Handle the response and returns the parsed value
      *
-     * @param Response $response
      * @return mixed
      */
     public function handle(Response $response);

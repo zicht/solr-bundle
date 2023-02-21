@@ -14,14 +14,9 @@ use Zicht\Bundle\SolrBundle\Solr\Client;
  */
 class StopWordManager
 {
-    /**
-     * @var Client
-     */
+    /** @var Client */
     protected $client;
 
-    /**
-     * @param Client $client
-     */
     public function __construct(Client $client)
     {
         $this->client = $client;
@@ -47,20 +42,17 @@ class StopWordManager
         $response = $this->client->request($request);
 
         if (200 === $response->getStatusCode()) {
-             $data = \json_decode($response->getBody()->getContents(), true);
+            $data = \json_decode($response->getBody()->getContents(), true);
 
-             if (array_key_exists('wordSet', $data) && array_key_exists('managedList', $data['wordSet'])) {
-                 return $data['wordSet']['managedList'];
-             }
+            if (array_key_exists('wordSet', $data) && array_key_exists('managedList', $data['wordSet'])) {
+                return $data['wordSet']['managedList'];
+            }
         }
 
         return [];
     }
 
     /**
-     * Adds an stopword
-     *
-     * @param StopWord $stopWord
      * @return bool
      */
     public function addStopWord(StopWord $stopWord)
@@ -86,13 +78,7 @@ class StopWordManager
         $dataPerManaged = [];
         foreach ($stopWords as $stopWord) {
             if (!$stopWord instanceof StopWord) {
-                throw new \UnexpectedValueException(
-                    sprintf(
-                        'Stop words array elements must be of type %s. Got %s',
-                        StopWord::class,
-                        is_object($stopWord) ? get_class($stopWord) : gettype($stopWord)
-                    )
-                );
+                throw new \UnexpectedValueException(sprintf('Stop words array elements must be of type %s. Got %s', StopWord::class, is_object($stopWord) ? get_class($stopWord) : gettype($stopWord)));
             }
             if (!array_key_exists($stopWord->getManaged(), $dataPerManaged)) {
                 $dataPerManaged[$stopWord->getManaged()] = [];
@@ -119,9 +105,6 @@ class StopWordManager
     }
 
     /**
-     * Has an stopword.
-     *
-     * @param StopWord $stopWord
      * @return bool
      */
     public function hasStopWord(StopWord $stopWord)
@@ -135,9 +118,6 @@ class StopWordManager
     }
 
     /**
-     * Removes an stopword.
-     *
-     * @param StopWord $stopWord
      * @return bool
      */
     public function removeStopWord(StopWord $stopWord)

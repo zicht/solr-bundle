@@ -5,9 +5,6 @@
 
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
-/**
- * Class AbstractQueryBuilder
- */
 abstract class AbstractQueryBuilder implements RequestBuilderInterface
 {
     /**
@@ -23,7 +20,7 @@ abstract class AbstractQueryBuilder implements RequestBuilderInterface
     {
         $ret = '';
         $isFirst = true;
-        $format = function($key, $value) use(&$isFirst) {
+        $format = function ($key, $value) use (&$isFirst) {
             $ret = '';
 
             if (!$isFirst) {
@@ -45,7 +42,7 @@ abstract class AbstractQueryBuilder implements RequestBuilderInterface
             } elseif (is_scalar($value)) {
                 $ret .= $format($key, $value);
             } else {
-                throw new \InvalidArgumentException("Unhandled parameter type " . gettype($value) . " in call to buildQuery()");
+                throw new \InvalidArgumentException('Unhandled parameter type ' . gettype($value) . ' in call to buildQuery()');
             }
         }
 

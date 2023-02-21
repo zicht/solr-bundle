@@ -1,4 +1,5 @@
 <?php
+
 namespace Zicht\Bundle\SolrBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -23,9 +24,7 @@ class StopWord
     private $value;
 
     /**
-     * Maps within the rest API to the "identifier" of the collection.
-     *
-     * @var string|null
+     * @var string|null Maps within the rest API to the "identifier" of the collection.
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private $managed;
