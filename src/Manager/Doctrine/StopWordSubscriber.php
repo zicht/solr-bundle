@@ -12,24 +12,12 @@ use Zicht\Bundle\SolrBundle\Entity\StopWord;
 use Zicht\Bundle\SolrBundle\Exception\NotFoundException;
 use Zicht\Bundle\SolrBundle\Manager\StopWordManager;
 
-/**
- * Class StopWordSubscriber
- */
 class StopWordSubscriber implements EventSubscriber
 {
-    /**
-     * @var bool
-     */
-    private $enabled = true;
+    private bool $enabled = true;
 
-    /**
-     * @var StopWordManager
-     */
-    private $manager;
+    private StopWordManager $manager;
 
-    /**
-     * @param StopWordManager $manager
-     */
     public function __construct(StopWordManager $manager)
     {
         $this->manager = $manager;
@@ -44,7 +32,6 @@ class StopWordSubscriber implements EventSubscriber
     }
 
     /**
-     * @param LifecycleEventArgs $event
      * @return void
      */
     public function prePersist(LifecycleEventArgs $event)
@@ -57,7 +44,6 @@ class StopWordSubscriber implements EventSubscriber
     }
 
     /**
-     * @param LifecycleEventArgs $event
      * @return void
      */
     public function postPersist(LifecycleEventArgs $event)
@@ -66,7 +52,6 @@ class StopWordSubscriber implements EventSubscriber
     }
 
     /**
-     * @param LifecycleEventArgs $event
      * @return void
      */
     public function preUpdate(LifecycleEventArgs $event)
@@ -80,7 +65,6 @@ class StopWordSubscriber implements EventSubscriber
     }
 
     /**
-     * @param LifecycleEventArgs $event
      * @return void
      */
     public function preRemove(LifecycleEventArgs $event)
@@ -97,20 +81,16 @@ class StopWordSubscriber implements EventSubscriber
         }
     }
 
-    /** {@inheritDoc} */
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             Events::prePersist,
             Events::postPersist,
             Events::preUpdate,
-            Events::preRemove
-        );
+            Events::preRemove,
+        ];
     }
 
-    /**
-     * @param LifecycleEventArgs $event
-     */
     private function callUpdate(LifecycleEventArgs $event)
     {
         if (!$this->enabled || !$event->getEntity() instanceof StopWord) {
@@ -121,9 +101,6 @@ class StopWordSubscriber implements EventSubscriber
         $this->manager->getClient()->reload();
     }
 
-    /**
-     * @param StopWord $stopWord
-     */
     private function prepareStopword(StopWord $stopWord)
     {
         $stopWord->setValue(strtolower(trim($stopWord->getValue())));

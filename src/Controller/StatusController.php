@@ -39,8 +39,7 @@ class StatusController extends AbstractController
         } catch (\Exception $e) {
             $response
                 ->setStatusCode(503)
-                ->setContent($e->getMessage())
-            ;
+                ->setContent($e->getMessage());
         }
 
         return $response;

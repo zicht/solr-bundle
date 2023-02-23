@@ -4,7 +4,6 @@
  */
 
 namespace AppTest {
-
     use Zicht\Bundle\SolrBundle\Manager\AbstractDataMapper;
 
     class TestEntity
@@ -44,11 +43,9 @@ namespace AppTest {
 }
 
 namespace Zicht\Bundle\SolrBundle\Tests\Manager {
-
-    use AppTest\TestMapper;
     use AppTest\TestEntity;
+    use AppTest\TestMapper;
     use PHPUnit\Framework\TestCase;
-    use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Extract;
     use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 
     class DataMapperTest extends TestCase
@@ -107,5 +104,4 @@ namespace Zicht\Bundle\SolrBundle\Tests\Manager {
             $this->assertSame($testMapper->getClassNames(), $classNames);
         }
     }
-
 }

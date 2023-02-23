@@ -22,12 +22,6 @@ class SolrPageable implements Pageable
     /** @var int|null */
     protected $total = null;
 
-    /**
-     * Construct the pager.
-     *
-     * @param Client $client
-     * @param Select $selectQuery
-     */
     public function __construct(Client $client, Select $selectQuery)
     {
         $this->client = $client;
@@ -64,7 +58,6 @@ class SolrPageable implements Pageable
     {
         $this->query
             ->setStart($start)
-            ->setRows($length)
-        ;
+            ->setRows($length);
     }
 }

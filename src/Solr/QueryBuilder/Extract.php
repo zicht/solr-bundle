@@ -10,8 +10,6 @@ use GuzzleHttp\Message\RequestInterface;
 use GuzzleHttp\Post\PostFile;
 
 /**
- * Class Extract
- *
  * Each extract query should be a standalone one, a batch update is not available at this point.
  * The endpoint can fail on some types of PDF or Word documents due to an unknown structure.
  *
@@ -25,34 +23,18 @@ class Extract extends AbstractQueryBuilder
     /** field in solr to map document_file content */
     const DEFAULT_DOCUMENT_FILE_CONTENT_FIELD = 'document_file_content';
 
-    /**
-     * @var array
-     */
-    private $data;
+    /** @var array */
+    private $data = [];
 
     /**
-     * Initialize the update request.
-     */
-    public function __construct()
-    {
-        $this->data = [];
-    }
-
-    /**
-     * Extract a document.
-     *
      * @param string $id
-     * @param array $values
-     * @param array $params
      * @param resource $file
      * @return self
      */
     public function extract($id, array $values, array $params, $file)
     {
         if (!is_resource($file)) {
-            throw new \BadFunctionCallException(
-                sprintf('argument file must be of type resource %s given', gettype($file))
-            );
+            throw new \BadFunctionCallException(sprintf('argument file must be of type resource %s given', gettype($file)));
         }
 
         // All default fields mapped in SOLR are prefixed with `literal.` to define the actual field
@@ -65,13 +47,12 @@ class Extract extends AbstractQueryBuilder
             // So the fix is to post arrays as single elements
             if (is_array($value)) {
                 foreach ($value as $k => $v) {
-                    //
-                    $this->data[ sprintf('literal.%s%d', $key, $k) ] = $v;
-                    $this->data[ sprintf('fmap.%s%d', $key, $k) ] = sprintf('%s', $key);
+                    $this->data[sprintf('literal.%s%d', $key, $k)] = $v;
+                    $this->data[sprintf('fmap.%s%d', $key, $k)] = sprintf('%s', $key);
                 }
                 continue;
             }
-            $this->data[ sprintf('literal.%s', $key) ] = $value;
+            $this->data[sprintf('literal.%s', $key)] = $value;
         }
 
         $this->data['file'] = $file;
@@ -87,7 +68,6 @@ class Extract extends AbstractQueryBuilder
     /**
      * Create an HTTP request that needs to be sent to SOLR.
      *
-     * @param Client $httpClient
      * @return RequestInterface
      */
     public function createRequest(Client $httpClient)

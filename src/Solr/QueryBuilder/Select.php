@@ -9,25 +9,20 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 
-/**
- * Class Select
- */
 class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
 {
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $params = [
         'wt' => 'json',
         'q' => '*:*',
-        'fl' => '*,score'
+        'fl' => '*,score',
     ];
 
     /**
      * Set the 'q' parameter
      *
      * @param string $q
-     * @return $this|Select
+     * @return $this
      */
     public function setQuery($q)
     {
@@ -38,7 +33,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      * Set the field list '`fl` parameter
      *
      * @param string $fl
-     * @return $this|Select
+     * @return $this
      */
     public function setFieldList($fl)
     {
@@ -49,13 +44,11 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      * Sets the `start` parameter (the paging offset)
      *
      * @param int $start
-     * @return $this|Select
+     * @return $this
      */
     public function setStart($start)
     {
-        $this->setParam('start', (int)$start);
-
-        return $this;
+        return $this->setParam('start', (int)$start);
     }
 
     /**
@@ -66,9 +59,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      */
     public function setRows($rows)
     {
-        $this->setParam('rows', (int)$rows);
-
-        return $this;
+        return $this->setParam('rows', (int)$rows);
     }
 
     /**
@@ -93,9 +84,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      */
     public function addFilterQuery($fq)
     {
-        $this->addParam('fq', $fq);
-
-        return $this;
+        return $this->addParam('fq', $fq);
     }
 
     /**
@@ -106,18 +95,14 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      */
     public function setFilterQuery($fq)
     {
-        $this->setParam('fq', $fq);
-
-        return $this;
+        return $this->setParam('fq', $fq);
     }
 
-    /** {@inheritDoc} */
     public function createRequest(ClientInterface $httpClient)
     {
         return new Request('GET', sprintf('%sselect?%s', $httpClient->getConfig('base_uri'), $this->createQueryString($this->params)));
     }
 
-    /** {@inheritDoc} */
     public function handle(Response $response)
     {
         $contentType = $response->getHeaderLine('Content-Type');
@@ -156,9 +141,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      */
     public function setDefType($string)
     {
-        $this->setParam('defType', $string);
-
-        return $this;
+        return $this->setParam('defType', $string);
     }
 
     /**
@@ -170,9 +153,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      */
     public function setQueryFields($string)
     {
-        $this->setParam('qf', $string);
-
-        return $this;
+        return $this->setParam('qf', $string);
     }
 
     /**
@@ -183,9 +164,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      */
     public function setSort($value)
     {
-        $this->setParam('sort', $value);
-
-        return $this;
+        return $this->setParam('sort', $value);
     }
 
     /**
@@ -196,9 +175,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      */
     public function setFacetMinCount($value)
     {
-        $this->setParam('facet.mincount', (int)$value);
-
-        return $this;
+        return $this->setParam('facet.mincount', (int)$value);
     }
 
     /**
@@ -209,9 +186,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      */
     public function addFacetField($field)
     {
-        $this->addParam('facet.field', $field);
-
-        return $this;
+        return $this->addParam('facet.field', $field);
     }
 
     /**
@@ -222,9 +197,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      */
     public function addFacetQuery($query)
     {
-        $this->addParam('facet.query', $query);
-
-        return $this;
+        return $this->addParam('facet.query', $query);
     }
 
     /**
@@ -235,9 +208,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      */
     public function setGroupField($groupField)
     {
-        $this->setParam('group.field', $groupField);
-
-        return $this;
+        return $this->setParam('group.field', $groupField);
     }
 
     /**
@@ -248,14 +219,14 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      */
     public function setGroupLimit($groupLimit)
     {
-        $this->setParam('group.limit', $groupLimit);
-
-        return $this;
+        return $this->setParam('group.limit', $groupLimit);
     }
 
     /**
      * Set debugging on.
      *
+     * @param mixed $value
+     * @param bool $structured
      * @return $this
      */
     public function setDebugQuery($value, $structured = false)

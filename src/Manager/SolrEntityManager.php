@@ -5,8 +5,6 @@
 
 namespace Zicht\Bundle\SolrBundle\Manager;
 
-use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
-use Zicht\Bundle\SolrBundle\Solr\Client;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update as UpdateQuery;
 
 /**
@@ -30,24 +28,18 @@ class SolrEntityManager extends SolrManager
     /**
      * @param mixed $entity
      * @return bool
+     * @psalm-assert object $entity
      */
     protected static function validateEntity($entity)
     {
         if (!is_object($entity)) {
             $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-            throw new \InvalidArgumentException(
-                sprintf(
-                    'Received %s while expecting an object. %s can only handle objects.',
-                    gettype($entity),
-                    isset($backtrace[1]) ? $backtrace[1]['class'] . '::' . $backtrace[1]['function'] . '()' : get_class()
-                )
-            );
+            throw new \InvalidArgumentException(sprintf('Received %s while expecting an object. %s can only handle objects.', gettype($entity), isset($backtrace[1]) ? $backtrace[1]['class'] . '::' . $backtrace[1]['function'] . '()' : get_class()));
         }
 
         return true;
     }
 
-    /** {@inheritDoc} */
     public function updateBatch($records, $incrementCallback = null, $errorCallback = null, $deleteFirst = false)
     {
         $this->update = new UpdateQuery();
@@ -62,12 +54,12 @@ class SolrEntityManager extends SolrManager
                 self::validateEntity($entity);
 
                 if (in_array(spl_object_hash($entity), $this->updatedEntityHashes)) {
-                    $totalCount++;
+                    ++$totalCount;
                     continue;
                 }
 
                 if ($mapper = $this->getMapper($entity)) {
-                    $updatedCount++;
+                    ++$updatedCount;
                     try {
                         if ($deleteFirst) {
                             $mapper->delete($this->update, $entity);
@@ -89,7 +81,7 @@ class SolrEntityManager extends SolrManager
                     $innnerUpdateBatch($entity->getIndexableRelations());
                 }
 
-                $totalCount++;
+                ++$totalCount;
             }
         };
         $innnerUpdateBatch($records);
@@ -105,7 +97,6 @@ class SolrEntityManager extends SolrManager
         return [$totalCount, $updatedCount];
     }
 
-    /** {@inheritDoc} */
     public function update($entity)
     {
         self::validateEntity($entity);
@@ -133,7 +124,6 @@ class SolrEntityManager extends SolrManager
         return $updated;
     }
 
-    /** {@inheritDoc} */
     public function delete($entity)
     {
         self::validateEntity($entity);

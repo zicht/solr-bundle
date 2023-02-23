@@ -12,16 +12,9 @@ use Zicht\Bundle\SolrBundle\Solr\Client;
 
 class SolrDataCollector extends DataCollector
 {
-    /**
-     * @var Client
-     */
+    /** @var Client */
     private $client;
 
-    /**
-     * SolrDataCollector constructor.
-     *
-     * @param Client $client
-     */
     public function __construct(Client $client)
     {
         $this->client = $client;
@@ -36,9 +29,9 @@ class SolrDataCollector extends DataCollector
      */
     public function collect(Request $request, Response $response, \Exception $exception = null)
     {
-        $this->data = array(
+        $this->data = [
             'requests' => $this->client->logs,
-        );
+        ];
     }
 
     public function getRequests()

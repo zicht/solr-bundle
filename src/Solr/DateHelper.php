@@ -7,9 +7,7 @@ namespace Zicht\Bundle\SolrBundle\Solr;
 
 class DateHelper
 {
-    /**
-     * SOLR date format
-     */
+    /** SOLR date format */
     const DATE_FORMAT = 'Y-m-d\TH:i:s\Z';
 
     /**

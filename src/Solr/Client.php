@@ -10,31 +10,23 @@ use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Request;
 use Psr\Http\Message\ResponseInterface;
 use Zicht\Bundle\SolrBundle\Exception\ConfigurationException;
-use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
 class Client
 {
     private $lastRequest = null;
+
     private $lastResponse = null;
 
-    /**
-     * @var ClientInterface
-     */
+    /** @var ClientInterface */
     private $http;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $absoluteBaseUrl;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $core;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     public $logs = [];
 
     public function __construct(array $options, string $clientClass)
@@ -46,7 +38,6 @@ class Client
     /**
      * Selects documents based on the specified query.
      *
-     * @param QueryBuilder\Select $query
      * @return mixed
      */
     public function select(QueryBuilder\Select $query)
@@ -57,7 +48,6 @@ class Client
     /**
      * Do an update query
      *
-     * @param QueryBuilder\Update $update
      * @return mixed
      */
     public function update(QueryBuilder\Update $update)
@@ -68,7 +58,6 @@ class Client
     /**
      * Do an extract query
      *
-     * @param QueryBuilder\Extract $extract
      * @return mixed
      */
     public function extract(QueryBuilder\Extract $extract)
@@ -81,7 +70,6 @@ class Client
      *
      * Throw an exception wrapping the internal exception if an error occurs.
      *
-     * @param QueryBuilder\RequestBuilderInterface $handler
      * @return mixed
      * @throws Exception
      * @see https://solr.apache.org/docs/5_5_0/solr-solrj/org/apache/solr/common/SolrException.html
@@ -123,7 +111,6 @@ class Client
     /**
      * Allows to pass guzzle requests straight to SOLR.
      *
-     * @param Request $request
      * @return ResponseInterface|null
      */
     public function request(Request $request)
@@ -199,7 +186,6 @@ class Client
     }
 
     /**
-     * @param array $options
      * @return array{string, string|null}
      */
     private function parseSolrUrlFromOptions(array $options): array

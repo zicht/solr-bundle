@@ -23,7 +23,7 @@ class StopWordAdmin extends AbstractAdmin
         $collection->clearExcept([
             'create',
             'list',
-            'delete'
+            'delete',
         ]);
         parent::configureRoutes($collection);
     }
@@ -32,8 +32,7 @@ class StopWordAdmin extends AbstractAdmin
     {
         $filter
             ->add('managed')
-            ->add('value', null, ['label' => 'filter.label_stop_word'])
-        ;
+            ->add('value', null, ['label' => 'filter.label_stop_word']);
     }
 
     protected function configureListFields(ListMapper $list): void
@@ -49,8 +48,7 @@ class StopWordAdmin extends AbstractAdmin
                         'delete' => [],
                     ],
                 ]
-            )
-        ;
+            );
     }
 
     protected function configureFormFields(FormMapper $form): void
@@ -60,17 +58,14 @@ class StopWordAdmin extends AbstractAdmin
                 ->add('managed', ChoiceType::class, $this->getManagedFieldOptions())
                 ->add('value', null, ['label' => 'form.label_stop_word'])
                 ->end()
-            ->end()
-        ;
+            ->end();
     }
 
     private function getManagedFieldOptions(): array
     {
         return [
             'choices' => $this->getConfigurationPool()->getContainer()->getParameter('zicht_solr.managed'),
-            'choice_label' => function($k, $v) {
-                return 'choice.managed_stop_words.' . $k;
-            },
+            'choice_label' => fn ($k, $v) => 'choice.managed_stop_words.' . $k,
             'choice_translation_domain' => 'admin',
         ];
     }

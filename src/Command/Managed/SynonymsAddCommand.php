@@ -8,8 +8,10 @@ namespace Zicht\Bundle\SolrBundle\Command\Managed;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
-use Symfony\Component\Console\Input;
-use Symfony\Component\Console\Output;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
 use Zicht\Bundle\SolrBundle\Command\AbstractCommand;
 use Zicht\Bundle\SolrBundle\Entity\Synonym;
@@ -48,7 +50,6 @@ class SynonymsAddCommand extends AbstractCommand
         $this->synonymSubscriber = $synonymSubscriber;
     }
 
-    /** {@inheritDoc} */
     protected function configure()
     {
         $name = 'zicht:solr:synonyms-add';
@@ -57,10 +58,10 @@ class SynonymsAddCommand extends AbstractCommand
         $this
             ->setName($name)
             ->setDescription($description)
-            ->addArgument('managed', Input\InputArgument::REQUIRED, 'Specify the managed prefix')
-            ->addArgument('synonyms', Input\InputArgument::REQUIRED, 'The synonyms data')
-            ->addOption('type', 't', Input\InputOption::VALUE_OPTIONAL, $typeDescription, self::TYPE_JSON)
-            ->addOption('file', 'f', Input\InputOption::VALUE_NONE, 'Treat the synonyms argument as a file containing the data instead of command line data input')
+            ->addArgument('managed', InputArgument::REQUIRED, 'Specify the managed prefix')
+            ->addArgument('synonyms', InputArgument::REQUIRED, 'The synonyms data')
+            ->addOption('type', 't', InputOption::VALUE_OPTIONAL, $typeDescription, self::TYPE_JSON)
+            ->addOption('file', 'f', InputOption::VALUE_NONE, 'Treat the synonyms argument as a file containing the data instead of command line data input')
             ->setHelp(
                 <<<HELP
 <fg=yellow;options=bold>${description}</>
@@ -83,8 +84,7 @@ HELP
             );
     }
 
-    /** {@inheritDoc} */
-    protected function execute(Input\InputInterface $input, Output\OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $output->writeln('Adding synonyms to SOLR');
         $output->writeln('');
