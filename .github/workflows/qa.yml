@@ -10,7 +10,7 @@ jobs:
         runs-on: ubuntu-22.04
         strategy:
             matrix:
-                php: [ '7.4', '8.0', '8.1' ]
+                php: [ '7.4', '8.0', '8.1', '8.2' ]
         name: PHP ${{ matrix.php }}
         steps:
             -   uses: actions/checkout@v3
@@ -25,6 +25,6 @@ jobs:
             -   run: composer config -g github-oauth.github.com ${{ secrets.GITHUB_TOKEN }}
             -   run: composer install --prefer-dist --no-progress --no-scripts
             -   if: always()
-                run: composer run-script analysis -- --no-suggestions --output-format=github
+                run: composer run-script analysis -- --php-version=${{ matrix.php }} --no-suggestions --output-format=github
             -   if: always()
                 run: composer run-script test

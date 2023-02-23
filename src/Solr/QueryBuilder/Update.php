@@ -14,6 +14,8 @@ use Zicht\Bundle\SolrBundle\Solr\DateHelper;
  */
 class Update extends AbstractQueryBuilder
 {
+    private const STREAM_MAX_MEMORY = 50 * 1048576; // 50 Mb, default is 2 Mb
+
     private $stream = null;
 
     /**
@@ -21,7 +23,7 @@ class Update extends AbstractQueryBuilder
      */
     public function __construct()
     {
-        $this->stream = fopen('php://temp', 'rw');
+        $this->stream = fopen(sprintf('php://temp/maxmemory:%s', self::STREAM_MAX_MEMORY), 'rw');
         fwrite($this->stream, '{');
     }
 
@@ -138,5 +140,10 @@ class Update extends AbstractQueryBuilder
             ['Content-Type' => 'application/json'],
             \GuzzleHttp\Psr7\stream_for($this->stream)
         );
+    }
+
+    public function getQueryByteSize(): int
+    {
+        return fstat($this->stream)['size'];
     }
 }

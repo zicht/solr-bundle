@@ -7,13 +7,18 @@ namespace Zicht\Bundle\SolrBundle\Manager;
 
 use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
 use Zicht\Bundle\SolrBundle\Solr\Client;
-use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Extract as ExtractQuery;
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update as UpdateQuery;
 
 /**
  * Central manager service for solr features.
  */
 class SolrManager
 {
+    public ?UpdateQuery $update = null;
+
+    public ?ExtractQuery $extract = null;
+
     /**
      * @var Client
      */
@@ -96,7 +101,7 @@ class SolrManager
      */
     public function updateBatch($records, $incrementCallback = null, $errorCallback = null, $deleteFirst = false)
     {
-        $update = new QueryBuilder\Update();
+        $this->update = new UpdateQuery();
 
         $n = $i = 0;
         foreach ($records as $record) {
@@ -104,9 +109,9 @@ class SolrManager
                 $i++;
                 try {
                     if ($deleteFirst) {
-                        $mapper->delete($update, $record);
+                        $mapper->delete($this->update, $record);
                     }
-                    $mapper->update($update, $record);
+                    $mapper->update($this->update, $record);
                 } catch (\Exception $e) {
                     if ($errorCallback) {
                         call_user_func($errorCallback, $record, $e);
@@ -122,8 +127,9 @@ class SolrManager
             call_user_func($incrementCallback, $n);
         }
 
-        $update->commit();
-        $this->client->update($update);
+        $this->update->commit();
+        $this->client->update($this->update);
+        $this->update = null;
 
         return [$n, $i];
     }
@@ -147,9 +153,10 @@ class SolrManager
 
             $i++;
             try {
-                $extract = new QueryBuilder\Extract();
-                $mapper->extract($extract, $record);
-                $this->client->extract($extract);
+                $this->extract = new ExtractQuery();
+                $mapper->extract($this->extract, $record);
+                $this->client->extract($this->extract);
+                $this->extract = null;
             } catch (\Exception $e) {
                 if ($errorCallback) {
                     call_user_func($errorCallback, $record, $e);
@@ -180,10 +187,11 @@ class SolrManager
         }
 
         if ($mapper = $this->getMapper($entity)) {
-            $update = new QueryBuilder\Update();
-            $mapper->update($update, $entity);
-            $update->commit();
-            $this->client->update($update);
+            $this->update = new UpdateQuery();
+            $mapper->update($this->update, $entity);
+            $this->update->commit();
+            $this->client->update($this->update);
+            $this->update = null;
 
             return true;
         }
@@ -204,9 +212,10 @@ class SolrManager
         }
 
         if ($mapper = $this->getMapper($entity)) {
-            $extract = new QueryBuilder\Extract();
-            $mapper->extract($extract, $entity);
-            $this->client->extract($extract);
+            $this->extract = new ExtractQuery();
+            $mapper->extract($this->extract, $entity);
+            $this->client->extract($this->extract);
+            $this->extract = null;
 
             return true;
         }
@@ -227,10 +236,11 @@ class SolrManager
         }
 
         if ($mapper = $this->getMapper($entity)) {
-            $update = new QueryBuilder\Update();
-            $mapper->delete($update, $entity);
-            $update->commit();
-            $this->client->update($update);
+            $this->update = new UpdateQuery();
+            $mapper->delete($this->update, $entity);
+            $this->update->commit();
+            $this->client->update($this->update);
+            $this->update = null;
 
             return true;
         }
