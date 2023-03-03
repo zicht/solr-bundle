@@ -41,7 +41,7 @@ class StopWordManager
         $request = new Request('GET', sprintf('%sschema/analysis/stopwords/%s', $this->client->getHttpClient()->getConfig('base_uri'), $managed));
         $response = $this->client->request($request);
 
-        if (200 === $response->getStatusCode()) {
+        if ($response && 200 === $response->getStatusCode()) {
             $data = \json_decode($response->getBody()->getContents(), true);
 
             if (array_key_exists('wordSet', $data) && array_key_exists('managedList', $data['wordSet'])) {
@@ -64,7 +64,8 @@ class StopWordManager
             \json_encode([$stopWord->getValue()])
         );
 
-        return 200 === $this->client->request($request)->getStatusCode();
+        $response = $this->client->request($request);
+        return $response && 200 === $response->getStatusCode();
     }
 
     /**
@@ -95,7 +96,8 @@ class StopWordManager
                     \json_encode($data)
                 );
 
-                return 200 === $this->client->request($request)->getStatusCode();
+                $response = $this->client->request($request);
+                return $response && 200 === $response->getStatusCode();
             },
             array_keys($dataPerManaged),
             $dataPerManaged
@@ -114,7 +116,8 @@ class StopWordManager
             sprintf('%sschema/analysis/stopwords/%s/%s', $this->client->getHttpClient()->getConfig('base_uri'), $stopWord->getManaged(), $stopWord->getValue())
         );
 
-        return 200 === $this->client->request($request)->getStatusCode();
+        $response = $this->client->request($request);
+        return $response && 200 === $response->getStatusCode();
     }
 
     /**
@@ -127,6 +130,7 @@ class StopWordManager
             sprintf('%sschema/analysis/stopwords/%s/%s', $this->client->getHttpClient()->getConfig('base_uri'), $stopWord->getManaged(), $stopWord->getValue())
         );
 
-        return 200 === $this->client->request($request)->getStatusCode();
+        $response = $this->client->request($request);
+        return $response && 200 === $response->getStatusCode();
     }
 }

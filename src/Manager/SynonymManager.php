@@ -41,7 +41,7 @@ class SynonymManager
         $request = new Request('GET', sprintf('%sschema/analysis/synonyms/%s', $this->client->getHttpClient()->getConfig('base_uri'), $managed));
         $response = $this->client->request($request);
 
-        if (200 === $response->getStatusCode()) {
+        if ($response && 200 === $response->getStatusCode()) {
             $data = \json_decode($response->getBody()->getContents(), true);
 
             if (array_key_exists('synonymMappings', $data) && array_key_exists('managedMap', $data['synonymMappings'])) {
@@ -66,7 +66,8 @@ class SynonymManager
             \json_encode([(string)$synonym->getIdentifier() => $data])
         );
 
-        return 200 === $this->client->request($request)->getStatusCode();
+        $response = $this->client->request($request);
+        return $response && 200 === $response->getStatusCode();
     }
 
     /**
@@ -97,7 +98,8 @@ class SynonymManager
                     \json_encode($data)
                 );
 
-                return 200 === $this->client->request($request)->getStatusCode();
+                $response = $this->client->request($request);
+                return $response && 200 === $response->getStatusCode();
             },
             array_keys($dataPerManaged),
             $dataPerManaged
@@ -116,7 +118,8 @@ class SynonymManager
             sprintf('%sschema/analysis/synonyms/%s/%s', $this->client->getHttpClient()->getConfig('base_uri'), $synonym->getManaged(), $synonym->getIdentifier())
         );
 
-        return 200 === $this->client->request($request)->getStatusCode();
+        $response = $this->client->request($request);
+        return $response && 200 === $response->getStatusCode();
     }
 
     /**
@@ -129,7 +132,8 @@ class SynonymManager
             sprintf('%sschema/analysis/synonyms/%s/%s', $this->client->getHttpClient()->getConfig('base_uri'), $synonym->getManaged(), $synonym->getIdentifier())
         );
 
-        return 200 === $this->client->request($request)->getStatusCode();
+        $response = $this->client->request($request);
+        return $response && 200 === $response->getStatusCode();
     }
 
     /**

@@ -5,7 +5,7 @@
 
 namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
-use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * If the request implements this interface, it's response is filtered through the handle() method by `doRequest`
@@ -18,5 +18,5 @@ interface ResponseHandlerInterface
      *
      * @return mixed
      */
-    public function handle(Response $response);
+    public function handle(ResponseInterface $response);
 }

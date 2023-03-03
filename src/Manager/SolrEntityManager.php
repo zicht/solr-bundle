@@ -34,7 +34,7 @@ class SolrEntityManager extends SolrManager
     {
         if (!is_object($entity)) {
             $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-            throw new \InvalidArgumentException(sprintf('Received %s while expecting an object. %s can only handle objects.', gettype($entity), isset($backtrace[1]) ? $backtrace[1]['class'] . '::' . $backtrace[1]['function'] . '()' : get_class()));
+            throw new \InvalidArgumentException(sprintf('Received %s while expecting an object. %s can only handle objects.', gettype($entity), isset($backtrace[1]) ? (isset($backtrace[1]['class']) ? $backtrace[1]['class'] . '::' : '') . $backtrace[1]['function'] . '()' : get_class()));
         }
 
         return true;
@@ -44,55 +44,68 @@ class SolrEntityManager extends SolrManager
     {
         $this->update = new UpdateQuery();
 
-        $totalCount = $updatedCount = 0;
-        /**
-         * Recursive Closure to be able to travel deep into entity relations but
-         * still keep updates in one single transaction ($update object)
-         */
-        $innnerUpdateBatch = function (array $entities) use (&$innnerUpdateBatch, &$incrementCallback, &$errorCallback, $deleteFirst, &$totalCount, &$updatedCount) {
-            foreach ($entities as $entity) {
-                self::validateEntity($entity);
-
-                if (in_array(spl_object_hash($entity), $this->updatedEntityHashes)) {
-                    ++$totalCount;
-                    continue;
-                }
-
-                if ($mapper = $this->getMapper($entity)) {
-                    ++$updatedCount;
-                    try {
-                        if ($deleteFirst) {
-                            $mapper->delete($this->update, $entity);
-                            $this->deletedEntityHashes[] = spl_object_hash($entity);
-                        }
-                        $mapper->update($this->update, $entity);
-                        $this->updatedEntityHashes[] = spl_object_hash($entity);
-                    } catch (\Exception $e) {
-                        if ($errorCallback) {
-                            call_user_func($errorCallback, $entity, $e);
-                        }
-                    }
-                    if ($incrementCallback) {
-                        call_user_func($incrementCallback, $totalCount);
-                    }
-                }
-
-                if ($entity instanceof IndexableRelationsInterface) {
-                    $innnerUpdateBatch($entity->getIndexableRelations());
-                }
-
-                ++$totalCount;
-            }
-        };
-        $innnerUpdateBatch($records);
-
+        [$totalCount, $updatedCount] = $this->innerUpdateBatch($records, $incrementCallback, $errorCallback, $deleteFirst);
         if ($incrementCallback) {
-            call_user_func($incrementCallback, $totalCount);
+            $incrementCallback($totalCount);
         }
 
-        $this->update->commit();
-        $this->client->update($this->update);
+        if ($updatedCount > 0) {
+            $this->update->commit();
+            $this->client->update($this->update);
+        }
         $this->update = null;
+
+        return [$totalCount, $updatedCount];
+    }
+
+    /**
+     * Recursive inner function to be able to travel deep into entity relations but
+     * still keep updates in one single transaction ($update object)
+     *
+     * @return array{int, int}
+     */
+    private function innerUpdateBatch(iterable $entities, ?callable $incrementCallback, ?callable $errorCallback, bool $deleteFirst): array
+    {
+        if ($this->update === null) {
+            throw new \UnexpectedValueException('There\'s no pending update object.');
+        }
+
+        $totalCount = $updatedCount = 0;
+        foreach ($entities as $entity) {
+            self::validateEntity($entity);
+
+            if (in_array(spl_object_hash($entity), $this->updatedEntityHashes)) {
+                ++$totalCount;
+                continue;
+            }
+
+            if ($mapper = $this->getMapper($entity)) {
+                ++$updatedCount;
+                try {
+                    if ($deleteFirst) {
+                        $mapper->delete($this->update, $entity);
+                        $this->deletedEntityHashes[] = spl_object_hash($entity);
+                    }
+                    $mapper->update($this->update, $entity);
+                    $this->updatedEntityHashes[] = spl_object_hash($entity);
+                } catch (\Exception $e) {
+                    if ($errorCallback) {
+                        $errorCallback($entity, $e);
+                    }
+                }
+                if ($incrementCallback) {
+                    $incrementCallback($totalCount);
+                }
+            }
+
+            if ($entity instanceof IndexableRelationsInterface) {
+                [$subTotalCount, $subUpdatedCount] = $this->innerUpdateBatch($entity->getIndexableRelations(), $incrementCallback, $errorCallback, $deleteFirst);
+                $totalCount += $subTotalCount;
+                $updatedCount += $subUpdatedCount;
+            }
+
+            ++$totalCount;
+        }
 
         return [$totalCount, $updatedCount];
     }

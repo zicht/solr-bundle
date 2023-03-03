@@ -5,7 +5,6 @@
 
 namespace Zicht\Bundle\SolrBundle\Command\Managed;
 
-use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
@@ -35,13 +34,13 @@ class SynonymsAddCommand extends AbstractCommand
     /** @var EntityManagerInterface */
     protected $entityManager;
 
-    /** @var SynonymSubscriber|EventSubscriber */
+    /** @var SynonymSubscriber */
     protected $synonymSubscriber;
 
     /** @var Synonym[][] */
     protected $existingSynonyms = [];
 
-    public function __construct(Client $solr, SynonymManager $manager, EntityManagerInterface $entityManager, EventSubscriber $synonymSubscriber)
+    public function __construct(Client $solr, SynonymManager $manager, EntityManagerInterface $entityManager, SynonymSubscriber $synonymSubscriber)
     {
         parent::__construct($solr);
 
@@ -174,13 +173,10 @@ HELP
 
         if (isset($this->existingSynonyms[$managed][$word])) {
             $synonym = $this->existingSynonyms[$managed][$word];
+            $synonym->setValue(implode(PHP_EOL, $synonyms));
         } else {
-            $synonym = new Synonym();
-            $synonym->setManaged($managed);
-            $synonym->setIdentifier($word);
+            $synonym = new Synonym($managed, $word, implode(PHP_EOL, $synonyms));
         }
-
-        $synonym->setValue(implode(PHP_EOL, $synonyms));
 
         return $synonym;
     }

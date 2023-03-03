@@ -5,7 +5,6 @@
 
 namespace Zicht\Bundle\SolrBundle\Command\Managed;
 
-use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
@@ -35,13 +34,13 @@ class StopWordsAddCommand extends AbstractCommand
     /** @var EntityManagerInterface */
     protected $entityManager;
 
-    /** @var StopWordSubscriber|EventSubscriber */
+    /** @var StopWordSubscriber */
     protected $stopWordSubscriber;
 
     /** @var StopWord[][] */
     protected $existingStopWords = [];
 
-    public function __construct(Client $solr, StopWordManager $manager, EntityManagerInterface $entityManager, EventSubscriber $stopWordSubscriber)
+    public function __construct(Client $solr, StopWordManager $manager, EntityManagerInterface $entityManager, StopWordSubscriber $stopWordSubscriber)
     {
         parent::__construct($solr);
 
@@ -172,12 +171,10 @@ HELP
 
         if (isset($this->existingStopWords[$managed][$word])) {
             $synonym = $this->existingStopWords[$managed][$word];
+            $synonym->setValue($word);
         } else {
-            $synonym = new StopWord();
-            $synonym->setManaged($managed);
+            $synonym = new StopWord($managed, $word);
         }
-
-        $synonym->setValue($word);
 
         return $synonym;
     }

@@ -18,16 +18,22 @@ class StopWord
     private $id;
 
     /**
-     * @var string|null
+     * @var string
      * @ORM\Column(type="text", nullable=false)
      */
     private $value;
 
     /**
-     * @var string|null Maps within the rest API to the "identifier" of the collection.
+     * @var string Maps within the rest API to the "identifier" of the collection.
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private $managed;
+
+    public function __construct(string $managed, string $value)
+    {
+        $this->managed = $managed;
+        $this->value = $value;
+    }
 
     /**
      * @return int
@@ -38,7 +44,8 @@ class StopWord
     }
 
     /**
-     * @return string|null
+     * @return string
+     * @psalm-mutation-free
      */
     public function getValue()
     {
@@ -46,7 +53,7 @@ class StopWord
     }
 
     /**
-     * @param string|null $value
+     * @param string $value
      */
     public function setValue($value)
     {
@@ -54,7 +61,8 @@ class StopWord
     }
 
     /**
-     * @return string|null
+     * @return string
+     * @psalm-mutation-free
      */
     public function getManaged()
     {
@@ -62,7 +70,7 @@ class StopWord
     }
 
     /**
-     * @param string|null $managed
+     * @param string $managed
      */
     public function setManaged($managed)
     {

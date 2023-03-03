@@ -18,7 +18,7 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
  */
 abstract class AbstractDataMapper implements DataMapperInterface
 {
-    /** @var array<mixed, class-string<T>> */
+    /** @var array<array-key, class-string<T>> */
     protected $classNames = [];
 
     public function extract(Extract $extract, $entity)
@@ -33,6 +33,7 @@ abstract class AbstractDataMapper implements DataMapperInterface
         }
         $id = $this->generateObjectIdentity($entity);
         $doc = $this->mapDocument($entity);
+        /** @psalm-suppress PossiblyNullArgument */
         $extract->extract($id, $doc, $params, $entity->getFileResource());
     }
 

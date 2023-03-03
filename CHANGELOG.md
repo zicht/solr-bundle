@@ -13,9 +13,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Added explicit max. memory of 50 Mb to the temp stream of the Solr update query,
   instead of relying on the (2 Mb) default.
 - Added PHP CS Fixer to lint the PHP code style.
+### Changed
+- Psalm level 4 to 3 to increase Psalm's type checking strictness.
 ### Fixed
 - Improved texts and text colors of reindex command output.
 - Fixed the PHP code style with Zicht Standards PHP first and then with the newly added PHP CS Fixer.
+- Fixed call to Doctrine's deprecated Lifecycle event `getEntity()` method.
+- Fixead all type issues reported by Psalm after changing to level 3.
 
 ## 6.1.1 - 2023-02-20
 ### Fixed

@@ -24,7 +24,7 @@ class SearchDocumentRepositoryAdapter implements SearchDocumentRepository
         $qb = $this->repository->createQueryBuilder('d');
 
         if ($where) {
-            foreach ((array)$where as $w) {
+            foreach ($where as $w) {
                 $qb->andWhere($w);
             }
         }

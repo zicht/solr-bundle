@@ -59,12 +59,12 @@ interface DataMapperInterface
     /**
      * Set a list of classnames that are supported by this mapper.
      *
-     * @param array<mixed, class-string<T>> $classNames
+     * @param array<array-key, class-string<T>> $classNames
      */
     public function setClassNames($classNames);
 
     /**
-     * @return array<mixed, class-string<T>>
+     * @return array<array-key, class-string<T>>
      */
     public function getClassNames();
 }

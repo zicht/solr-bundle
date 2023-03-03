@@ -14,17 +14,16 @@ abstract class SearchFacade
 {
     protected static $defaultParameterWhitelist = ['keywords', 'page', 'type', 'perpage'];
 
-    /** @var Client */
-    protected $client = null;
+    protected Client $client;
 
-    /** @var Params */
+    /** @var Params|null */
     protected $searchParams = null;
 
-    /** @var \stdClass SOLR result document */
+    /** @var \stdClass|null SOLR result document */
     protected $response = null;
 
-    /** @var string|null GET Url mapping */
-    protected $urlTemplate = null;
+    /** @var string GET Url mapping */
+    protected $urlTemplate = '';
 
     /**
      * @var Pager|null
@@ -64,6 +63,7 @@ abstract class SearchFacade
 
     /**
      * @return void
+     * @psalm-assert Params $this->searchParams
      */
     public function setParams(Params $params)
     {
@@ -79,7 +79,8 @@ abstract class SearchFacade
     }
 
     /**
-     * @return Params
+     * @return Params|null
+     * @psalm-mutation-free
      */
     public function getParams()
     {
@@ -93,8 +94,10 @@ abstract class SearchFacade
      */
     public function redirectPost()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            header(sprintf('Location: %s', $this->getPostRedirect($_POST['search'])));
+        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            header(sprintf('Location: %s', $this->getPostRedirect(
+                isset($_POST['search']) && is_array($_POST['search']) ? $_POST['search'] : []
+            )));
             exit;
         }
     }
@@ -107,6 +110,7 @@ abstract class SearchFacade
      */
     public function getPostRedirect($postParams)
     {
+        $this->initSearchParams();
         $this->searchParams->mergeAll(array_filter($postParams));
         return $this->getUrl($this->searchParams);
     }
@@ -130,6 +134,7 @@ abstract class SearchFacade
      */
     public function getPagerUrl($index = 0)
     {
+        $this->initSearchParams();
         return $this->getUrl($this->searchParams->with('page', (string)$index, false));
     }
 
@@ -167,6 +172,7 @@ abstract class SearchFacade
             ->setParam('facet', 'true')
             ->setParam('facet.mincount', $this->facetMinimumCount);
 
+        $this->initSearchParams();
         foreach ($this->getFacetFields() as $field) {
             $query->addFacetField($field);
 
@@ -192,6 +198,7 @@ abstract class SearchFacade
      */
     public function getActiveFacetValues($field)
     {
+        $this->initSearchParams();
         return $this->searchParams->get($field);
     }
 
@@ -206,6 +213,7 @@ abstract class SearchFacade
     {
         $active = [];
 
+        $this->initSearchParams();
         foreach ($this->getFacetFields() as $field) {
             if (($value = $this->searchParams->getOne($field)) && $this->isFacetActive($field, $value)) {
                 $active[$field] = $value;
@@ -220,7 +228,7 @@ abstract class SearchFacade
      */
     public function getResults()
     {
-        return $this->response->response->docs;
+        return $this->response ? $this->response->response->docs : [];
     }
 
     /**
@@ -228,7 +236,7 @@ abstract class SearchFacade
      */
     public function getDebug()
     {
-        return $this->response->debug;
+        return $this->response ? $this->response->debug : new \stdClass();
     }
 
     /**
@@ -236,7 +244,7 @@ abstract class SearchFacade
      */
     public function getNumFound()
     {
-        return $this->response->response->numFound;
+        return $this->response ? $this->response->response->numFound : 0;
     }
 
     /**
@@ -248,7 +256,7 @@ abstract class SearchFacade
     {
         $count = 0;
 
-        if (!isset($this->response->facet_counts->facet_fields->{$facetName})) {
+        if (!$this->response || !isset($this->response->facet_counts->facet_fields->{$facetName})) {
             return $count;
         }
         $facet = $this->response->facet_counts->facet_fields->{$facetName};
@@ -266,8 +274,8 @@ abstract class SearchFacade
     /**
      * Get the facet filters for use in the template
      *
-     * @param null $blacklist
-     * @return array
+     * @param string[]|null $blacklist
+     * @return array<string, array<string, array<string, mixed>>>
      */
     public function getFacetFilters($blacklist = null)
     {
@@ -277,7 +285,7 @@ abstract class SearchFacade
 
         $ret = [];
         foreach ($this->getFacetFields() as $facetName) {
-            if (!in_array($facetName, $blacklist)) {
+            if (!in_array($facetName, $blacklist) && isset($this->response->facet_counts->facet_fields->{$facetName})) {
                 foreach (array_chunk($this->response->facet_counts->facet_fields->{$facetName}, 2) as [$value, $count]) {
                     $ret[$facetName][$value] = $this->getFacetMetaData($facetName, $value, $count);
                 }
@@ -311,13 +319,14 @@ abstract class SearchFacade
      * Get facet data for use in the templates for one specific facet value
      *
      * @param string $facetName
-     * @param mixed $value
+     * @param string $value
      * @param int|null $count
      * @param string|null $label
      * @return array
      */
     public function getFacetMetaData($facetName, $value, $count = null, $label = null)
     {
+        $this->initSearchParams();
         return [
             'value' => $value,
             'label' => ($label === null ? $value : $label),
@@ -341,6 +350,7 @@ abstract class SearchFacade
      */
     public function decorateHierarchy(&$filters, $facetName, $depth = 3, $stack = [])
     {
+        $this->initSearchParams();
         $ret = [];
         foreach ($filters as &$term) {
             $ret[] = $term['id'];
@@ -400,14 +410,14 @@ abstract class SearchFacade
     /**
      * Return the field names that should act as a facet. Implement with an empty array return value to ignore.
      *
-     * @return mixed
+     * @return string[]
      */
     abstract protected function getFacetFields();
 
     /**
      * Return additional facet field queries. Implement with an empty array return value to ignore.
      *
-     * @return array
+     * @return array<string, string[]>
      */
     abstract protected function getFacetQueries();
 
@@ -454,6 +464,16 @@ abstract class SearchFacade
     public function getDefaultLimit()
     {
         return $this->defaultLimit;
+    }
+
+    /**
+     * @psalm-assert Params $this->searchParams
+     */
+    private function initSearchParams(): void
+    {
+        if (!isset($this->searchParams)) {
+            $this->searchParams = new Params();
+        }
     }
 
     /**

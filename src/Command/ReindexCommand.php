@@ -7,6 +7,7 @@ namespace Zicht\Bundle\SolrBundle\Command;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Logging\EchoSQLLogger;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
@@ -36,6 +37,7 @@ class ReindexCommand extends AbstractCommand
 
     private ManagerRegistry $doctrine;
 
+    /** @var class-string[] */
     private array $entities = [];
 
     public function __construct(Client $solr, SolrManager $solrManager, ManagerRegistry $doctrine)
@@ -62,6 +64,7 @@ class ReindexCommand extends AbstractCommand
 
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
+        /** @var class-string $entity */
         if ($entity = $input->getArgument('entity')) {
             $this->entities[] = $entity;
 
@@ -84,6 +87,7 @@ class ReindexCommand extends AbstractCommand
                 \memory_reset_peak_usage();
             }
 
+            /** @var EntityManagerInterface $em */
             $em = $this->doctrine->getManager($input->getOption('em'));
 
             $reflection = $em->getClassMetadata($entity)->getReflectionClass();
@@ -162,7 +166,7 @@ class ReindexCommand extends AbstractCommand
                 if ($n === $total) {
                     $progress->finish();
                     $output->write("\n");
-                    $size = $this->solrManager->update->getQueryByteSize();
+                    $size = $this->solrManager->update ? $this->solrManager->update->getQueryByteSize() : 0;
                     $output->writeln(sprintf('Sending data (%s)...', $size >= 1048576 ? sprintf('%0.1f Mb', $size / 1048576) : sprintf('%0.2f Kb', $size / 1024)));
                 }
             },
