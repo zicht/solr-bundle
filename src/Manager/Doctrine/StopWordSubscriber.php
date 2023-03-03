@@ -36,11 +36,12 @@ class StopWordSubscriber implements EventSubscriber
      */
     public function prePersist(LifecycleEventArgs $event)
     {
-        if (!$event->getEntity() instanceof StopWord) {
+        $object = $event->getObject();
+        if (!$object instanceof StopWord) {
             return;
         }
 
-        $this->prepareStopword($event->getEntity());
+        $this->prepareStopword($object);
     }
 
     /**
@@ -56,11 +57,12 @@ class StopWordSubscriber implements EventSubscriber
      */
     public function preUpdate(LifecycleEventArgs $event)
     {
-        if (!$event->getEntity() instanceof StopWord) {
+        $object = $event->getObject();
+        if (!$object instanceof StopWord) {
             return;
         }
 
-        $this->prepareStopword($event->getEntity());
+        $this->prepareStopword($object);
         $this->callUpdate($event);
     }
 
@@ -69,12 +71,13 @@ class StopWordSubscriber implements EventSubscriber
      */
     public function preRemove(LifecycleEventArgs $event)
     {
-        if (!$this->enabled || !$event->getEntity() instanceof StopWord) {
+        $object = $event->getObject();
+        if (!$this->enabled || !$object instanceof StopWord) {
             return;
         }
 
         try {
-            $this->manager->removeStopWord($event->getEntity());
+            $this->manager->removeStopWord($object);
             $this->manager->getClient()->reload();
         } catch (NotFoundException $e) {
             // Stopword was not found, so isn't already there. Nothing to be done...
@@ -93,11 +96,12 @@ class StopWordSubscriber implements EventSubscriber
 
     private function callUpdate(LifecycleEventArgs $event)
     {
-        if (!$this->enabled || !$event->getEntity() instanceof StopWord) {
+        $object = $event->getObject();
+        if (!$this->enabled || !$object instanceof StopWord) {
             return;
         }
 
-        $this->manager->addStopWord($event->getEntity());
+        $this->manager->addStopWord($object);
         $this->manager->getClient()->reload();
     }
 

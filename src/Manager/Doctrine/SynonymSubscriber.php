@@ -37,11 +37,12 @@ class SynonymSubscriber implements EventSubscriber
      */
     public function prePersist(LifecycleEventArgs $event)
     {
-        if (!$event->getEntity() instanceof Synonym) {
+        $object = $event->getObject();
+        if (!$object instanceof Synonym) {
             return;
         }
 
-        $this->prepareSynonym($event->getEntity());
+        $this->prepareSynonym($object);
     }
 
     /**
@@ -57,11 +58,12 @@ class SynonymSubscriber implements EventSubscriber
      */
     public function preUpdate(LifecycleEventArgs $event)
     {
-        if (!$event->getEntity() instanceof Synonym) {
+        $object = $event->getObject();
+        if (!$object instanceof Synonym) {
             return;
         }
 
-        $this->prepareSynonym($event->getEntity());
+        $this->prepareSynonym($object);
         $this->callUpdate($event);
     }
 
@@ -70,12 +72,13 @@ class SynonymSubscriber implements EventSubscriber
      */
     public function preRemove(LifecycleEventArgs $event)
     {
-        if (!$this->enabled || !$event->getEntity() instanceof Synonym) {
+        $object = $event->getObject();
+        if (!$this->enabled || !$object instanceof Synonym) {
             return;
         }
 
         try {
-            $this->manager->removeSynonym($event->getEntity());
+            $this->manager->removeSynonym($object);
             $this->manager->getClient()->reload();
         } catch (NotFoundException $e) {
             // Synonym was not found, so isn't already there. Nothing to be done...
@@ -94,7 +97,8 @@ class SynonymSubscriber implements EventSubscriber
 
     private function callUpdate(LifecycleEventArgs $event)
     {
-        if (!$this->enabled || !$event->getEntity() instanceof Synonym) {
+        $object = $event->getObject();
+        if (!$this->enabled || !$object instanceof Synonym) {
             return;
         }
 
@@ -103,8 +107,7 @@ class SynonymSubscriber implements EventSubscriber
             ($event->hasChangedField('identifier') && $event->getNewValue('identifier') !== $event->getOldValue('identifier'))
             || ($event->hasChangedField('managed') && $event->getNewValue('managed') !== $event->getOldValue('managed'))
         )) {
-            /** @var Synonym $oldEntity */
-            $oldEntity = clone $event->getEntity();
+            $oldEntity = clone $object;
             $oldEntity->setIdentifier($event->hasChangedField('identifier') ? $event->getOldValue('identifier') : $oldEntity->getIdentifier());
             $oldEntity->setManaged($event->hasChangedField('managed') ? $event->getOldValue('managed') : $oldEntity->getManaged());
             try {
@@ -114,7 +117,7 @@ class SynonymSubscriber implements EventSubscriber
             }
         }
 
-        $this->manager->addSynonym($event->getEntity());
+        $this->manager->addSynonym($object);
         $this->manager->getClient()->reload();
     }
 
