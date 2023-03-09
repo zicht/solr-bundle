@@ -14,14 +14,9 @@ use Zicht\Bundle\SolrBundle\Solr\Client;
  */
 class SynonymManager
 {
-    /**
-     * @var Client
-     */
+    /** @var Client */
     protected $client;
 
-    /**
-     * @param Client $client
-     */
     public function __construct(Client $client)
     {
         $this->client = $client;
@@ -46,7 +41,7 @@ class SynonymManager
         $request = new Request('GET', sprintf('%sschema/analysis/synonyms/%s', $this->client->getHttpClient()->getConfig('base_uri'), $managed));
         $response = $this->client->request($request);
 
-        if (200 === $response->getStatusCode()) {
+        if ($response && 200 === $response->getStatusCode()) {
             $data = \json_decode($response->getBody()->getContents(), true);
 
             if (array_key_exists('synonymMappings', $data) && array_key_exists('managedMap', $data['synonymMappings'])) {
@@ -58,9 +53,6 @@ class SynonymManager
     }
 
     /**
-     * Adds an synonym
-     *
-     * @param Synonym $synonym
      * @return bool
      */
     public function addSynonym(Synonym $synonym)
@@ -74,7 +66,8 @@ class SynonymManager
             \json_encode([(string)$synonym->getIdentifier() => $data])
         );
 
-        return 200 === $this->client->request($request)->getStatusCode();
+        $response = $this->client->request($request);
+        return $response && 200 === $response->getStatusCode();
     }
 
     /**
@@ -88,13 +81,7 @@ class SynonymManager
         $dataPerManaged = [];
         foreach ($synonyms as $synonym) {
             if (!$synonym instanceof Synonym) {
-                throw new \UnexpectedValueException(
-                    sprintf(
-                        'Synonyms array elements must be of type %s. Got %s',
-                        Synonym::class,
-                        is_object($synonym) ? get_class($synonym) : gettype($synonym)
-                    )
-                );
+                throw new \UnexpectedValueException(sprintf('Synonyms array elements must be of type %s. Got %s', Synonym::class, is_object($synonym) ? get_class($synonym) : gettype($synonym)));
             }
             if (!array_key_exists($synonym->getManaged(), $dataPerManaged)) {
                 $dataPerManaged[$synonym->getManaged()] = [];
@@ -111,7 +98,8 @@ class SynonymManager
                     \json_encode($data)
                 );
 
-                return 200 === $this->client->request($request)->getStatusCode();
+                $response = $this->client->request($request);
+                return $response && 200 === $response->getStatusCode();
             },
             array_keys($dataPerManaged),
             $dataPerManaged
@@ -121,39 +109,34 @@ class SynonymManager
     }
 
     /**
-     * Has an synonym.
-     *
-     * @param Synonym $synonym
      * @return bool
      */
     public function hasSynonym(Synonym $synonym)
     {
-        $request =  new Request(
+        $request = new Request(
             'GET',
             sprintf('%sschema/analysis/synonyms/%s/%s', $this->client->getHttpClient()->getConfig('base_uri'), $synonym->getManaged(), $synonym->getIdentifier())
         );
 
-        return 200 === $this->client->request($request)->getStatusCode();
+        $response = $this->client->request($request);
+        return $response && 200 === $response->getStatusCode();
     }
 
     /**
-     * Removes an synonym.
-     *
-     * @param Synonym $synonym
      * @return bool
      */
     public function removeSynonym(Synonym $synonym)
     {
-        $request =  new Request(
+        $request = new Request(
             'DELETE',
             sprintf('%sschema/analysis/synonyms/%s/%s', $this->client->getHttpClient()->getConfig('base_uri'), $synonym->getManaged(), $synonym->getIdentifier())
         );
 
-        return 200 === $this->client->request($request)->getStatusCode();
+        $response = $this->client->request($request);
+        return $response && 200 === $response->getStatusCode();
     }
 
     /**
-     * @param Synonym $synonym
      * @return array
      */
     protected function prepareSynonymData(Synonym $synonym)

@@ -16,7 +16,6 @@ interface DataMapperInterface
     /**
      * Request an extract for the specified entity
      *
-     * @param Extract $extract
      * @param T $entity
      */
     public function extract(Extract $extract, $entity);
@@ -24,7 +23,6 @@ interface DataMapperInterface
     /**
      * Request an update for the specified entity
      *
-     * @param Update $update
      * @param T $entity
      */
     public function update(Update $update, $entity);
@@ -32,7 +30,6 @@ interface DataMapperInterface
     /**
      * Request an update for the specified entity
      *
-     * @param Update $update
      * @param T $entity
      */
     public function delete(Update $update, $entity);
@@ -40,7 +37,6 @@ interface DataMapperInterface
     /**
      * Add an update to the query
      *
-     * @param Update $update
      * @param T $entity
      */
     public function addUpdateDocument(Update $update, $entity);
@@ -48,7 +44,6 @@ interface DataMapperInterface
     /**
      * Add a delete to the update query
      *
-     * @param Update $update
      * @param T $entity
      */
     public function addDeleteDocument(Update $update, $entity);
@@ -64,12 +59,12 @@ interface DataMapperInterface
     /**
      * Set a list of classnames that are supported by this mapper.
      *
-     * @param array<mixed, class-string<T>> $classNames
+     * @param array<array-key, class-string<T>> $classNames
      */
     public function setClassNames($classNames);
 
     /**
-     * @return array<mixed, class-string<T>>
+     * @return array<array-key, class-string<T>>
      */
     public function getClassNames();
 }

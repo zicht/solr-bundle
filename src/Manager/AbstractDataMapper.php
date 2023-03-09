@@ -18,10 +18,9 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
  */
 abstract class AbstractDataMapper implements DataMapperInterface
 {
-    /** @var array<mixed, class-string<T>> */
+    /** @var array<array-key, class-string<T>> */
     protected $classNames = [];
 
-    /** {@inheritDoc} */
     public function extract(Extract $extract, $entity)
     {
         if (!($entity instanceof Extractable)) {
@@ -34,22 +33,20 @@ abstract class AbstractDataMapper implements DataMapperInterface
         }
         $id = $this->generateObjectIdentity($entity);
         $doc = $this->mapDocument($entity);
+        /** @psalm-suppress PossiblyNullArgument */
         $extract->extract($id, $doc, $params, $entity->getFileResource());
     }
 
-    /** {@inheritDoc} */
     public function update(Update $update, $entity)
     {
         $this->addUpdateDocument($update, $entity);
     }
 
-    /** {@inheritDoc} */
     public function delete(Update $update, $entity)
     {
         $update->deleteOne($this->generateObjectIdentity($entity));
     }
 
-    /** {@inheritDoc} */
     public function addUpdateDocument(Update $update, $entity)
     {
         $params = [];
@@ -61,7 +58,6 @@ abstract class AbstractDataMapper implements DataMapperInterface
         $update->add($doc, $params);
     }
 
-    /** {@inheritDoc} */
     public function addDeleteDocument(Update $update, $entity)
     {
         $update->deleteOne($this->generateObjectIdentity($entity));
@@ -97,7 +93,6 @@ abstract class AbstractDataMapper implements DataMapperInterface
         throw new \UnexpectedValueException("$className has no getId() method. Either implement it, or override $me::generateObjectIdentity()");
     }
 
-    /** {@inheritDoc} */
     public function supports($entity)
     {
         foreach ($this->classNames as $name) {
@@ -108,21 +103,17 @@ abstract class AbstractDataMapper implements DataMapperInterface
         return false;
     }
 
-    /** {@inheritDoc} */
     public function setClassNames($classNames)
     {
         $this->classNames = $classNames;
     }
 
-    /** {@inheritDoc} */
     public function getClassNames()
     {
         return $this->classNames;
     }
 
     /**
-     * Map document data
-     *
      * @param T $entity
      * @return array
      */

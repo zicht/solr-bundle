@@ -8,45 +8,42 @@ namespace Zicht\Bundle\SolrBundle\Solr;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Request;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Zicht\Bundle\SolrBundle\Exception\ConfigurationException;
-use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
 class Client
 {
+    /** @var RequestInterface|null */
     private $lastRequest = null;
+
+    /** @var ResponseInterface|null */
     private $lastResponse = null;
 
-    /**
-     * @var ClientInterface
-     */
-    private $http;
+    private ClientInterface $http;
 
-    /**
-     * @var string
-     */
-    private $absoluteBaseUrl;
+    private string $absoluteBaseUrl;
 
-    /**
-     * @var string
-     */
-    private $core;
+    private string $core;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     public $logs = [];
 
+    /**
+     * @param array<string, scalar> $options
+     * @param class-string<ClientInterface> $clientClass
+     */
     public function __construct(array $options, string $clientClass)
     {
-        [$this->absoluteBaseUrl, $this->core] = $this->parseSolrUrlFromOptions($options);
+        [$absoluteBaseUrl, $core] = $this->parseSolrUrlFromOptions($options);
+        $this->absoluteBaseUrl = $absoluteBaseUrl;
+        $this->core = $core ?: 'core';
         $this->http = new $clientClass(['base_uri' => sprintf('%s%s/', $this->absoluteBaseUrl, $this->core)]);
     }
 
     /**
      * Selects documents based on the specified query.
      *
-     * @param QueryBuilder\Select $query
      * @return mixed
      */
     public function select(QueryBuilder\Select $query)
@@ -57,7 +54,6 @@ class Client
     /**
      * Do an update query
      *
-     * @param QueryBuilder\Update $update
      * @return mixed
      */
     public function update(QueryBuilder\Update $update)
@@ -68,7 +64,6 @@ class Client
     /**
      * Do an extract query
      *
-     * @param QueryBuilder\Extract $extract
      * @return mixed
      */
     public function extract(QueryBuilder\Extract $extract)
@@ -81,7 +76,6 @@ class Client
      *
      * Throw an exception wrapping the internal exception if an error occurs.
      *
-     * @param QueryBuilder\RequestBuilderInterface $handler
      * @return mixed
      * @throws Exception
      * @see https://solr.apache.org/docs/5_5_0/solr-solrj/org/apache/solr/common/SolrException.html
@@ -123,7 +117,6 @@ class Client
     /**
      * Allows to pass guzzle requests straight to SOLR.
      *
-     * @param Request $request
      * @return ResponseInterface|null
      */
     public function request(Request $request)
@@ -181,7 +174,7 @@ class Client
     /**
      * Returns the last request issued to SOLR. This is typically for debugging purposes.
      *
-     * @return mixed
+     * @return RequestInterface|null
      */
     public function getLastRequest()
     {
@@ -191,7 +184,7 @@ class Client
     /**
      * Returns the last response issued by SOLR. This is typically for debugging purposes.
      *
-     * @return ResponseInterface
+     * @return ResponseInterface|null
      */
     public function getLastResponse()
     {
@@ -199,7 +192,6 @@ class Client
     }
 
     /**
-     * @param array $options
      * @return array{string, string|null}
      */
     private function parseSolrUrlFromOptions(array $options): array
@@ -240,7 +232,7 @@ class Client
             throw new ConfigurationException('Solr core was not configured through Solr url in configuration options');
         }
 
-        $baseUrl = sprintf('%s://%s%s/%s/', $url['scheme'], $url['host'], (isset($url['port']) ? ':' . $url['port'] : ''), ($url['path'] ? trim($url['path'], '/') : ''));
+        $baseUrl = sprintf('%s://%s%s/%s/', $url['scheme'], $url['host'], (isset($url['port']) ? ':' . $url['port'] : ''), (isset($url['path']) ? trim($url['path'], '/') : ''));
 
         return [$baseUrl, $core];
     }
@@ -250,10 +242,11 @@ class Client
         if ($be->getRequest()->getBody()) {
             $be->getRequest()->getBody()->seek(0);
         }
-        $content = $be->getResponse()->getBody()->getContents();
-        $contentType = $be->getResponse()->getHeaderLine('Content-Type');
+        $response = $be->getResponse();
+        $content = $response ? $response->getBody()->getContents() : null;
+        $contentType = $response ? $response->getHeaderLine('Content-Type') : null;
         $errorMsg = $be->getMessage();
-        if (preg_match('!^application/json!', $contentType) || preg_match('!^text/plain!', $contentType)) {
+        if ($content && $contentType && (strpos($contentType, 'application/json') === 0 || strpos($contentType, 'text/plain') === 0)) {
             try {
                 // possibly content is a json-string containing a SolrException.
                 $solrException = \GuzzleHttp\json_decode($content);
@@ -266,7 +259,9 @@ class Client
         }
         if (defined('STDERR')) {
             fwrite(STDERR, PHP_EOL . $errorMsg . PHP_EOL);
-            fwrite(STDERR, PHP_EOL . $content . PHP_EOL);
+            if ($content) {
+                fwrite(STDERR, PHP_EOL . $content . PHP_EOL);
+            }
         }
 
         return (string)$errorMsg;

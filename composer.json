@@ -12,7 +12,7 @@
     "require": {
         "php": "^7.4 || ^8",
         "doctrine/common": "^2.2 || ^3",
-        "doctrine/orm": "^2.5",
+        "doctrine/orm": "^2.13",
         "guzzlehttp/guzzle": "^6.3 || ^7",
         "sonata-project/admin-bundle": "^4",
         "symfony/console": "^5.4",
@@ -21,8 +21,9 @@
         "zicht/url-bundle": "^7"
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3",
         "phpunit/phpunit": "^9.5",
-        "vimeo/psalm": "^4"
+        "vimeo/psalm": "^5"
     },
     "autoload": {
         "psr-4": {
@@ -36,6 +37,8 @@
     },
     "scripts": {
         "analysis": "psalm",
+        "lint": "PHP_CS_FIXER_IGNORE_ENV=1 php-cs-fixer fix --dry-run --diff -vvv",
+        "lint-fix": "php-cs-fixer fix",
         "test": "phpunit"
     }
 }

@@ -10,43 +10,35 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Utils;
 use Zicht\Bundle\SolrBundle\Solr\DateHelper;
 
-/**
- * Class Update
- */
 class Update extends AbstractQueryBuilder
 {
-    private $stream = null;
+    private const STREAM_MAX_MEMORY = 50 * 1048576; // 50 Mb, default is 2 Mb
 
-    /**
-     * Initialize the update request.
-     */
+    private $stream;
+
     public function __construct()
     {
-        $this->stream = fopen('php://temp', 'rw');
+        $this->stream = fopen(sprintf('php://temp/maxmemory:%s', self::STREAM_MAX_MEMORY), 'rw');
         fwrite($this->stream, '{');
     }
 
     /**
      * Add a document to the update request
      *
-     * @param array[] $document
-     * @param array $params
-     * @return self
+     * @param array<string, mixed> $document
+     * @param array<string, mixed> $params
+     * @return $this
      */
     public function add($document, $params = [])
     {
         $this->addInstruction(
             'add',
-            ['doc' => array_map(
-                function ($v) {
-                    if ($v instanceof \DateTimeInterface) {
-                        $v = DateHelper::formatDate($v);
-                    }
-
-                    return $v;
-                },
-                $document
-            )] + $params
+            [
+                'doc' => array_map(
+                    static fn ($v) => $v instanceof \DateTime || $v instanceof \DateTimeImmutable ? DateHelper::formatDate($v) : $v,
+                    $document
+                ),
+            ] + $params
         );
 
         return $this;
@@ -59,7 +51,7 @@ class Update extends AbstractQueryBuilder
      */
     public function commit()
     {
-        $this->addInstruction('commit', new \stdClass);
+        $this->addInstruction('commit', new \stdClass());
 
         return $this;
     }
@@ -102,9 +94,7 @@ class Update extends AbstractQueryBuilder
     {
         $instruction = ['doc' => ['id' => $id]];
         $instruction['doc'] += array_map(
-            function ($v) {
-                return ['set' => $v];
-            },
+            static fn ($v): array => ['set' => $v],
             $values
         );
         $instruction += $params;
@@ -127,7 +117,6 @@ class Update extends AbstractQueryBuilder
         fwrite($this->stream, json_encode($type) . ':' . json_encode($value) . ',');
     }
 
-    /** {@inheritDoc} */
     public function createRequest(ClientInterface $httpClient)
     {
         fseek($this->stream, -1, SEEK_END);
@@ -139,5 +128,10 @@ class Update extends AbstractQueryBuilder
             ['Content-Type' => 'application/json'],
             Utils::streamFor($this->stream)
         );
+    }
+
+    public function getQueryByteSize(): int
+    {
+        return fstat($this->stream)['size'];
     }
 }

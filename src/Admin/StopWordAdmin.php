@@ -30,7 +30,7 @@ class StopWordAdmin extends AbstractAdmin
         $collection->clearExcept([
             'create',
             'list',
-            'delete'
+            'delete',
         ]);
         parent::configureRoutes($collection);
     }
@@ -72,9 +72,7 @@ class StopWordAdmin extends AbstractAdmin
     {
         return [
             'choices' => $this->managed,
-            'choice_label' => function ($k, $v) {
-                return 'choice.managed_stop_words.' . $k;
-            },
+            'choice_label' => fn ($k, $v) => 'choice.managed_stop_words.' . $k,
             'choice_translation_domain' => 'admin',
         ];
     }

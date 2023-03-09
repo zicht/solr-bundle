@@ -5,11 +5,12 @@
 
 namespace Zicht\Bundle\SolrBundle\Command\Managed;
 
-use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
-use Symfony\Component\Console\Input;
-use Symfony\Component\Console\Output;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
 use Zicht\Bundle\SolrBundle\Command\AbstractCommand;
 use Zicht\Bundle\SolrBundle\Entity\StopWord;
@@ -33,13 +34,13 @@ class StopWordsAddCommand extends AbstractCommand
     /** @var EntityManagerInterface */
     protected $entityManager;
 
-    /** @var StopWordSubscriber|EventSubscriber */
+    /** @var StopWordSubscriber */
     protected $stopWordSubscriber;
 
     /** @var StopWord[][] */
     protected $existingStopWords = [];
 
-    public function __construct(Client $solr, StopWordManager $manager, EntityManagerInterface $entityManager, EventSubscriber $stopWordSubscriber)
+    public function __construct(Client $solr, StopWordManager $manager, EntityManagerInterface $entityManager, StopWordSubscriber $stopWordSubscriber)
     {
         parent::__construct($solr);
 
@@ -48,7 +49,6 @@ class StopWordsAddCommand extends AbstractCommand
         $this->stopWordSubscriber = $stopWordSubscriber;
     }
 
-    /** {@inheritDoc} */
     protected function configure()
     {
         $name = 'zicht:solr:stop-words-add';
@@ -57,10 +57,10 @@ class StopWordsAddCommand extends AbstractCommand
         $this
             ->setName($name)
             ->setDescription($description)
-            ->addArgument('managed', Input\InputArgument::REQUIRED, 'Specify the managed prefix')
-            ->addArgument('stop-words', Input\InputArgument::REQUIRED, 'The stop words data')
-            ->addOption('type', 't', Input\InputOption::VALUE_OPTIONAL, $typeDescription, self::TYPE_JSON)
-            ->addOption('file', 'f', Input\InputOption::VALUE_NONE, 'Treat the stop words argument as a file containing the data instead of command line data input')
+            ->addArgument('managed', InputArgument::REQUIRED, 'Specify the managed prefix')
+            ->addArgument('stop-words', InputArgument::REQUIRED, 'The stop words data')
+            ->addOption('type', 't', InputOption::VALUE_OPTIONAL, $typeDescription, self::TYPE_JSON)
+            ->addOption('file', 'f', InputOption::VALUE_NONE, 'Treat the stop words argument as a file containing the data instead of command line data input')
             ->setHelp(
                 <<<HELP
 <fg=yellow;options=bold>${description}</>
@@ -84,8 +84,7 @@ HELP
             );
     }
 
-    /** {@inheritDoc} */
-    protected function execute(Input\InputInterface $input, Output\OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $output->writeln('Adding stop words to SOLR');
         $output->writeln('');
@@ -172,12 +171,10 @@ HELP
 
         if (isset($this->existingStopWords[$managed][$word])) {
             $synonym = $this->existingStopWords[$managed][$word];
+            $synonym->setValue($word);
         } else {
-            $synonym = new StopWord();
-            $synonym->setManaged($managed);
+            $synonym = new StopWord($managed, $word);
         }
-
-        $synonym->setValue($word);
 
         return $synonym;
     }

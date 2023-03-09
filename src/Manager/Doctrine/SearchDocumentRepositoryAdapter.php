@@ -14,21 +14,17 @@ class SearchDocumentRepositoryAdapter implements SearchDocumentRepository
 {
     private EntityRepository $repository;
 
-    /**
-     * @param EntityRepository $repository
-     */
     public function __construct(EntityRepository $repository)
     {
         $this->repository = $repository;
     }
 
-    /** {@inheritDoc} */
     public function findIndexableDocuments($where = null, $limit = null, $offset = null)
     {
         $qb = $this->repository->createQueryBuilder('d');
 
         if ($where) {
-            foreach ((array)$where as $w) {
+            foreach ($where as $w) {
                 $qb->andWhere($w);
             }
         }

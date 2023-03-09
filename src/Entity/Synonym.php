@@ -1,4 +1,5 @@
 <?php
+
 namespace Zicht\Bundle\SolrBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -17,24 +18,29 @@ class Synonym
     private $id;
 
     /**
-     * @var string|null
+     * @var string
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private $identifier;
 
     /**
-     * @var string|null
+     * @var string
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private $value;
 
     /**
-     * Maps within the rest API to the "identifier" of the collection.
-     *
-     * @var string|null
+     * @var string Maps within the rest API to the "identifier" of the collection.
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private $managed;
+
+    public function __construct(string $managed, string $identifier, string $value)
+    {
+        $this->managed = $managed;
+        $this->identifier = $identifier;
+        $this->value = $value;
+    }
 
     /**
      * @return int
@@ -45,7 +51,8 @@ class Synonym
     }
 
     /**
-     * @return string|null
+     * @return string
+     * @psalm-mutation-free
      */
     public function getIdentifier()
     {
@@ -53,7 +60,7 @@ class Synonym
     }
 
     /**
-     * @param string|null $identifier
+     * @param string $identifier
      */
     public function setIdentifier($identifier)
     {
@@ -61,7 +68,8 @@ class Synonym
     }
 
     /**
-     * @return string|null
+     * @return string
+     * @psalm-mutation-free
      */
     public function getValue()
     {
@@ -69,7 +77,7 @@ class Synonym
     }
 
     /**
-     * @param string|null $value
+     * @param string $value
      */
     public function setValue($value)
     {
@@ -77,7 +85,8 @@ class Synonym
     }
 
     /**
-     * @return string|null
+     * @return string
+     * @psalm-mutation-free
      */
     public function getManaged()
     {
@@ -85,7 +94,7 @@ class Synonym
     }
 
     /**
-     * @param string|null $managed
+     * @param string $managed
      */
     public function setManaged($managed)
     {

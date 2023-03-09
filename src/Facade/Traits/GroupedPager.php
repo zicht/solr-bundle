@@ -13,7 +13,6 @@ use Zicht\Bundle\SolrBundle\Pager\GroupedSolrPageable;
  */
 trait GroupedPager
 {
-    /** {@inheritDoc} */
     protected function initPager($query)
     {
         $currentPage = $this->searchParams->getOne('page', 0);

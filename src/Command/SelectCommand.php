@@ -5,75 +5,36 @@
 
 namespace Zicht\Bundle\SolrBundle\Command;
 
-use Symfony\Component\Console;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
-/**
- * Reindex a specified repository or entity in SOLR
- */
 class SelectCommand extends AbstractCommand
 {
-    /** {@inheritDoc} */
     protected function configure()
     {
         $this
             ->setName('zicht:solr:select')
             ->setDescription('Do a select (search) query in SOLR')
-            ->addArgument(
-                'query',
-                Console\Input\InputArgument::OPTIONAL,
-                "Select these documents (e.g.: 'id:abc')",
-                '*:*'
-            )
-            ->addOption(
-                'field',
-                'f',
-                Console\Input\InputOption::VALUE_REQUIRED | Console\Input\InputOption::VALUE_IS_ARRAY,
-                "Fields to display. Defaults to all fields and score"
-            )
-            ->addOption(
-                'deftype',
-                '',
-                Console\Input\InputOption::VALUE_REQUIRED,
-                'Set the `defType` of the query, e.g. `edismax`'
-            )
-            ->addOption(
-                'qf',
-                '',
-                Console\Input\InputOption::VALUE_REQUIRED | Console\Input\InputOption::VALUE_IS_ARRAY,
-                'Specify a `qf` (query fields) parameter for when the deftype is set to dismax or edismax. Ignored if defType is not set'
-            )
-            ->addOption(
-                'fq',
-                '',
-                Console\Input\InputOption::VALUE_REQUIRED | Console\Input\InputOption::VALUE_IS_ARRAY,
-                'Specify a `fq` (filter query)'
-            )
-            ->addOption(
-                'rows',
-                '',
-                Console\Input\InputOption::VALUE_REQUIRED,
-                'Specify the number of rows to return'
-            )
-            ->addOption(
-                'start',
-                '',
-                Console\Input\InputOption::VALUE_REQUIRED,
-                'Specify the start of the paged results'
-            )
-        ;
+            ->addArgument('query', InputArgument::OPTIONAL, "Select these documents (e.g.: 'id:abc')", '*:*')
+            ->addOption('field', 'f', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Fields to display. Defaults to all fields and score')
+            ->addOption('deftype', null, InputOption::VALUE_REQUIRED, 'Set the `defType` of the query, e.g. `edismax`')
+            ->addOption('qf', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Specify a `qf` (query fields) parameter for when the deftype is set to dismax or edismax. Ignored if defType is not set')
+            ->addOption('fq', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Specify a `fq` (filter query)')
+            ->addOption('rows', null, InputOption::VALUE_REQUIRED, 'Specify the number of rows to return')
+            ->addOption('start', null, InputOption::VALUE_REQUIRED, 'Specify the start of the paged results');
     }
 
-    /** {@inheritDoc} */
-    protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $select = new QueryBuilder\Select();
         $select->setQuery($input->getArgument('query'));
         if ($input->getOption('deftype')) {
             $select
                 ->setDefType($input->getOption('deftype'))
-                ->setQueryFields($input->getOption('qf'))
-            ;
+                ->setQueryFields($input->getOption('qf'));
         }
         if ($fq = $input->getOption('fq')) {
             $select->setFilterQuery($fq);
@@ -88,8 +49,10 @@ class SelectCommand extends AbstractCommand
             $select->setStart($start);
         }
         $results = $this->solr->select($select)->response->docs;
-        if ($output->getVerbosity() >= Console\Output\OutputInterface::VERBOSITY_VERBOSE) {
-            $output->writeln(sprintf('<info>%s %s</info>', $this->solr->getLastResponse()->getReasonPhrase(), $this->solr->getLastRequest()->getUri()));
+        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+            if (($lastResponse = $this->solr->getLastResponse()) && ($lastRequest = $this->solr->getLastRequest())) {
+                $output->writeln(sprintf('<info>%s %s</info>', $lastResponse->getReasonPhrase(), (string)$lastRequest->getUri()));
+            }
             $output->writeln(sprintf('<info>%d result(s)</info>', count($results)));
             $output->writeln('');
         }

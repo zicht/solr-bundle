@@ -7,36 +7,32 @@ namespace Zicht\Bundle\SolrBundle\Manager;
 
 use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
 use Zicht\Bundle\SolrBundle\Solr\Client;
-use Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Extract as ExtractQuery;
+use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update as UpdateQuery;
 
 /**
  * Central manager service for solr features.
  */
 class SolrManager
 {
-    /**
-     * @var Client
-     */
-    protected $client = null;
+    public ?UpdateQuery $update = null;
 
-    /**
-     * @var bool
-     */
+    public ?ExtractQuery $extract = null;
+
+    /** @var Client */
+    protected $client;
+
+    /** @var bool */
     protected $enabled = true;
 
-    /**
-     * @var DataMapperInterface[]
-     */
+    /** @var DataMapperInterface[] */
     protected $mappers = [];
+
     private $repositories;
 
-    /**
-     * @param Client $client
-     */
     public function __construct(Client $client)
     {
         $this->client = $client;
-        $this->mappers = [];
     }
 
     /**
@@ -67,7 +63,7 @@ class SolrManager
      */
     public function addRepository($class, $repository)
     {
-        $this->repositories[ $class ] = $repository;
+        $this->repositories[$class] = $repository;
     }
 
     /**
@@ -78,35 +74,33 @@ class SolrManager
      */
     public function getRepository($entityClass)
     {
-        if (!isset($this->repositories[ $entityClass ])) {
+        if (!isset($this->repositories[$entityClass])) {
             return null;
         }
 
-        return $this->repositories[ $entityClass ];
+        return $this->repositories[$entityClass];
     }
 
     /**
-     * Updates as batch.
-     *
-     * @param array $records
+     * @param iterable $records
      * @param callable|null $incrementCallback
      * @param callable|null $errorCallback
      * @param bool $deleteFirst
-     * @return array
+     * @return array{int, int}
      */
     public function updateBatch($records, $incrementCallback = null, $errorCallback = null, $deleteFirst = false)
     {
-        $update = new QueryBuilder\Update();
+        $this->update = new UpdateQuery();
 
         $n = $i = 0;
         foreach ($records as $record) {
             if ($mapper = $this->getMapper($record)) {
-                $i++;
+                ++$i;
                 try {
                     if ($deleteFirst) {
-                        $mapper->delete($update, $record);
+                        $mapper->delete($this->update, $record);
                     }
-                    $mapper->update($update, $record);
+                    $mapper->update($this->update, $record);
                 } catch (\Exception $e) {
                     if ($errorCallback) {
                         call_user_func($errorCallback, $record, $e);
@@ -116,22 +110,21 @@ class SolrManager
                     call_user_func($incrementCallback, $n);
                 }
             }
-            $n++;
+            ++$n;
         }
         if ($incrementCallback) {
             call_user_func($incrementCallback, $n);
         }
 
-        $update->commit();
-        $this->client->update($update);
+        $this->update->commit();
+        $this->client->update($this->update);
+        $this->update = null;
 
         return [$n, $i];
     }
 
     /**
-     * Extracts as batch.
-     *
-     * @param array $records
+     * @param iterable $records
      * @param callable|null $incrementCallback
      * @param callable|null $errorCallback
      * @return array
@@ -145,11 +138,12 @@ class SolrManager
                 continue;
             }
 
-            $i++;
+            ++$i;
             try {
-                $extract = new QueryBuilder\Extract();
-                $mapper->extract($extract, $record);
-                $this->client->extract($extract);
+                $this->extract = new ExtractQuery();
+                $mapper->extract($this->extract, $record);
+                $this->client->extract($this->extract);
+                $this->extract = null;
             } catch (\Exception $e) {
                 if ($errorCallback) {
                     call_user_func($errorCallback, $record, $e);
@@ -160,9 +154,11 @@ class SolrManager
                 call_user_func($incrementCallback, $n);
             }
 
-            $n++;
+            ++$n;
         }
-        call_user_func($incrementCallback, $n);
+        if ($incrementCallback) {
+            call_user_func($incrementCallback, $n);
+        }
 
         return [$n, $i];
     }
@@ -180,10 +176,11 @@ class SolrManager
         }
 
         if ($mapper = $this->getMapper($entity)) {
-            $update = new QueryBuilder\Update();
-            $mapper->update($update, $entity);
-            $update->commit();
-            $this->client->update($update);
+            $this->update = new UpdateQuery();
+            $mapper->update($this->update, $entity);
+            $this->update->commit();
+            $this->client->update($this->update);
+            $this->update = null;
 
             return true;
         }
@@ -204,9 +201,10 @@ class SolrManager
         }
 
         if ($mapper = $this->getMapper($entity)) {
-            $extract = new QueryBuilder\Extract();
-            $mapper->extract($extract, $entity);
-            $this->client->extract($extract);
+            $this->extract = new ExtractQuery();
+            $mapper->extract($this->extract, $entity);
+            $this->client->extract($this->extract);
+            $this->extract = null;
 
             return true;
         }
@@ -227,10 +225,11 @@ class SolrManager
         }
 
         if ($mapper = $this->getMapper($entity)) {
-            $update = new QueryBuilder\Update();
-            $mapper->delete($update, $entity);
-            $update->commit();
-            $this->client->update($update);
+            $this->update = new UpdateQuery();
+            $mapper->delete($this->update, $entity);
+            $this->update->commit();
+            $this->client->update($this->update);
+            $this->update = null;
 
             return true;
         }
@@ -241,7 +240,7 @@ class SolrManager
     /**
      * Enables or disabled the solr manager.
      *
-     * @param boolean $enabled
+     * @param bool $enabled
      * @return void
      */
     public function setEnabled($enabled)

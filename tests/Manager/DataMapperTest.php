@@ -4,7 +4,6 @@
  */
 
 namespace AppTest {
-
     use Zicht\Bundle\SolrBundle\Manager\AbstractDataMapper;
 
     class TestEntity
@@ -22,6 +21,16 @@ namespace AppTest {
         }
     }
 
+    class Foo extends TestEntity
+    {
+    }
+    class Bar extends TestEntity
+    {
+    }
+
+    /**
+     * @extends AbstractDataMapper<TestEntity>
+     */
     class TestMapper extends AbstractDataMapper
     {
         protected $classNames = [
@@ -44,16 +53,14 @@ namespace AppTest {
 }
 
 namespace Zicht\Bundle\SolrBundle\Tests\Manager {
-
-    use AppTest\TestMapper;
     use AppTest\TestEntity;
+    use AppTest\TestMapper;
     use PHPUnit\Framework\TestCase;
-    use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Extract;
     use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 
     class DataMapperTest extends TestCase
     {
-        public function testUpdate()
+        public function testUpdate(): void
         {
             $testMapper = new TestMapper();
             $entityId = 123;
@@ -75,7 +82,7 @@ namespace Zicht\Bundle\SolrBundle\Tests\Manager {
             $testMapper->update($update, new TestEntity($entityId));
         }
 
-        public function testDelete()
+        public function testDelete(): void
         {
             $testMapper = new TestMapper();
             $entityId = 123;
@@ -90,16 +97,16 @@ namespace Zicht\Bundle\SolrBundle\Tests\Manager {
             $testMapper->delete($update, new TestEntity($entityId));
         }
 
-        public function testSupports()
+        public function testSupports(): void
         {
             $testMapper = new TestMapper();
 
             $this->assertTrue($testMapper->supports(new TestEntity(123)));
         }
 
-        public function testSettingAndGettingClassNames()
+        public function testSettingAndGettingClassNames(): void
         {
-            $classNames = [\Foo\Bar::class, \Foo\Baz::class];
+            $classNames = [\AppTest\Foo::class, \AppTest\Bar::class];
 
             $testMapper = new TestMapper();
             $testMapper->setClassNames($classNames);
@@ -107,5 +114,4 @@ namespace Zicht\Bundle\SolrBundle\Tests\Manager {
             $this->assertSame($testMapper->getClassNames(), $classNames);
         }
     }
-
 }

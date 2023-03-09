@@ -5,9 +5,6 @@
 
 namespace Zicht\Bundle\SolrBundle\Manager\Doctrine;
 
-/**
- * Interface SearchDocumentRepository
- */
 interface SearchDocumentRepository
 {
     /**

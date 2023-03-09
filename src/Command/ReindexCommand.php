@@ -7,6 +7,7 @@ namespace Zicht\Bundle\SolrBundle\Command;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Logging\EchoSQLLogger;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
@@ -14,8 +15,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\StreamOutput;
-use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepositoryAdapter;
 use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepository;
+use Zicht\Bundle\SolrBundle\Manager\Doctrine\SearchDocumentRepositoryAdapter;
 use Zicht\Bundle\SolrBundle\Manager\Doctrine\WrappedSearchDocumentRepository;
 use Zicht\Bundle\SolrBundle\Manager\SolrManager;
 use Zicht\Bundle\SolrBundle\Solr\Client;
@@ -32,28 +33,21 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Interfaces\Extractable;
  */
 class ReindexCommand extends AbstractCommand
 {
-    /** @var SolrManager */
-    private $solrManager;
+    private SolrManager $solrManager;
 
-    /** @var ManagerRegistry */
-    private $doctrine;
+    private ManagerRegistry $doctrine;
 
-    /** @var array */
-    private $entities;
+    /** @var class-string[] */
+    private array $entities = [];
 
-    /**
-     * Setup the reindex command
-     */
     public function __construct(Client $solr, SolrManager $solrManager, ManagerRegistry $doctrine)
     {
         parent::__construct($solr);
 
         $this->solrManager = $solrManager;
         $this->doctrine = $doctrine;
-        $this->entities = [];
     }
 
-    /** {@inheritDoc} */
     protected function configure()
     {
         $this
@@ -70,10 +64,11 @@ class ReindexCommand extends AbstractCommand
 
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
+        /** @var class-string $entity */
         if ($entity = $input->getArgument('entity')) {
             $this->entities[] = $entity;
 
-            $output->writeln(sprintf('<comment>One single entity specified</comment>', $entity));
+            $output->writeln('<comment>One single entity specified</comment>');
         } else {
             $mappers = $this->solrManager->getMappers();
             foreach ($mappers as $mapper) {
@@ -85,57 +80,62 @@ class ReindexCommand extends AbstractCommand
         }
     }
 
-    /** {@inheritDoc} */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        foreach($this->entities as $entity) {
+        foreach ($this->entities as $entity) {
+            if (\function_exists('memory_reset_peak_usage')) {
+                \memory_reset_peak_usage();
+            }
+
+            /** @var EntityManagerInterface $em */
             $em = $this->doctrine->getManager($input->getOption('em'));
 
             $reflection = $em->getClassMetadata($entity)->getReflectionClass();
             $entity = $reflection->name;
             $output->writeln(['', sprintf('<info>%s</info>', $entity)]);
 
-            if (null !== ($repos = $this->solrManager->getRepository($entity))) {
-                if ($repos instanceof WrappedSearchDocumentRepository) {
-                    $repos->setSourceRepository($em->getRepository($entity));
+            if (null !== ($repository = $this->solrManager->getRepository($entity))) {
+                if ($repository instanceof WrappedSearchDocumentRepository) {
+                    $repository->setSourceRepository($em->getRepository($entity));
                 }
             } else {
-                $repos = $em->getRepository($entity);
+                $repository = $em->getRepository($entity);
 
-                if (!$repos instanceof SearchDocumentRepository) {
-                    $repos = new SearchDocumentRepositoryAdapter($repos);
+                if (!$repository instanceof SearchDocumentRepository) {
+                    $repository = new SearchDocumentRepositoryAdapter($repository);
                 }
             }
 
-            $output->writeln('Finding indexable documents...');
+            $output->writeln('Finding indexable items...');
 
-            $records = $repos->findIndexableDocuments(
+            $records = $repository->findIndexableDocuments(
                 $input->getOption('where'),
                 $input->getOption('limit'),
                 $input->getOption('offset')
             );
 
             $total = count($records);
-            $output->writeln($total . ' documents found.');
+            $output->writeln(sprintf('<comment>%s items found.</comment>', $total));
 
-            $output->writeln('Reindexing records...');
+            $output->writeln('Reindexing items...');
 
+            $startTime = microtime(true);
             if ($reflection->implementsInterface(Extractable::class)) {
-                list($extractableRecords, $updatableRecords) = $this->splitRecords($records);
-                list($n, $i) = $this->extractBatch($input, $output, $extractableRecords);
+                [$extractableRecords, $updatableRecords] = $this->splitRecords($records);
+                [$n, $i] = $this->extractBatch($input, $output, $extractableRecords);
                 $output->write("\n");
                 $output->writeln(sprintf('Processed (Extracted) %s of %s items.', $i, $n));
 
                 if (count($updatableRecords)) {
-                    list($n, $i) = $this->updateBatch($input, $output, $updatableRecords);
+                    [$n, $i] = $this->updateBatch($input, $output, $updatableRecords);
                     $output->write("\n");
                     $output->writeln(sprintf('Processed (Updated) %s of %s items.', $i, $n));
                 }
             } else {
-                list($n, $i) = $this->updateBatch($input, $output, $records);
+                [$n, $i] = $this->updateBatch($input, $output, $records);
             }
-            $output->write("\n");
-            $output->writeln(sprintf('Processed %s of %s items. Peak mem usage: %2d Mb', $i, $n, memory_get_peak_usage() / 1024 / 1024));
+            $duration = round($duration = microtime(true) - $startTime, $duration < 4 ? 2 : ($duration < 32 ? 1 : 0));
+            $output->writeln(sprintf('<comment>Processed %s of %s items in %s seconds. Peak mem usage: %2d Mb</comment>', $i, $n, $duration, \memory_get_peak_usage() / 1048576));
             $em->clear();
             gc_collect_cycles();
         }
@@ -144,10 +144,6 @@ class ReindexCommand extends AbstractCommand
     }
 
     /**
-     * Updates in batch
-     *
-     * @param InputInterface $input
-     * @param OutputInterface $output
      * @param array|Collection $records
      * @return array
      */
@@ -156,15 +152,16 @@ class ReindexCommand extends AbstractCommand
         $total = count($records);
         $progress = new ProgressBar($output instanceof StreamOutput ? new StreamOutput($output->getStream()) : $output, $total);
         $progress->display();
-        list($n, $i) = $this->solrManager->updateBatch(
+        [$n, $i] = $this->solrManager->updateBatch(
             $records,
             function ($n) use ($progress, $total, $output) {
                 $progress->setProgress($n);
 
-                if ($n == $total) {
+                if ($n === $total) {
                     $progress->finish();
                     $output->write("\n");
-                    $output->writeln('Flushing ...');
+                    $size = $this->solrManager->update ? $this->solrManager->update->getQueryByteSize() : 0;
+                    $output->writeln(sprintf('Sending data (%s)...', $size >= 1048576 ? sprintf('%0.1f Mb', $size / 1048576) : sprintf('%0.2f Kb', $size / 1024)));
                 }
             },
             function ($record, $e) use ($input, $output) {
@@ -181,10 +178,6 @@ class ReindexCommand extends AbstractCommand
     }
 
     /**
-     * Extracts in batches
-     *
-     * @param InputInterface $input
-     * @param OutputInterface $output
      * @param array|Collection $records
      * @return array
      */
@@ -193,15 +186,14 @@ class ReindexCommand extends AbstractCommand
         $total = count($records);
         $progress = new ProgressBar($output instanceof StreamOutput ? new StreamOutput($output->getStream()) : $output, $total);
         $progress->display();
-        list($n, $i) = $this->solrManager->extractBatch(
+        [$n, $i] = $this->solrManager->extractBatch(
             $records,
             function ($n) use ($progress, $total, $output) {
                 $progress->setProgress($n);
 
-                if ($n == $total) {
+                if ($n === $total) {
                     $progress->finish();
                     $output->write("\n");
-                    $output->writeln('Flushing ...');
                 }
             },
             function ($record, $e) use ($input, $output) {
@@ -218,11 +210,8 @@ class ReindexCommand extends AbstractCommand
 
     /**
      * Split the records to being processed by an Update or Extract query
-     *
-     * @param $records
-     * @return array
      */
-    private function splitRecords($records)
+    private function splitRecords(array $records): array
     {
         $extractableRecords = array_filter($records, [$this, 'hasResource']);
         $updatableRecords = array_filter($records, [$this, 'hasNoResource']);
@@ -230,24 +219,14 @@ class ReindexCommand extends AbstractCommand
         return [$extractableRecords, $updatableRecords];
     }
 
-    /**
-     * Defines whether a Extractable has a resource.
-     *
-     * @param Extractable $extractable
-     * @return bool
-     */
-    public function hasResource(Extractable $extractable)
+    /** Defines whether a Extractable has a resource. */
+    public function hasResource(Extractable $extractable): bool
     {
         return is_resource($extractable->getFileResource());
     }
 
-    /**
-     * Defines whether a Extractable has not a resource.
-     *
-     * @param Extractable $extractable
-     * @return bool
-     */
-    public function hasNoResource(Extractable $extractable)
+    /** Defines whether a Extractable has not a resource. */
+    public function hasNoResource(Extractable $extractable): bool
     {
         return !is_resource($extractable->getFileResource());
     }

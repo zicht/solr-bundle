@@ -14,14 +14,9 @@ use Zicht\Bundle\SolrBundle\Solr\Client;
  */
 class StopWordManager
 {
-    /**
-     * @var Client
-     */
+    /** @var Client */
     protected $client;
 
-    /**
-     * @param Client $client
-     */
     public function __construct(Client $client)
     {
         $this->client = $client;
@@ -46,21 +41,18 @@ class StopWordManager
         $request = new Request('GET', sprintf('%sschema/analysis/stopwords/%s', $this->client->getHttpClient()->getConfig('base_uri'), $managed));
         $response = $this->client->request($request);
 
-        if (200 === $response->getStatusCode()) {
-             $data = \json_decode($response->getBody()->getContents(), true);
+        if ($response && 200 === $response->getStatusCode()) {
+            $data = \json_decode($response->getBody()->getContents(), true);
 
-             if (array_key_exists('wordSet', $data) && array_key_exists('managedList', $data['wordSet'])) {
-                 return $data['wordSet']['managedList'];
-             }
+            if (array_key_exists('wordSet', $data) && array_key_exists('managedList', $data['wordSet'])) {
+                return $data['wordSet']['managedList'];
+            }
         }
 
         return [];
     }
 
     /**
-     * Adds an stopword
-     *
-     * @param StopWord $stopWord
      * @return bool
      */
     public function addStopWord(StopWord $stopWord)
@@ -72,7 +64,8 @@ class StopWordManager
             \json_encode([$stopWord->getValue()])
         );
 
-        return 200 === $this->client->request($request)->getStatusCode();
+        $response = $this->client->request($request);
+        return $response && 200 === $response->getStatusCode();
     }
 
     /**
@@ -86,13 +79,7 @@ class StopWordManager
         $dataPerManaged = [];
         foreach ($stopWords as $stopWord) {
             if (!$stopWord instanceof StopWord) {
-                throw new \UnexpectedValueException(
-                    sprintf(
-                        'Stop words array elements must be of type %s. Got %s',
-                        StopWord::class,
-                        is_object($stopWord) ? get_class($stopWord) : gettype($stopWord)
-                    )
-                );
+                throw new \UnexpectedValueException(sprintf('Stop words array elements must be of type %s. Got %s', StopWord::class, is_object($stopWord) ? get_class($stopWord) : gettype($stopWord)));
             }
             if (!array_key_exists($stopWord->getManaged(), $dataPerManaged)) {
                 $dataPerManaged[$stopWord->getManaged()] = [];
@@ -109,7 +96,8 @@ class StopWordManager
                     \json_encode($data)
                 );
 
-                return 200 === $this->client->request($request)->getStatusCode();
+                $response = $this->client->request($request);
+                return $response && 200 === $response->getStatusCode();
             },
             array_keys($dataPerManaged),
             $dataPerManaged
@@ -119,9 +107,6 @@ class StopWordManager
     }
 
     /**
-     * Has an stopword.
-     *
-     * @param StopWord $stopWord
      * @return bool
      */
     public function hasStopWord(StopWord $stopWord)
@@ -131,13 +116,11 @@ class StopWordManager
             sprintf('%sschema/analysis/stopwords/%s/%s', $this->client->getHttpClient()->getConfig('base_uri'), $stopWord->getManaged(), $stopWord->getValue())
         );
 
-        return 200 === $this->client->request($request)->getStatusCode();
+        $response = $this->client->request($request);
+        return $response && 200 === $response->getStatusCode();
     }
 
     /**
-     * Removes an stopword.
-     *
-     * @param StopWord $stopWord
      * @return bool
      */
     public function removeStopWord(StopWord $stopWord)
@@ -147,6 +130,7 @@ class StopWordManager
             sprintf('%sschema/analysis/stopwords/%s/%s', $this->client->getHttpClient()->getConfig('base_uri'), $stopWord->getManaged(), $stopWord->getValue())
         );
 
-        return 200 === $this->client->request($request)->getStatusCode();
+        $response = $this->client->request($request);
+        return $response && 200 === $response->getStatusCode();
     }
 }

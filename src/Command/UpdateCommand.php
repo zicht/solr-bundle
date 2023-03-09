@@ -5,7 +5,9 @@
 
 namespace Zicht\Bundle\SolrBundle\Command;
 
-use Symfony\Component\Console;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
 
 /**
@@ -13,25 +15,22 @@ use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Update;
  */
 class UpdateCommand extends AbstractCommand
 {
-    /** {@inheritDoc} */
     protected function configure()
     {
         $this
             ->setName('zicht:solr:update')
             ->setDescription('Update a document\'s fields.')
-            ->addArgument('select', Console\Input\InputArgument::REQUIRED, "Select these documents to update (e.g.: 'id:abc')")
-            ->addArgument('field', Console\Input\InputArgument::REQUIRED, 'Solr field name (e.g "title")')
-            ->addArgument('value', Console\Input\InputArgument::REQUIRED, 'Set the value (e.g. "New title")')
-        ;
+            ->addArgument('select', InputArgument::REQUIRED, "Select these documents to update (e.g.: 'id:abc')")
+            ->addArgument('field', InputArgument::REQUIRED, 'Solr field name (e.g "title")')
+            ->addArgument('value', InputArgument::REQUIRED, 'Set the value (e.g. "New title")');
     }
 
-    /** {@inheritDoc} */
-    protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $i = 0;
         $update = new Update();
         foreach ($this->solr->getDocumentIds($input->getArgument('select')) as $id) {
-            $i ++;
+            ++$i;
             $update->update($id, [$input->getArgument('field') => $input->getArgument('value')]);
         }
         if ($i > 0) {

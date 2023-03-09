@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <psalm
-    errorLevel="4"
+    errorLevel="3"
     resolveFromConfigFile="true"
 
     findUnusedVariablesAndParams="true"
@@ -13,6 +13,7 @@
 >
     <projectFiles>
         <directory name="src" />
+        <directory name="tests" />
         <ignoreFiles>
             <directory name="vendor" />
             <!-- Extract is normally not being used and the intensions are unclear, so efforts to fix issues are not worth it -->
@@ -21,6 +22,11 @@
     </projectFiles>
 
     <issueHandlers>
+        <PossiblyUndefinedMethod>
+            <errorLevel type="info">
+                <file name="src/DependencyInjection/Configuration.php"/>
+            </errorLevel>
+        </PossiblyUndefinedMethod>
         <UnusedClosureParam>
             <!-- The fix is to prefix the variables with an underscore `_`. Since we use a lot of Closures with a predefined param list, this is not really dev friendly to force... -->
             <errorLevel type="info">

@@ -5,7 +5,9 @@
 
 namespace Zicht\Bundle\SolrBundle\Command\Managed;
 
-use Symfony\Component\Console;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Zicht\Bundle\SolrBundle\Command\AbstractCommand;
 use Zicht\Bundle\SolrBundle\Manager\StopWordManager;
 use Zicht\Bundle\SolrBundle\Solr\Client;
@@ -21,18 +23,15 @@ class StopWordsListCommand extends AbstractCommand
         $this->manager = $manager;
     }
 
-    /** {@inheritDoc} */
     protected function configure()
     {
         $this
             ->setName('zicht:solr:stop-words-list')
             ->setDescription('List solr stop words')
-            ->addArgument('managed', Console\Input\InputArgument::REQUIRED, 'Specify the managed prefix')
-        ;
+            ->addArgument('managed', InputArgument::REQUIRED, 'Specify the managed prefix');
     }
 
-    /** {@inheritDoc} */
-    protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $output->writeln('Stopwords registered in SOLR:');
         $output->writeln('');

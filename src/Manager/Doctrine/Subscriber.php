@@ -8,24 +8,16 @@ namespace Zicht\Bundle\SolrBundle\Manager\Doctrine;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Zicht\Bundle\SolrBundle\Manager\SolrEntityManager;
 use Zicht\Bundle\SolrBundle\Manager\SolrManager;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Interfaces\Extractable;
 
-/**
- * Class Subscriber
- */
 class Subscriber implements EventSubscriber
 {
-    /**
-     * @var SolrManager|SolrEntityManager
-     */
+    /** @var SolrManager|SolrEntityManager */
     protected $manager;
 
     /**
-     * Construct the subscriber
-     *
      * @param SolrManager|SolrEntityManager $manager
      */
     public function __construct(SolrManager $manager)
@@ -36,7 +28,6 @@ class Subscriber implements EventSubscriber
     /**
      * Triggers an update in the solrmanager
      *
-     * @param LifecycleEventArgs $event
      * @return void
      */
     public function postPersist(LifecycleEventArgs $event)
@@ -47,7 +38,6 @@ class Subscriber implements EventSubscriber
     /**
      * Triggers an update in the solrmanager
      *
-     * @param LifecycleEventArgs $event
      * @return void
      */
     public function preUpdate(LifecycleEventArgs $event)
@@ -58,7 +48,6 @@ class Subscriber implements EventSubscriber
     /**
      * Triggers a deletein the solrmanager
      *
-     * @param LifecycleEventArgs $event
      * @return void
      */
     public function preRemove(LifecycleEventArgs $event)
@@ -66,20 +55,17 @@ class Subscriber implements EventSubscriber
         $this->manager->delete($event->getEntity());
     }
 
-    /** {@inheritDoc} */
     public function getSubscribedEvents()
     {
-        return array(
+        return [
             Events::postPersist,
             Events::preUpdate,
-            Events::preRemove
-        );
+            Events::preRemove,
+        ];
     }
 
     /**
      * Calls the proper method in the Solr Manager to update or extract the document
-     *
-     * @param LifecycleEventArgs $event
      */
     private function callUpdate(LifecycleEventArgs $event)
     {

@@ -5,7 +5,6 @@
 
 namespace Zicht\Bundle\SolrBundle\Facade;
 
-use Psr\Http\Message\ResponseInterface;
 use Zicht\Bundle\FrameworkExtraBundle\Pager\Pager;
 use Zicht\Bundle\SolrBundle\Solr\Client;
 use Zicht\Bundle\SolrBundle\Solr\QueryBuilder\Select;
@@ -13,31 +12,18 @@ use Zicht\Bundle\UrlBundle\Url\Params\Params;
 
 abstract class SearchFacade
 {
-    protected static $defaultParameterWhitelist = array('keywords', 'page', 'type', 'perpage');
+    protected static $defaultParameterWhitelist = ['keywords', 'page', 'type', 'perpage'];
 
-    /**
-     * @var Client
-     */
-    protected $client = null;
+    protected Client $client;
 
-    /**
-     * @var Params
-     */
+    /** @var Params|null */
     protected $searchParams = null;
 
-    /**
-     * SOLR result document
-     *
-     * @var \stdClass
-     */
+    /** @var \stdClass|null SOLR result document */
     protected $response = null;
 
-    /**
-     * GET Url mapping
-     *
-     * @var null|string
-     */
-    protected $urlTemplate = null;
+    /** @var string GET Url mapping */
+    protected $urlTemplate = '';
 
     /**
      * @var Pager|null
@@ -45,35 +31,24 @@ abstract class SearchFacade
      */
     protected $pager;
 
-    /**
-     * @var int override to 0 to keep facets displayed at all times.
-     */
+    /** @var int override to 0 to keep facets displayed at all times. */
     protected $facetMinimumCount = 1;
 
-    /**
-     * @var int
-     */
+    /** @var int */
     protected $facetResultLimit = -1;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $facetSort = 'count';
 
-    /**
-     * @var int
-     */
+    /** @var int */
     protected $defaultLimit;
 
     /**
-     * Construct the facade.
-     *
-     * @param Client $client
      * @param int $defaultLimit
      */
     public function __construct(Client $client, $defaultLimit = 30)
     {
-        $this->client       = $client;
+        $this->client = $client;
         $this->defaultLimit = $defaultLimit;
     }
 
@@ -87,8 +62,8 @@ abstract class SearchFacade
     }
 
     /**
-     * @param Params $params
      * @return void
+     * @psalm-assert Params $this->searchParams
      */
     public function setParams(Params $params)
     {
@@ -104,7 +79,8 @@ abstract class SearchFacade
     }
 
     /**
-     * @return Params
+     * @return Params|null
+     * @psalm-mutation-free
      */
     public function getParams()
     {
@@ -118,8 +94,10 @@ abstract class SearchFacade
      */
     public function redirectPost()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            header(sprintf('Location: %s', $this->getPostRedirect($_POST['search'])));
+        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            header(sprintf('Location: %s', $this->getPostRedirect(
+                isset($_POST['search']) && is_array($_POST['search']) ? $_POST['search'] : []
+            )));
             exit;
         }
     }
@@ -132,6 +110,7 @@ abstract class SearchFacade
      */
     public function getPostRedirect($postParams)
     {
+        $this->initSearchParams();
         $this->searchParams->mergeAll(array_filter($postParams));
         return $this->getUrl($this->searchParams);
     }
@@ -155,6 +134,7 @@ abstract class SearchFacade
      */
     public function getPagerUrl($index = 0)
     {
+        $this->initSearchParams();
         return $this->getUrl($this->searchParams->with('page', (string)$index, false));
     }
 
@@ -166,7 +146,7 @@ abstract class SearchFacade
     final public function search()
     {
         if (!isset($this->searchParams)) {
-            throw new \LogicException("You need to call setParams() first");
+            throw new \LogicException('You need to call setParams() first');
         }
 
         if (!empty($_POST['search'])) {
@@ -184,16 +164,15 @@ abstract class SearchFacade
     /**
      * Adds the facet options to the query and apply filter queries if facets are selected.
      *
-     * @param Select $query
      * @return void
      */
     protected function prepareFacetSet(Select $query)
     {
         $query
             ->setParam('facet', 'true')
-            ->setParam('facet.mincount', $this->facetMinimumCount)
-        ;
+            ->setParam('facet.mincount', $this->facetMinimumCount);
 
+        $this->initSearchParams();
         foreach ($this->getFacetFields() as $field) {
             $query->addFacetField($field);
 
@@ -219,6 +198,7 @@ abstract class SearchFacade
      */
     public function getActiveFacetValues($field)
     {
+        $this->initSearchParams();
         return $this->searchParams->get($field);
     }
 
@@ -231,8 +211,9 @@ abstract class SearchFacade
      */
     public function getActiveFacets()
     {
-        $active = array();
+        $active = [];
 
+        $this->initSearchParams();
         foreach ($this->getFacetFields() as $field) {
             if (($value = $this->searchParams->getOne($field)) && $this->isFacetActive($field, $value)) {
                 $active[$field] = $value;
@@ -247,7 +228,7 @@ abstract class SearchFacade
      */
     public function getResults()
     {
-        return $this->response->response->docs;
+        return $this->response ? $this->response->response->docs : [];
     }
 
     /**
@@ -255,7 +236,7 @@ abstract class SearchFacade
      */
     public function getDebug()
     {
-        return $this->response->debug;
+        return $this->response ? $this->response->debug : new \stdClass();
     }
 
     /**
@@ -263,11 +244,11 @@ abstract class SearchFacade
      */
     public function getNumFound()
     {
-        return $this->response->response->numFound;
+        return $this->response ? $this->response->response->numFound : 0;
     }
 
     /**
-     * @param string $name
+     * @param string $facetName
      * @param mixed $value
      * @return int
      */
@@ -275,7 +256,7 @@ abstract class SearchFacade
     {
         $count = 0;
 
-        if (!isset($this->response->facet_counts->facet_fields->{$facetName})) {
+        if (!$this->response || !isset($this->response->facet_counts->facet_fields->{$facetName})) {
             return $count;
         }
         $facet = $this->response->facet_counts->facet_fields->{$facetName};
@@ -293,18 +274,18 @@ abstract class SearchFacade
     /**
      * Get the facet filters for use in the template
      *
-     * @param null $blacklist
-     * @return array
+     * @param string[]|null $blacklist
+     * @return array<string, array<string, array<string, mixed>>>
      */
     public function getFacetFilters($blacklist = null)
     {
         if (null === $blacklist) {
-            $blacklist = array();
+            $blacklist = [];
         }
 
-        $ret = array();
+        $ret = [];
         foreach ($this->getFacetFields() as $facetName) {
-            if (!in_array($facetName, $blacklist)) {
+            if (!in_array($facetName, $blacklist) && isset($this->response->facet_counts->facet_fields->{$facetName})) {
                 foreach (array_chunk($this->response->facet_counts->facet_fields->{$facetName}, 2) as [$value, $count]) {
                     $ret[$facetName][$value] = $this->getFacetMetaData($facetName, $value, $count);
                 }
@@ -318,8 +299,7 @@ abstract class SearchFacade
                     // It should be similar to the above implementation of the facets. Dump the response to find out
                     // dump($this->response)
 
-                    throw new \Exception("not implemented yet: reading facet queries from response. Read source for info");
-
+                    throw new \Exception('not implemented yet: reading facet queries from response. Read source for info');
 //                    $count = $this->getResponse()->getFacetSet()->getFacet($facetName . '-' . $i)->getValue();
 //                    if ($count >= $this->facetMinimumCount) {
 //                        $ret[$facetName][$i] = $this->getFacetMetaData(
@@ -339,21 +319,22 @@ abstract class SearchFacade
      * Get facet data for use in the templates for one specific facet value
      *
      * @param string $facetName
-     * @param mixed $value
+     * @param string $value
      * @param int|null $count
      * @param string|null $label
      * @return array
      */
     public function getFacetMetaData($facetName, $value, $count = null, $label = null)
     {
-        return array(
-            'value'         => $value,
-            'label'         => ($label === null ? $value : $label),
-            'count'         => $count,
-            'active'        => $this->searchParams->contains($facetName, $value),
-            'url'           => $this->getUrl($this->searchParams->without('page')->with($facetName, $value)),
-            'url_filter'    => $this->getUrl($this->searchParams->without($facetName)->with($facetName, $value)),
-        );
+        $this->initSearchParams();
+        return [
+            'value' => $value,
+            'label' => ($label === null ? $value : $label),
+            'count' => $count,
+            'active' => $this->searchParams->contains($facetName, $value),
+            'url' => $this->getUrl($this->searchParams->without('page')->with($facetName, $value)),
+            'url_filter' => $this->getUrl($this->searchParams->without($facetName)->with($facetName, $value)),
+        ];
     }
 
     /**
@@ -367,11 +348,12 @@ abstract class SearchFacade
      * @param array $stack
      * @return array
      */
-    public function decorateHierarchy(&$filters, $facetName, $depth = 3, $stack = array())
+    public function decorateHierarchy(&$filters, $facetName, $depth = 3, $stack = [])
     {
-        $ret = array();
+        $this->initSearchParams();
+        $ret = [];
         foreach ($filters as &$term) {
-            $ret[]= $term['id'];
+            $ret[] = $term['id'];
             $term += $this->getFacetMetaData($facetName, $term['id']);
 
             if (count($stack) < $depth && !empty($term['__children'])) {
@@ -406,7 +388,7 @@ abstract class SearchFacade
     final public function getResponse()
     {
         if (!$this->response) {
-            throw new \LogicException("There is no response, call search() first");
+            throw new \LogicException('There is no response, call search() first');
         }
 
         return $this->response;
@@ -421,8 +403,6 @@ abstract class SearchFacade
     }
 
     /**
-     * Create the search query
-     *
      * @return mixed
      */
     abstract protected function createQueryBuilder();
@@ -430,14 +410,14 @@ abstract class SearchFacade
     /**
      * Return the field names that should act as a facet. Implement with an empty array return value to ignore.
      *
-     * @return mixed
+     * @return string[]
      */
     abstract protected function getFacetFields();
 
     /**
      * Return additional facet field queries. Implement with an empty array return value to ignore.
      *
-     * @return array
+     * @return array<string, string[]>
      */
     abstract protected function getFacetQueries();
 
@@ -471,8 +451,8 @@ abstract class SearchFacade
      */
     public function setDefaultLimit($defaultLimit)
     {
-        if (!!$this->response) {
-            throw new \LogicException("There is already a response, call setDefaultLimit() before calling search()");
+        if ((bool)$this->response) {
+            throw new \LogicException('There is already a response, call setDefaultLimit() before calling search()');
         }
 
         $this->defaultLimit = $defaultLimit;
@@ -487,16 +467,22 @@ abstract class SearchFacade
     }
 
     /**
-     * Initialize the pager.
-     *
+     * @psalm-assert Params $this->searchParams
+     */
+    private function initSearchParams(): void
+    {
+        if (!isset($this->searchParams)) {
+            $this->searchParams = new Params();
+        }
+    }
+
+    /**
      * @param Select $query
      * @return Pager|null
      */
     abstract protected function initPager($query);
 
     /**
-     * Execute the query.
-     *
      * @param Select $query
      * @return mixed
      */

@@ -13,7 +13,6 @@ use GuzzleHttp\Psr7\Request;
  */
 class Ping implements RequestBuilderInterface
 {
-    /** {@inheritDoc} */
     public function createRequest(ClientInterface $httpClient)
     {
         return new Request('GET', sprintf('%sadmin/ping', $httpClient->getConfig('base_uri')));
