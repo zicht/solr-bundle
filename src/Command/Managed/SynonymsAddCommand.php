@@ -63,21 +63,21 @@ class SynonymsAddCommand extends AbstractCommand
             ->addOption('file', 'f', InputOption::VALUE_NONE, 'Treat the synonyms argument as a file containing the data instead of command line data input')
             ->setHelp(
                 <<<HELP
-<fg=yellow;options=bold>${description}</>
+<fg=yellow;options=bold>{$description}</>
 
 You can import synonyms into SOLR + database using different formats and either directly from the commandline or from a file.
 
 From the command line, as JSON:
-<info>php app/console ${name} --type json 'en' '{"monkey": ["baboon", "capuchin", "gorilla", "macaque"], "horse": ["stallion", "mare"]}'</info>
+<info>php app/console {$name} --type json 'en' '{"monkey": ["baboon", "capuchin", "gorilla", "macaque"], "horse": ["stallion", "mare"]}'</info>
 
 From the command line, as CSV (the first column is the main word, all the following are the synonyms):
-<info>php app/console ${name} --type csv 'en' 'monkey, baboon, capuchin, gorilla, macaque
+<info>php app/console {$name} --type csv 'en' 'monkey, baboon, capuchin, gorilla, macaque
 horse, stallion, mare'</info>
 
 To import data from a file, use the <comment>--file</comment> option. This makes the command interpret the <comment>synonyms</comment> argument as the file source for the data:
-<info>php app/console ${name} --type json --file 'en' fixtures/synonyms_animals_en.json</info>
-<info>php app/console ${name} --type csv --file 'en' fixtures/synonyms_animals_en.csv</info>
-<info>php app/console ${name} --type yaml --file 'en' fixtures/synonyms_animals_en.yml</info>
+<info>php app/console {$name} --type json --file 'en' fixtures/synonyms_animals_en.json</info>
+<info>php app/console {$name} --type csv --file 'en' fixtures/synonyms_animals_en.csv</info>
+<info>php app/console {$name} --type yaml --file 'en' fixtures/synonyms_animals_en.yml</info>
 
 HELP
             );

@@ -63,22 +63,22 @@ class StopWordsAddCommand extends AbstractCommand
             ->addOption('file', 'f', InputOption::VALUE_NONE, 'Treat the stop words argument as a file containing the data instead of command line data input')
             ->setHelp(
                 <<<HELP
-<fg=yellow;options=bold>${description}</>
+<fg=yellow;options=bold>{$description}</>
 
 You can import stop words into SOLR + database using different formats and either directly from the commandline or from a file.
 
 From the command line, as JSON:
-<info>php app/console ${name} --type json 'en' '["a", "but", "the"]'</info>
+<info>php app/console {$name} --type json 'en' '["a", "but", "the"]'</info>
 
 From the command line, as "CSV" (one word per line):
-<info>php app/console ${name} --type csv 'en' 'a
+<info>php app/console {$name} --type csv 'en' 'a
 but
 the'</info>
 
 To import data from a file, use the <comment>--file</comment> option. This makes the command interpret the <comment>stop-words</comment> argument as the file source for the data:
-<info>php app/console ${name} --type json --file 'en' fixtures/stop_words_en.json</info>
-<info>php app/console ${name} --type csv --file 'en' fixtures/stop_words_en.csv</info>
-<info>php app/console ${name} --type yaml --file 'en' fixtures/stop_words_en.yml</info>
+<info>php app/console {$name} --type json --file 'en' fixtures/stop_words_en.json</info>
+<info>php app/console {$name} --type csv --file 'en' fixtures/stop_words_en.csv</info>
+<info>php app/console {$name} --type yaml --file 'en' fixtures/stop_words_en.yml</info>
 
 HELP
             );
