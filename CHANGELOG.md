@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
 
-## 6.2.0 - 2023-02-22
+## 6.2.0 - 2023-03-09
 ### Added
 - Reset PHP's memory peak usage in between reindexing of entities (PHP >= 8.2).
 - Duration time and byte size information in reindex command.
