@@ -28,7 +28,7 @@ abstract class AbstractDataMapper implements DataMapperInterface
         }
 
         $params = [];
-        if (($boost = $this->getBoost($entity))) {
+        if ($boost = $this->getBoost($entity)) {
             $params['boost'] = $boost;
         }
         $id = $this->generateObjectIdentity($entity);
@@ -50,7 +50,7 @@ abstract class AbstractDataMapper implements DataMapperInterface
     public function addUpdateDocument(Update $update, $entity)
     {
         $params = [];
-        if (($boost = $this->getBoost($entity))) {
+        if ($boost = $this->getBoost($entity)) {
             $params['boost'] = $boost;
         }
         $doc = ['id' => $this->generateObjectIdentity($entity)];

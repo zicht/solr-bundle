@@ -6,7 +6,6 @@
 namespace Zicht\Bundle\SolrBundle\Command;
 
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Logging\EchoSQLLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Console\Helper\ProgressBar;

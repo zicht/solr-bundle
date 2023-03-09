@@ -33,7 +33,7 @@ class StopWordManager
     /**
      * Return all the stopwords managed in SOLR.
      *
-     * @param $managed
+     * @param string $managed
      * @return array
      */
     public function findAll($managed)

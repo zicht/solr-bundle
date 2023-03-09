@@ -6,6 +6,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
 
+## 7.1.0 - 2023-03-09
+### Added
+- Forward merge of v6.2.0: Reset PHP's memory peak usage in between reindexing of entities (PHP >= 8.2).
+- Forward merge of v6.2.0: Duration time and byte size information in reindex command.
+- Forward merge of v6.2.0: Added explicit max. memory of 50 Mb to the temp stream of the Solr update query,
+  instead of relying on the (2 Mb) default.
+- Forward merge of v6.2.0: Added PHP CS Fixer to lint the PHP code style.
+### Changed
+- Forward merge of v6.2.0: Psalm level 4 to 3 to increase Psalm's type checking strictness.
+### Fixed
+- Forward merge of v6.2.0: Improved texts and text colors of reindex command output.
+- Fixed the PHP code style with newer PHP CS Fixer version than being used in v6.
+- Forward merge of v6.2.0: Fixed the PHP code style with Zicht Standards PHP first and then with the newly added PHP CS Fixer.
+- Forward merge of v6.2.0: Fixed call to Doctrine's deprecated Lifecycle event `getEntity()` method.
+- Forward merge of v6.2.0: Fixed all type issues reported by Psalm after changing to level 3.
+- Fixed type issues reported by Psalm here in release v7 with different dependencies.
+
 ## 7.0.1 - 2023-02-20
 ### Fixed
 - Forward merge of 4.3.1
@@ -34,7 +51,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Improved texts and text colors of reindex command output.
 - Fixed the PHP code style with Zicht Standards PHP first and then with the newly added PHP CS Fixer.
 - Fixed call to Doctrine's deprecated Lifecycle event `getEntity()` method.
-- Fixead all type issues reported by Psalm after changing to level 3.
+- Fixed all type issues reported by Psalm after changing to level 3.
 
 ## 6.1.1 - 2023-02-20
 ### Fixed

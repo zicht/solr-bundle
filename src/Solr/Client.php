@@ -232,7 +232,7 @@ class Client
             throw new ConfigurationException('Solr core was not configured through Solr url in configuration options');
         }
 
-        $baseUrl = sprintf('%s://%s%s/%s/', $url['scheme'], $url['host'], (isset($url['port']) ? ':' . $url['port'] : ''), (isset($url['path']) ? trim($url['path'], '/') : ''));
+        $baseUrl = sprintf('%s://%s%s/%s/', $url['scheme'], $url['host'], isset($url['port']) ? ':' . $url['port'] : '', isset($url['path']) ? trim($url['path'], '/') : '');
 
         return [$baseUrl, $core];
     }
@@ -243,14 +243,19 @@ class Client
             $be->getRequest()->getBody()->seek(0);
         }
         $response = $be->getResponse();
+        // Because of differences between Guzzle 6 and 7, we need to suppress some false positive Psalm errors here.
+        /** @psalm-suppress RedundantCondition
+         * @psalm-suppress TypeDoesNotContainType */
         $content = $response ? $response->getBody()->getContents() : null;
+        /** @psalm-suppress RedundantCondition
+         * @psalm-suppress TypeDoesNotContainType */
         $contentType = $response ? $response->getHeaderLine('Content-Type') : null;
         $errorMsg = $be->getMessage();
         if ($content && $contentType && (strpos($contentType, 'application/json') === 0 || strpos($contentType, 'text/plain') === 0)) {
             try {
                 // possibly content is a json-string containing a SolrException.
                 $solrException = \GuzzleHttp\json_decode($content);
-                if (property_exists($solrException, 'error') && property_exists($solrException->error, 'msg')) {
+                if (is_object($solrException) && property_exists($solrException, 'error') && property_exists($solrException->error, 'msg')) {
                     $errorMsg = $solrException->error->msg;
                 }
             } catch (\InvalidArgumentException $invalidArgumentException) {
