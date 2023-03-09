@@ -50,7 +50,9 @@ class SelectCommand extends AbstractCommand
         }
         $results = $this->solr->select($select)->response->docs;
         if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-            $output->writeln(sprintf('<info>%s %s</info>', $this->solr->getLastResponse()->getReasonPhrase(), $this->solr->getLastRequest()->getUri()));
+            if (($lastResponse = $this->solr->getLastResponse()) && ($lastRequest = $this->solr->getLastRequest())) {
+                $output->writeln(sprintf('<info>%s %s</info>', $lastResponse->getReasonPhrase(), (string)$lastRequest->getUri()));
+            }
             $output->writeln(sprintf('<info>%d result(s)</info>', count($results)));
             $output->writeln('');
         }

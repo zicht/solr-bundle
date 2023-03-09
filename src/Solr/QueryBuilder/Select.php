@@ -7,11 +7,11 @@ namespace Zicht\Bundle\SolrBundle\Solr\QueryBuilder;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
 
 class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
 {
-    /** @var array */
+    /** @var array<string, scalar|scalar[]> */
     protected $params = [
         'wt' => 'json',
         'q' => '*:*',
@@ -103,7 +103,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
         return new Request('GET', sprintf('%sselect?%s', $httpClient->getConfig('base_uri'), $this->createQueryString($this->params)));
     }
 
-    public function handle(Response $response)
+    public function handle(ResponseInterface $response)
     {
         $contentType = $response->getHeaderLine('Content-Type');
         if (preg_match('!^application/json!', $contentType) || preg_match('!^text/plain!', $contentType)) {
@@ -118,7 +118,7 @@ class Select extends AbstractQueryBuilder implements ResponseHandlerInterface
      * Only useful for multiple valued parameters, such as 'fq', or 'facet.query', etc
      *
      * @param string $name
-     * @param string $value
+     * @param mixed $value
      * @return $this
      */
     public function addParam($name, $value)

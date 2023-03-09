@@ -82,11 +82,11 @@ class SolrManager
     }
 
     /**
-     * @param array $records
+     * @param iterable $records
      * @param callable|null $incrementCallback
      * @param callable|null $errorCallback
      * @param bool $deleteFirst
-     * @return array
+     * @return array{int, int}
      */
     public function updateBatch($records, $incrementCallback = null, $errorCallback = null, $deleteFirst = false)
     {
@@ -124,7 +124,7 @@ class SolrManager
     }
 
     /**
-     * @param array $records
+     * @param iterable $records
      * @param callable|null $incrementCallback
      * @param callable|null $errorCallback
      * @return array
@@ -156,7 +156,9 @@ class SolrManager
 
             ++$n;
         }
-        call_user_func($incrementCallback, $n);
+        if ($incrementCallback) {
+            call_user_func($incrementCallback, $n);
+        }
 
         return [$n, $i];
     }

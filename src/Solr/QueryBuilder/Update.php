@@ -32,7 +32,12 @@ class Update extends AbstractQueryBuilder
     {
         $this->addInstruction(
             'add',
-            ['doc' => array_map(static fn ($v) => $v instanceof \DateTimeInterface ? DateHelper::formatDate($v) : $v, $document)] + $params
+            [
+                'doc' => array_map(
+                    static fn ($v) => $v instanceof \DateTime || $v instanceof \DateTimeImmutable ? DateHelper::formatDate($v) : $v,
+                    $document
+                ),
+            ] + $params
         );
 
         return $this;
@@ -88,9 +93,7 @@ class Update extends AbstractQueryBuilder
     {
         $instruction = ['doc' => ['id' => $id]];
         $instruction['doc'] += array_map(
-            function ($v) {
-                return ['set' => $v];
-            },
+            static fn ($v): array => ['set' => $v],
             $values
         );
         $instruction += $params;
