@@ -22,7 +22,7 @@ form:
     label_managed: Managed
     label_identifier: Woord
     label_stop_word: Stopwoord
-    label_value: Synoniemen
+    label_synonyms: Synoniemen
 
 list:
     label_identifier: Woord
