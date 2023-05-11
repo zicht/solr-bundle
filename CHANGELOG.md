@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
 
+## 6.2.1 - 2023-05-11
+### Fixed
+- Synonym admin value label
+
 ## 6.2.0 - 2023-03-09
 ### Added
 - Reset PHP's memory peak usage in between reindexing of entities (PHP >= 8.2).
