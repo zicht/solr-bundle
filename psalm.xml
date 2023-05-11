@@ -27,6 +27,11 @@
                 <file name="src/DependencyInjection/Configuration.php"/>
             </errorLevel>
         </PossiblyUndefinedMethod>
+        <UndefinedMethod>
+            <errorLevel type="info">
+                <file name="src/DependencyInjection/Configuration.php"/>
+            </errorLevel>
+        </UndefinedMethod>
         <UnusedClosureParam>
             <!-- The fix is to prefix the variables with an underscore `_`. Since we use a lot of Closures with a predefined param list, this is not really dev friendly to force... -->
             <errorLevel type="info">
