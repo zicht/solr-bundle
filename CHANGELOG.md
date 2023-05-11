@@ -38,6 +38,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Support for Symfony 4
 - Support for Sonata 3
 
+## 6.2.1 - 2023-05-11
+### Fixed
+- Synonym admin value label
+
 ## 6.2.0 - 2023-03-09
 ### Added
 - Reset PHP's memory peak usage in between reindexing of entities (PHP >= 8.2).

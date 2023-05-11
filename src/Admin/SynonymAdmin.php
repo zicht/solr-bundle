@@ -76,7 +76,7 @@ class SynonymAdmin extends AbstractAdmin
             ->tab('admin.tab.general')
                 ->add('managed', ChoiceType::class, $this->getManagedFieldOptions())
                 ->add('identifier')
-                ->add('value', TextareaType::class, ['help' => 'help.synonyms'])
+                ->add('value', TextareaType::class, ['label' => 'form.label_synonyms', 'help' => 'help.synonyms'])
                 ->end()
             ->end();
     }

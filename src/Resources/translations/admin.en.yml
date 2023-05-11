@@ -24,7 +24,7 @@ form:
     label_managed: Managed
     label_identifier: Word
     label_stop_word: Stop word
-    label_value: Synonyms
+    label_synonyms: Synonyms
 
 list:
     label_identifier: Word
